@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { canQuery, recordQuery, getRemainingQueries } from "@/lib/rateLimit";
 import { AlertTriangle, Zap, Code, Lightbulb, Send, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import AuthModal from "@/components/AuthModal";
+import type { Session } from "@supabase/supabase-js";
 
 interface ExplanationResult {
   explanation: string;
@@ -16,19 +17,35 @@ interface ExplanationResult {
   correctedCode: string;
 }
 
+const FREE_QUERY_KEY = "eme_free_query_used";
+
 const Index = () => {
   const [errorInput, setErrorInput] = useState("");
   const [result, setResult] = useState<ExplanationResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [remaining, setRemaining] = useState(getRemainingQueries());
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [freeQueryUsed, setFreeQueryUsed] = useState(
+    () => localStorage.getItem(FREE_QUERY_KEY) === "true"
+  );
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleSubmit = async () => {
     if (!errorInput.trim()) {
       toast.error("Please paste an error message first.");
       return;
     }
-    if (!canQuery()) {
-      toast.error("You've used all 5 free queries for today. Come back tomorrow!");
+
+    // If not logged in and already used free query, show auth modal
+    if (!session && freeQueryUsed) {
+      setShowAuthModal(true);
       return;
     }
 
@@ -42,8 +59,12 @@ const Index = () => {
 
       if (error) throw error;
 
-      recordQuery();
-      setRemaining(getRemainingQueries());
+      // Mark free query as used if not logged in
+      if (!session) {
+        localStorage.setItem(FREE_QUERY_KEY, "true");
+        setFreeQueryUsed(true);
+      }
+
       setResult(data as ExplanationResult);
     } catch (err: any) {
       console.error(err);
@@ -65,17 +86,29 @@ const Index = () => {
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            <Badge variant="outline" className="font-mono text-xs">
-              {remaining}/5 queries left today
-            </Badge>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => supabase.auth.signOut()}
-              title="Sign out"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
+            {session ? (
+              <>
+                <Badge variant="outline" className="font-mono text-xs">
+                  Unlimited queries
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => supabase.auth.signOut()}
+                  title="Sign out"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <Badge
+                variant="outline"
+                className="font-mono text-xs cursor-pointer"
+                onClick={() => setShowAuthModal(true)}
+              >
+                {freeQueryUsed ? "Sign in for more" : "1 free query"}
+              </Badge>
+            )}
           </div>
         </div>
       </header>
@@ -114,7 +147,6 @@ const Index = () => {
         {/* Results */}
         {result && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Explanation */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg font-mono flex items-center gap-2">
@@ -127,7 +159,6 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {/* Causes */}
             {result.causes?.length > 0 && (
               <Card>
                 <CardHeader className="pb-3">
@@ -149,7 +180,6 @@ const Index = () => {
               </Card>
             )}
 
-            {/* Fixes */}
             {result.fixes?.length > 0 && (
               <Card>
                 <CardHeader className="pb-3">
@@ -171,7 +201,6 @@ const Index = () => {
               </Card>
             )}
 
-            {/* Corrected Code */}
             {result.correctedCode && (
               <Card>
                 <CardHeader className="pb-3">
@@ -199,6 +228,8 @@ const Index = () => {
           </Alert>
         )}
       </main>
+
+      <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
     </div>
   );
 };
