@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { canQuery, recordQuery, getRemainingQueries } from "@/lib/rateLimit";
-import { AlertTriangle, Zap, Code, Lightbulb, Send, Loader2 } from "lucide-react";
+import { AlertTriangle, Zap, Code, Lightbulb, Send, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 interface ExplanationResult {
@@ -64,9 +64,19 @@ const Index = () => {
               Explain My Error
             </h1>
           </div>
-          <Badge variant="outline" className="font-mono text-xs">
-            {remaining}/5 queries left today
-          </Badge>
+          <div className="flex items-center gap-3">
+            <Badge variant="outline" className="font-mono text-xs">
+              {remaining}/5 queries left today
+            </Badge>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => supabase.auth.signOut()}
+              title="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </header>
 
