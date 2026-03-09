@@ -8,7 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { canQuery, recordQuery, getRemainingQueries } from "@/lib/rateLimit";
 import { AlertTriangle, Zap, Code, Lightbulb, Send, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 
 interface ExplanationResult {
   explanation: string;
