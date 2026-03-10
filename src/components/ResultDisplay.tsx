@@ -10,6 +10,7 @@ import {
   Check,
   ExternalLink,
   Globe,
+  Wand2,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -32,11 +33,11 @@ export interface ExplanationResult {
 const resourceIcon = (type: string) => {
   switch (type) {
     case "stackoverflow":
-      return <Globe className="h-4 w-4 text-primary" />;
+      return <Globe className="h-4 w-4 text-primary shrink-0" />;
     case "docs":
-      return <Code className="h-4 w-4 text-primary" />;
+      return <Code className="h-4 w-4 text-primary shrink-0" />;
     default:
-      return <ExternalLink className="h-4 w-4 text-primary" />;
+      return <ExternalLink className="h-4 w-4 text-primary shrink-0" />;
   }
 };
 
@@ -64,31 +65,31 @@ export const ResultDisplay = ({ result }: { result: ExplanationResult }) => {
       </div>
 
       {/* Explanation */}
-      <Card>
+      <Card className="border-border/60">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-mono flex items-center gap-2">
-            <Lightbulb className="h-5 w-5 text-accent-foreground" />
-            What does this mean?
+          <CardTitle className="text-base font-mono flex items-center gap-2">
+            <Lightbulb className="h-4 w-4 text-accent-foreground" />
+            Error Explanation
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-foreground leading-relaxed">{result.explanation}</p>
+          <p className="text-sm text-foreground leading-relaxed">{result.explanation}</p>
         </CardContent>
       </Card>
 
       {/* Causes */}
       {result.causes?.length > 0 && (
-        <Card>
+        <Card className="border-border/60">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-mono flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
+            <CardTitle className="text-base font-mono flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
               Why This Error Happens
             </CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
               {result.causes.map((cause, i) => (
-                <li key={i} className="flex items-start gap-2 text-foreground">
+                <li key={i} className="flex items-start gap-2 text-sm text-foreground">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-destructive" />
                   {cause}
                 </li>
@@ -100,17 +101,17 @@ export const ResultDisplay = ({ result }: { result: ExplanationResult }) => {
 
       {/* Fixes */}
       {result.fixes?.length > 0 && (
-        <Card>
+        <Card className="border-border/60">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-mono flex items-center gap-2">
-              <Zap className="h-5 w-5 text-primary" />
+            <CardTitle className="text-base font-mono flex items-center gap-2">
+              <Zap className="h-4 w-4 text-primary" />
               How to Fix It
             </CardTitle>
           </CardHeader>
           <CardContent>
             <ol className="space-y-2 list-decimal list-inside">
               {result.fixes.map((fix, i) => (
-                <li key={i} className="text-foreground">
+                <li key={i} className="text-sm text-foreground">
                   {fix}
                 </li>
               ))}
@@ -121,30 +122,30 @@ export const ResultDisplay = ({ result }: { result: ExplanationResult }) => {
 
       {/* Corrected Code */}
       {result.correctedCode && (
-        <Card>
+        <Card className="border-border/60">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg font-mono flex items-center gap-2">
-                <Code className="h-5 w-5 text-primary" />
-                Correct Code Example
+              <CardTitle className="text-base font-mono flex items-center gap-2">
+                <Wand2 className="h-4 w-4 text-primary" />
+                Generated Fixed Code
               </CardTitle>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleCopy}
-                className="gap-1.5 text-xs"
+                className="gap-1.5 text-xs font-mono h-7"
               >
                 {copied ? (
-                  <Check className="h-3.5 w-3.5" />
+                  <Check className="h-3 w-3" />
                 ) : (
-                  <Copy className="h-3.5 w-3.5" />
+                  <Copy className="h-3 w-3" />
                 )}
                 {copied ? "Copied!" : "Copy Fix"}
               </Button>
             </div>
           </CardHeader>
           <CardContent>
-            <pre className="overflow-x-auto rounded-md bg-background border border-border p-4 font-mono text-sm text-foreground">
+            <pre className="overflow-x-auto rounded-md bg-background border border-border p-4 font-mono text-xs text-foreground leading-relaxed">
               <code>{result.correctedCode}</code>
             </pre>
           </CardContent>
@@ -153,10 +154,10 @@ export const ResultDisplay = ({ result }: { result: ExplanationResult }) => {
 
       {/* Resources */}
       {result.resources?.length > 0 && (
-        <Card>
+        <Card className="border-border/60">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-mono flex items-center gap-2">
-              <Globe className="h-5 w-5 text-primary" />
+            <CardTitle className="text-base font-mono flex items-center gap-2">
+              <Globe className="h-4 w-4 text-primary" />
               Similar Solutions & Resources
             </CardTitle>
           </CardHeader>
@@ -172,7 +173,7 @@ export const ResultDisplay = ({ result }: { result: ExplanationResult }) => {
                   >
                     {resourceIcon(res.type)}
                     <span className="text-sm">{res.title}</span>
-                    <ExternalLink className="h-3 w-3 opacity-50" />
+                    <ExternalLink className="h-3 w-3 opacity-50 shrink-0" />
                   </a>
                   <span className="text-xs text-muted-foreground ml-6 capitalize">
                     {res.type === "stackoverflow" ? "Stack Overflow" : res.type}
