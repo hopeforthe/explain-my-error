@@ -32,10 +32,12 @@ serve(async (req) => {
           {
             role: "system",
             content: `You are an expert programming error explainer. When given an error message, respond with a JSON object containing exactly these fields:
+- "language": The detected programming language (e.g. "JavaScript", "Python", "Java", "TypeScript", "C++", "Go", "Rust", "Ruby", "PHP", "C#"). If unknown, use "Unknown".
 - "explanation": A clear, beginner-friendly explanation of what the error means (2-4 sentences)
 - "causes": An array of 2-4 common causes for this error
-- "fixes": An array of 2-4 possible fixes
+- "fixes": An array of 2-4 possible fixes, each as a clear actionable step
 - "correctedCode": A short example of corrected code that avoids this error
+- "resources": An array of 2-4 objects with { "title": string, "url": string, "type": "stackoverflow" | "docs" | "article" } — relevant links to Stack Overflow discussions, official docs, or helpful articles about this error. Use real, plausible URLs.
 
 Respond ONLY with valid JSON, no markdown fences.`,
           },
@@ -73,15 +75,16 @@ Respond ONLY with valid JSON, no markdown fences.`,
 
     let parsed;
     try {
-      // Strip markdown fences if present
       const cleaned = content.replace(/^```json?\s*\n?/, "").replace(/\n?```\s*$/, "");
       parsed = JSON.parse(cleaned);
     } catch {
       parsed = {
+        language: "Unknown",
         explanation: content,
         causes: [],
         fixes: [],
         correctedCode: "",
+        resources: [],
       };
     }
 

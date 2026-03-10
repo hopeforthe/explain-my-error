@@ -5,17 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertTriangle, Zap, Code, Lightbulb, Send, Loader2, LogOut } from "lucide-react";
+import { AlertTriangle, Code, Send, Loader2, LogOut, Terminal } from "lucide-react";
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { ResultDisplay, type ExplanationResult } from "@/components/ResultDisplay";
 import type { Session } from "@supabase/supabase-js";
-
-interface ExplanationResult {
-  explanation: string;
-  causes: string[];
-  fixes: string[];
-  correctedCode: string;
-}
 
 const FREE_QUERY_KEY = "eme_free_query_used";
 
@@ -30,7 +25,9 @@ const Index = () => {
   );
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
@@ -43,7 +40,6 @@ const Index = () => {
       return;
     }
 
-    // If not logged in and already used free query, show auth modal
     if (!session && freeQueryUsed) {
       setShowAuthModal(true);
       return;
@@ -59,7 +55,6 @@ const Index = () => {
 
       if (error) throw error;
 
-      // Mark free query as used if not logged in
       if (!session) {
         localStorage.setItem(FREE_QUERY_KEY, "true");
         setFreeQueryUsed(true);
@@ -75,20 +70,23 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background transition-colors duration-300">
       {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-6 w-6 text-primary" />
-            <h1 className="font-mono text-xl font-bold text-foreground">
+      <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
+        <div className="container mx-auto flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+              <Terminal className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <h1 className="font-mono text-lg font-bold text-foreground sm:text-xl">
               Explain My Error
             </h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
             {session ? (
               <>
-                <Badge variant="outline" className="font-mono text-xs">
+                <Badge variant="outline" className="hidden font-mono text-xs sm:inline-flex">
                   Unlimited queries
                 </Badge>
                 <Button
@@ -103,7 +101,7 @@ const Index = () => {
             ) : (
               <Badge
                 variant="outline"
-                className="font-mono text-xs cursor-pointer"
+                className="cursor-pointer font-mono text-xs"
                 onClick={() => setShowAuthModal(true)}
               >
                 {freeQueryUsed ? "Sign in for more" : "1 free query"}
@@ -114,8 +112,15 @@ const Index = () => {
       </header>
 
       <main className="container mx-auto max-w-3xl px-4 py-8 space-y-6">
+        {/* Hero tagline */}
+        <div className="text-center space-y-1">
+          <p className="text-muted-foreground text-sm font-mono">
+            Paste any error → get a plain-English explanation with fixes
+          </p>
+        </div>
+
         {/* Input Section */}
-        <Card>
+        <Card className="shadow-md">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg font-mono flex items-center gap-2">
               <Code className="h-5 w-5 text-primary" />
@@ -125,7 +130,7 @@ const Index = () => {
           <CardContent className="space-y-4">
             <Textarea
               placeholder={`e.g. TypeError: Cannot read properties of undefined (reading 'map')\n    at App.js:12:15`}
-              className="font-mono text-sm min-h-[120px] bg-background"
+              className="font-mono text-sm min-h-[140px] bg-background resize-y"
               value={errorInput}
               onChange={(e) => setErrorInput(e.target.value)}
             />
@@ -133,6 +138,7 @@ const Index = () => {
               onClick={handleSubmit}
               disabled={loading || !errorInput.trim()}
               className="w-full gap-2"
+              size="lg"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -145,89 +151,25 @@ const Index = () => {
         </Card>
 
         {/* Results */}
-        {result && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg font-mono flex items-center gap-2">
-                  <Lightbulb className="h-5 w-5 text-accent-foreground" />
-                  What does this mean?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-foreground leading-relaxed">{result.explanation}</p>
-              </CardContent>
-            </Card>
-
-            {result.causes?.length > 0 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-mono flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-destructive" />
-                    Common Causes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {result.causes.map((cause, i) => (
-                      <li key={i} className="flex items-start gap-2 text-foreground">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-destructive" />
-                        {cause}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
-
-            {result.fixes?.length > 0 && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-mono flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-primary" />
-                    Possible Fixes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {result.fixes.map((fix, i) => (
-                      <li key={i} className="flex items-start gap-2 text-foreground">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                        {fix}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
-
-            {result.correctedCode && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-mono flex items-center gap-2">
-                    <Code className="h-5 w-5 text-primary" />
-                    Example Fix
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <pre className="overflow-x-auto rounded-md bg-background border border-border p-4 font-mono text-sm text-foreground">
-                    <code>{result.correctedCode}</code>
-                  </pre>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        )}
+        {result && <ResultDisplay result={result} />}
 
         {/* Empty state */}
         {!result && !loading && (
           <Alert className="border-dashed">
+            <AlertTriangle className="h-4 w-4" />
             <AlertDescription className="text-center text-muted-foreground py-4">
-              Paste any programming error above and get a plain-English explanation with fixes.
+              Supports JavaScript, Python, Java, TypeScript, C++, Go, Rust, and more.
             </AlertDescription>
           </Alert>
         )}
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border py-4 text-center">
+        <p className="text-xs text-muted-foreground font-mono">
+          Explain My Error — Developer tool powered by AI
+        </p>
+      </footer>
 
       <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
     </div>
