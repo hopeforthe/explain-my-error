@@ -2,3 +2,15 @@ project_id = "vtzelpgqssbmdrucyhzh"
 
 [functions.explain-error]
 verify_jwt = false
+
+[functions.ocr-error]
+verify_jwt = false
+
+[functions.debug-chat]
+verify_jwt = false
+
+[functions.share-debug]
+verify_jwt = false
+
+[functions.get-shared-debug]
+verify_jwt = false
