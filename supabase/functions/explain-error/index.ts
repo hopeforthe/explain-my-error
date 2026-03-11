@@ -5,13 +5,66 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Input modes: "error" | "code" | "terminal" | "review"
+// Explanation modes: "beginner" | "expert"
+
+function buildPrompt(inputMode: string, explanationMode: string): string {
+  const levelInstruction = explanationMode === "expert"
+    ? "Use technical language, reference specifications, internals, and advanced concepts. Assume the reader is an experienced developer."
+    : "Use simple, beginner-friendly language. Avoid jargon. Explain concepts as if teaching someone new to programming.";
+
+  if (inputMode === "review") {
+    return `You are an expert code reviewer. Analyze the provided code and return a JSON object with these fields:
+- "language": Detected programming language
+- "framework": Detected framework (e.g. "React", "Express", "Django", "Spring Boot", "Laravel", "Next.js", "Node.js") or "None"
+- "qualitySuggestions": Array of 2-4 code quality improvement suggestions
+- "performanceImprovements": Array of 2-4 performance improvement suggestions  
+- "bestPractices": Array of 2-4 best practice recommendations
+- "improvedCode": The improved version of the code
+- "summary": A brief summary of the review
+
+${levelInstruction}
+
+Respond ONLY with valid JSON, no markdown fences.`;
+  }
+
+  const terminalInstruction = inputMode === "terminal"
+    ? `The user has pasted a full terminal log. First, extract the MAIN error from the log, ignoring noise/warnings/info lines. Focus on the most relevant error line and stack trace. Then analyze that extracted error.`
+    : "";
+
+  const codeInstruction = inputMode === "code"
+    ? `The user has pasted source code (not just an error message). Analyze the code, detect potential bugs, problematic patterns, or errors. Identify the specific lines that could cause issues.`
+    : "";
+
+  return `You are an expert programming error analyzer and debugger. ${terminalInstruction}${codeInstruction}
+
+When given input, respond with a JSON object containing exactly these fields:
+- "language": The detected programming language (e.g. "JavaScript", "Python", "Java", "TypeScript", "C++", "Go", "Rust", "Ruby", "PHP", "C#"). If unknown, use "Unknown".
+- "framework": Detected framework (e.g. "React", "Express", "Django", "Spring Boot", "Laravel", "Next.js", "Node.js", "Flask", "Vue.js", "Angular") or "None"
+- "difficulty": Error difficulty level - one of "Easy", "Medium", "Advanced"
+- "difficultyExplanation": A short one-sentence explanation of why this difficulty level was assigned
+- "explanation": A clear explanation of what the error/issue means (2-4 sentences)
+- "causes": An array of 2-4 common causes for this error/issue
+- "fixes": An array of 2-3 fix objects, each with: { "title": string, "description": string, "code": string (optional code example) }
+- "correctedCode": A complete corrected code example that fixes the primary issue
+- "problemLines": If source code was provided, an array of line numbers where issues were detected (empty array otherwise)
+${inputMode === "terminal" ? '- "extractedError": The main error extracted from the terminal log' : ""}
+- "resources": An array of 2-4 objects with { "title": string, "url": string, "type": "stackoverflow" | "docs" | "article" } — relevant links
+
+${levelInstruction}
+
+Respond ONLY with valid JSON, no markdown fences.`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { errorMessage } = await req.json();
+    const body = await req.json();
+    const { errorMessage, inputMode = "error", explanationMode = "beginner" } = body;
+    
     if (!errorMessage || typeof errorMessage !== "string") {
-      return new Response(JSON.stringify({ error: "Please provide an error message" }), {
+      return new Response(JSON.stringify({ error: "Please provide an error message or code" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -19,6 +72,15 @@ serve(async (req) => {
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const systemPrompt = buildPrompt(inputMode, explanationMode);
+    
+    const userPromptPrefix = {
+      error: "Explain this error:",
+      code: "Analyze this code for bugs and issues:",
+      terminal: "Extract the main error from this terminal output and explain it:",
+      review: "Review this code and suggest improvements:",
+    }[inputMode as string] || "Explain this error:";
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -29,22 +91,8 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          {
-            role: "system",
-            content: `You are an expert programming error explainer. When given an error message, respond with a JSON object containing exactly these fields:
-- "language": The detected programming language (e.g. "JavaScript", "Python", "Java", "TypeScript", "C++", "Go", "Rust", "Ruby", "PHP", "C#"). If unknown, use "Unknown".
-- "explanation": A clear, beginner-friendly explanation of what the error means (2-4 sentences)
-- "causes": An array of 2-4 common causes for this error
-- "fixes": An array of 2-4 possible fixes, each as a clear actionable step
-- "correctedCode": A short example of corrected code that avoids this error
-- "resources": An array of 2-4 objects with { "title": string, "url": string, "type": "stackoverflow" | "docs" | "article" } — relevant links to Stack Overflow discussions, official docs, or helpful articles about this error. Use real, plausible URLs.
-
-Respond ONLY with valid JSON, no markdown fences.`,
-          },
-          {
-            role: "user",
-            content: `Explain this error:\n\n${errorMessage}`,
-          },
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `${userPromptPrefix}\n\n${errorMessage}` },
         ],
       }),
     });
@@ -52,21 +100,18 @@ Respond ONLY with valid JSON, no markdown fences.`,
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
         return new Response(JSON.stringify({ error: "AI service payment required." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
       return new Response(JSON.stringify({ error: "AI service error" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -80,6 +125,9 @@ Respond ONLY with valid JSON, no markdown fences.`,
     } catch {
       parsed = {
         language: "Unknown",
+        framework: "None",
+        difficulty: "Medium",
+        difficultyExplanation: "",
         explanation: content,
         causes: [],
         fixes: [],
@@ -94,8 +142,7 @@ Respond ONLY with valid JSON, no markdown fences.`,
   } catch (e) {
     console.error("explain-error error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
