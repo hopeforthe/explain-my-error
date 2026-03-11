@@ -14,7 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      shared_debugs: {
+        Row: {
+          created_at: string
+          id: string
+          input_mode: string
+          input_text: string
+          result: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input_mode?: string
+          input_text: string
+          result: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input_mode?: string
+          input_text?: string
+          result?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
