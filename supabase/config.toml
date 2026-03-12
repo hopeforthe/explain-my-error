@@ -14,3 +14,12 @@ verify_jwt = false
 
 [functions.get-shared-debug]
 verify_jwt = false
+
+[functions.generate-tests]
+verify_jwt = false
+
+[functions.add-debug-comment]
+verify_jwt = false
+
+[functions.get-debug-comments]
+verify_jwt = false
