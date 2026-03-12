@@ -20,9 +20,8 @@ import {
   History,
   MessageSquare,
   FileCode,
-  Search,
   Sparkles,
-  Share2,
+  BarChart3,
 } from "lucide-react";
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
@@ -31,12 +30,13 @@ import { ResultDisplay, type ExplanationResult } from "@/components/ResultDispla
 import { ImageUpload } from "@/components/ImageUpload";
 import { DebugChat } from "@/components/DebugChat";
 import { ErrorHistory } from "@/components/ErrorHistory";
-import { addErrorHistory } from "@/lib/errorHistory";
+import { ErrorTrends } from "@/components/ErrorTrends";
+import { addErrorHistory, findSimilarError } from "@/lib/errorHistory";
 import type { Session } from "@supabase/supabase-js";
 
 const FREE_QUERY_KEY = "eme_free_query_used";
 
-type SidebarPanel = "new" | "history" | "chat";
+type SidebarPanel = "new" | "history" | "chat" | "trends";
 type InputMode = "error" | "code" | "terminal" | "review";
 
 const inputModes: { id: InputMode; label: string; icon: React.ReactNode; placeholder: string }[] = [
@@ -80,6 +80,7 @@ const Index = () => {
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [inputMode, setInputMode] = useState<InputMode>("error");
   const [expertMode, setExpertMode] = useState(false);
+  const [similarError, setSimilarError] = useState<{ errorMessage: string; timestamp: number } | null>(null);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => setSession(s));
@@ -107,6 +108,13 @@ const Index = () => {
 
     setLoading(true);
     setResult(null);
+    setSimilarError(null);
+
+    // Check for similar error
+    const similar = findSimilarError(errorInput.trim());
+    if (similar) {
+      setSimilarError({ errorMessage: similar.errorMessage, timestamp: similar.timestamp });
+    }
 
     try {
       const { data, error } = await supabase.functions.invoke("explain-error", {
@@ -125,7 +133,7 @@ const Index = () => {
 
       const parsed = data as ExplanationResult;
       setResult(parsed);
-      addErrorHistory(errorInput.trim(), parsed.language || "Unknown");
+      addErrorHistory(errorInput.trim(), parsed.language || "Unknown", parsed.framework);
       setHistoryRefreshKey((k) => k + 1);
     } catch (err: any) {
       console.error(err);
@@ -154,12 +162,14 @@ const Index = () => {
   const handleNewError = useCallback(() => {
     setErrorInput("");
     setResult(null);
+    setSimilarError(null);
     setActivePanel("new");
   }, []);
 
   const handleHistorySelect = useCallback((errorMessage: string) => {
     setErrorInput(errorMessage);
     setResult(null);
+    setSimilarError(null);
     setActivePanel("new");
     setInputMode("error");
     if (window.innerWidth < 768) setSidebarOpen(false);
@@ -177,7 +187,10 @@ const Index = () => {
     { id: "new", label: "New Analysis", icon: <PlusCircle className="h-4 w-4" /> },
     { id: "history", label: "History", icon: <History className="h-4 w-4" /> },
     { id: "chat", label: "Debug Chat", icon: <MessageSquare className="h-4 w-4" /> },
+    { id: "trends", label: "Trends", icon: <BarChart3 className="h-4 w-4" /> },
   ];
+
+  const showMainContent = activePanel !== "trends";
 
   return (
     <div className="h-screen flex flex-col bg-background transition-colors duration-300 overflow-hidden">
@@ -244,7 +257,7 @@ const Index = () => {
             {activePanel === "chat" && (
               <DebugChat errorContext={errorInput || undefined} />
             )}
-            {activePanel === "new" && (
+            {(activePanel === "new" || activePanel === "trends") && (
               <div className="p-4 space-y-3">
                 <p className="text-xs text-muted-foreground font-mono">
                   Paste an error, code, terminal output, or request a code review.
@@ -253,7 +266,7 @@ const Index = () => {
                   {["TypeError: Cannot read properties of undefined", "SyntaxError: Unexpected token", "IndentationError: unexpected indent"].map((ex) => (
                     <button
                       key={ex}
-                      onClick={() => { setErrorInput(ex); setInputMode("error"); }}
+                      onClick={() => { setErrorInput(ex); setInputMode("error"); setActivePanel("new"); }}
                       className="w-full text-left text-xs font-mono text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-accent/50 transition-colors border border-transparent hover:border-border"
                     >
                       {ex}
@@ -267,139 +280,144 @@ const Index = () => {
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-5">
-            {/* Input Section */}
-            <Card className="shadow-sm border-border/60">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <CardTitle className="text-base font-mono flex items-center gap-2">
-                    <Code className="h-4 w-4 text-primary" />
-                    Input
-                  </CardTitle>
-                  <div className="flex items-center gap-2">
-                    <ImageUpload
-                      onTextExtracted={(text) => {
-                        setErrorInput(text);
-                        setResult(null);
-                        setInputMode("error");
-                      }}
-                    />
+          {activePanel === "trends" ? (
+            <ErrorTrends refreshKey={historyRefreshKey} />
+          ) : (
+            <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-5">
+              {/* Input Section */}
+              <Card className="shadow-sm border-border/60">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <CardTitle className="text-base font-mono flex items-center gap-2">
+                      <Code className="h-4 w-4 text-primary" />
+                      Input
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <ImageUpload
+                        onTextExtracted={(text) => {
+                          setErrorInput(text);
+                          setResult(null);
+                          setInputMode("error");
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
 
-                {/* Input mode tabs */}
-                <div className="flex gap-1 mt-2 flex-wrap">
-                  {inputModes.map((mode) => (
-                    <button
-                      key={mode.id}
-                      onClick={() => setInputMode(mode.id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono transition-colors ${
-                        inputMode === mode.id
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                      }`}
-                    >
-                      {mode.icon}
-                      {mode.label}
-                    </button>
-                  ))}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Textarea
-                  placeholder={currentMode.placeholder}
-                  className="font-mono text-xs min-h-[140px] bg-background resize-y border-border/60"
-                  value={errorInput}
-                  onChange={(e) => setErrorInput(e.target.value)}
-                />
-
-                {/* Controls row */}
-                <div className="flex items-center justify-between flex-wrap gap-3">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id="expert-mode"
-                      checked={expertMode}
-                      onCheckedChange={setExpertMode}
-                      className="data-[state=checked]:bg-primary"
-                    />
-                    <Label htmlFor="expert-mode" className="text-xs font-mono text-muted-foreground cursor-pointer">
-                      {expertMode ? "Expert" : "Beginner"}
-                    </Label>
-                  </div>
-                  <div className="flex gap-2">
-                    {errorInput && (
-                      <Button variant="outline" onClick={handleNewError} className="font-mono text-sm">
-                        Clear
-                      </Button>
-                    )}
-                    <Button
-                      onClick={handleSubmit}
-                      disabled={loading || !errorInput.trim()}
-                      className="gap-2 font-mono"
-                    >
-                      {loading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Send className="h-4 w-4" />
-                      )}
-                      {loading ? "Analyzing…" : submitLabel}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Loading state */}
-            {loading && (
-              <div className="flex flex-col items-center justify-center py-12 space-y-3 animate-in fade-in duration-300">
-                <div className="relative">
-                  <div className="h-12 w-12 rounded-full border-2 border-border" />
-                  <div className="absolute inset-0 h-12 w-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                </div>
-                <p className="text-sm text-muted-foreground font-mono">
-                  {inputMode === "review" ? "Reviewing your code…" : "AI is analyzing…"}
-                </p>
-              </div>
-            )}
-
-            {/* Results */}
-            {result && !loading && (
-              <>
-                <ResultDisplay
-                  result={result}
-                  isReview={inputMode === "review"}
-                  onShare={handleShare}
-                />
-                {inputMode !== "review" && (
-                  <Card className="border-dashed border-border/60">
-                    <CardContent className="py-4">
+                  {/* Input mode tabs */}
+                  <div className="flex gap-1 mt-2 flex-wrap">
+                    {inputModes.map((mode) => (
                       <button
-                        onClick={() => { setActivePanel("chat"); setSidebarOpen(true); }}
-                        className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-mono"
+                        key={mode.id}
+                        onClick={() => setInputMode(mode.id)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono transition-colors ${
+                          inputMode === mode.id
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                        }`}
                       >
-                        <MessageSquare className="h-4 w-4" />
-                        Have more questions? Open Debug Chat →
+                        {mode.icon}
+                        {mode.label}
                       </button>
-                    </CardContent>
-                  </Card>
-                )}
-              </>
-            )}
+                    ))}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Textarea
+                    placeholder={currentMode.placeholder}
+                    className="font-mono text-xs min-h-[140px] bg-background resize-y border-border/60"
+                    value={errorInput}
+                    onChange={(e) => setErrorInput(e.target.value)}
+                  />
 
-            {/* Empty state */}
-            {!result && !loading && (
-              <Alert className="border-dashed border-border/60">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription className="text-center text-muted-foreground py-3 text-sm font-mono">
-                  Supports errors, code analysis, terminal logs, and code reviews.
-                  <br />
-                  <span className="text-xs opacity-70">
-                    Toggle between modes above. Upload a screenshot or paste text.
-                  </span>
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
+                  {/* Controls row */}
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="expert-mode"
+                        checked={expertMode}
+                        onCheckedChange={setExpertMode}
+                        className="data-[state=checked]:bg-primary"
+                      />
+                      <Label htmlFor="expert-mode" className="text-xs font-mono text-muted-foreground cursor-pointer">
+                        {expertMode ? "Expert" : "Beginner"}
+                      </Label>
+                    </div>
+                    <div className="flex gap-2">
+                      {errorInput && (
+                        <Button variant="outline" onClick={handleNewError} className="font-mono text-sm">
+                          Clear
+                        </Button>
+                      )}
+                      <Button
+                        onClick={handleSubmit}
+                        disabled={loading || !errorInput.trim()}
+                        className="gap-2 font-mono"
+                      >
+                        {loading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Send className="h-4 w-4" />
+                        )}
+                        {loading ? "Analyzing…" : submitLabel}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Loading state */}
+              {loading && (
+                <div className="flex flex-col items-center justify-center py-12 space-y-3 animate-in fade-in duration-300">
+                  <div className="relative">
+                    <div className="h-12 w-12 rounded-full border-2 border-border" />
+                    <div className="absolute inset-0 h-12 w-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                  </div>
+                  <p className="text-sm text-muted-foreground font-mono">
+                    {inputMode === "review" ? "Reviewing your code…" : "AI is analyzing…"}
+                  </p>
+                </div>
+              )}
+
+              {/* Results */}
+              {result && !loading && (
+                <>
+                  <ResultDisplay
+                    result={result}
+                    isReview={inputMode === "review"}
+                    onShare={handleShare}
+                    similarError={similarError}
+                  />
+                  {inputMode !== "review" && (
+                    <Card className="border-dashed border-border/60">
+                      <CardContent className="py-4">
+                        <button
+                          onClick={() => { setActivePanel("chat"); setSidebarOpen(true); }}
+                          className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-mono"
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                          Have more questions? Open Debug Chat →
+                        </button>
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              )}
+
+              {/* Empty state */}
+              {!result && !loading && (
+                <Alert className="border-dashed border-border/60">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription className="text-center text-muted-foreground py-3 text-sm font-mono">
+                    Supports errors, code analysis, terminal logs, and code reviews.
+                    <br />
+                    <span className="text-xs opacity-70">
+                      Toggle between modes above. Upload a screenshot or paste text.
+                    </span>
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          )}
         </main>
       </div>
 

@@ -5,9 +5,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Input modes: "error" | "code" | "terminal" | "review"
-// Explanation modes: "beginner" | "expert"
-
 function buildPrompt(inputMode: string, explanationMode: string): string {
   const levelInstruction = explanationMode === "expert"
     ? "Use technical language, reference specifications, internals, and advanced concepts. Assume the reader is an experienced developer."
@@ -22,6 +19,8 @@ function buildPrompt(inputMode: string, explanationMode: string): string {
 - "bestPractices": Array of 2-4 best practice recommendations
 - "improvedCode": The improved version of the code
 - "summary": A brief summary of the review
+- "bugWarnings": Array of 0-4 potential future bug warnings. Each object: { "type": string (e.g. "memory_leak", "null_pointer", "inefficient_loop", "unsafe_practice"), "description": string, "severity": "low"|"medium"|"high", "line": number or null }
+- "commitMessage": A conventional commit message for the improvements (e.g. "refactor: improve error handling and add input validation")
 
 ${levelInstruction}
 
@@ -50,6 +49,11 @@ When given input, respond with a JSON object containing exactly these fields:
 - "problemLines": If source code was provided, an array of line numbers where issues were detected (empty array otherwise)
 ${inputMode === "terminal" ? '- "extractedError": The main error extracted from the terminal log' : ""}
 - "resources": An array of 2-4 objects with { "title": string, "url": string, "type": "stackoverflow" | "docs" | "article" } — relevant links
+- "learningConcept": An object with { "title": string (the concept name), "explanation": string (2-3 sentences explaining the concept), "example": string (a short code example demonstrating the concept), "bestPractices": array of 2-3 strings (best practices to avoid this error) }
+- "commitMessage": A conventional commit message for the fix (e.g. "fix: resolve null pointer exception in authentication module")
+- "bugWarnings": Array of 0-4 potential future bug warnings detected in the code. Each object: { "type": string (e.g. "memory_leak", "null_pointer", "inefficient_loop", "unsafe_practice"), "description": string, "severity": "low"|"medium"|"high", "line": number or null }
+- "dependencyFix": If the error is dependency-related (missing module, version conflict, package issue), an object with { "detected": true, "packageName": string, "installCommands": object with keys like "npm", "pip", "composer" etc. mapping to install command strings, "explanation": string }. If not dependency-related, { "detected": false }.
+${inputMode === "terminal" ? '- "stackTraceAnalysis": An object with { "rootCauseFile": string (file where the error originates), "problemLine": number or string, "reason": string, "suggestedFix": string }' : ""}
 
 ${levelInstruction}
 
@@ -133,6 +137,10 @@ serve(async (req) => {
         fixes: [],
         correctedCode: "",
         resources: [],
+        learningConcept: null,
+        commitMessage: "",
+        bugWarnings: [],
+        dependencyFix: { detected: false },
       };
     }
 

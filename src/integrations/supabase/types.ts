@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      debug_comments: {
+        Row: {
+          author_name: string
+          content: string
+          created_at: string
+          debug_id: string
+          id: string
+        }
+        Insert: {
+          author_name?: string
+          content: string
+          created_at?: string
+          debug_id: string
+          id?: string
+        }
+        Update: {
+          author_name?: string
+          content?: string
+          created_at?: string
+          debug_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "debug_comments_debug_id_fkey"
+            columns: ["debug_id"]
+            isOneToOne: false
+            referencedRelation: "shared_debugs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shared_debugs: {
         Row: {
           created_at: string
