@@ -22,6 +22,23 @@ import {
   FileCode,
   Sparkles,
   BarChart3,
+  Shield,
+  Zap,
+  BookOpen,
+  Database,
+  Globe,
+  Wrench,
+  FileText,
+  GitCompare,
+  Bug,
+  Gauge,
+  Cog,
+  ArrowRightLeft,
+  GraduationCap,
+  ChevronDown,
+  Layers,
+  Rocket,
+  Languages,
 } from "lucide-react";
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
@@ -31,39 +48,87 @@ import { ImageUpload } from "@/components/ImageUpload";
 import { DebugChat } from "@/components/DebugChat";
 import { ErrorHistory } from "@/components/ErrorHistory";
 import { ErrorTrends } from "@/components/ErrorTrends";
+import { SnippetLibrary } from "@/components/SnippetLibrary";
 import { addErrorHistory, findSimilarError } from "@/lib/errorHistory";
 import type { Session } from "@supabase/supabase-js";
 
 const FREE_QUERY_KEY = "eme_free_query_used";
 
-type SidebarPanel = "new" | "history" | "chat" | "trends";
-type InputMode = "error" | "code" | "terminal" | "review";
+type SidebarPanel = "new" | "history" | "chat" | "trends" | "snippets";
+type InputMode = string;
 
-const inputModes: { id: InputMode; label: string; icon: React.ReactNode; placeholder: string }[] = [
-  {
-    id: "error",
-    label: "Error",
-    icon: <AlertTriangle className="h-3.5 w-3.5" />,
-    placeholder: `Paste your error message or stack trace here…\n\ne.g. TypeError: Cannot read properties of undefined (reading 'map')\n    at App.js:12:15`,
-  },
-  {
-    id: "code",
-    label: "Code",
-    icon: <FileCode className="h-3.5 w-3.5" />,
-    placeholder: `Paste your source code here to detect bugs…\n\nfunction fetchData() {\n  const data = fetch('/api/data');\n  return data.json();\n}`,
-  },
-  {
-    id: "terminal",
-    label: "Terminal",
-    icon: <Terminal className="h-3.5 w-3.5" />,
-    placeholder: `Paste your full terminal output here…\n\nThe AI will extract the main error and ignore noise.`,
-  },
-  {
-    id: "review",
-    label: "Improve",
-    icon: <Sparkles className="h-3.5 w-3.5" />,
-    placeholder: `Paste code to get improvement suggestions…\n\nGet code quality, performance, and best practice recommendations.`,
-  },
+interface ModeConfig {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  placeholder: string;
+  category: string;
+}
+
+const inputModes: ModeConfig[] = [
+  // Analyze
+  { id: "error", label: "Error", icon: <AlertTriangle className="h-3.5 w-3.5" />, category: "Analyze",
+    placeholder: "Paste your error message or stack trace here…\n\ne.g. TypeError: Cannot read properties of undefined (reading 'map')" },
+  { id: "code", label: "Bug Detect", icon: <Bug className="h-3.5 w-3.5" />, category: "Analyze",
+    placeholder: "Paste your source code here to detect bugs…" },
+  { id: "terminal", label: "Terminal", icon: <Terminal className="h-3.5 w-3.5" />, category: "Analyze",
+    placeholder: "Paste your full terminal output here…\nThe AI will extract the main error and ignore noise." },
+  { id: "api", label: "API Error", icon: <Globe className="h-3.5 w-3.5" />, category: "Analyze",
+    placeholder: "Paste API error responses, curl commands, or HTTP errors here…\n\ncurl -X POST https://api.example.com/data -H 'Authorization: Bearer token'" },
+  { id: "log", label: "Log File", icon: <FileText className="h-3.5 w-3.5" />, category: "Analyze",
+    placeholder: "Paste log file contents (server.log, error.log, docker logs)…" },
+  { id: "sql", label: "SQL Debug", icon: <Database className="h-3.5 w-3.5" />, category: "Analyze",
+    placeholder: "Paste SQL queries or database error messages here…\n\nSELECT * FROM users WHERE id = ..." },
+  { id: "cicd", label: "CI/CD", icon: <Cog className="h-3.5 w-3.5" />, category: "Analyze",
+    placeholder: "Paste CI/CD pipeline errors (GitHub Actions, Docker, Jenkins)…" },
+  { id: "deploy", label: "Deploy", icon: <Rocket className="h-3.5 w-3.5" />, category: "Analyze",
+    placeholder: "Paste deployment errors from Vercel, Netlify, AWS, Docker…" },
+  { id: "env", label: "Environment", icon: <Wrench className="h-3.5 w-3.5" />, category: "Analyze",
+    placeholder: "Paste environment errors (version mismatch, missing packages, dependency conflicts)…" },
+
+  // Improve
+  { id: "review", label: "Code Review", icon: <Sparkles className="h-3.5 w-3.5" />, category: "Improve",
+    placeholder: "Paste code to get improvement suggestions…\nGet code quality, performance, and best practice recommendations." },
+  { id: "refactor", label: "Refactor", icon: <Layers className="h-3.5 w-3.5" />, category: "Improve",
+    placeholder: "Paste code to get refactoring suggestions…\nGet cleaner structure, better naming, and reduced complexity." },
+  { id: "security", label: "Security Scan", icon: <Shield className="h-3.5 w-3.5" />, category: "Improve",
+    placeholder: "Paste code to scan for security vulnerabilities…\nDetects SQL injection, XSS, exposed secrets, and more." },
+  { id: "performance", label: "Performance", icon: <Zap className="h-3.5 w-3.5" />, category: "Improve",
+    placeholder: "Paste code to analyze performance…\nDetects inefficient loops, memory issues, and optimization opportunities." },
+  { id: "complexity", label: "Complexity", icon: <Gauge className="h-3.5 w-3.5" />, category: "Improve",
+    placeholder: "Paste code to analyze its complexity metrics…\nGet cyclomatic complexity, maintainability score, and simplification suggestions." },
+
+  // Generate
+  { id: "explain", label: "Explain Code", icon: <BookOpen className="h-3.5 w-3.5" />, category: "Generate",
+    placeholder: "Paste code for a line-by-line explanation…" },
+  { id: "docs", label: "Generate Docs", icon: <FileCode className="h-3.5 w-3.5" />, category: "Generate",
+    placeholder: "Paste code to automatically generate documentation…" },
+  { id: "reproduce", label: "Reproduce Bug", icon: <Bug className="h-3.5 w-3.5" />, category: "Generate",
+    placeholder: "Paste buggy code to generate a minimal reproducible example…" },
+  { id: "interview", label: "Interview Prep", icon: <GraduationCap className="h-3.5 w-3.5" />, category: "Generate",
+    placeholder: "Paste code or error to generate interview-style questions…" },
+
+  // Compare
+  { id: "diff", label: "Code Diff", icon: <GitCompare className="h-3.5 w-3.5" />, category: "Compare",
+    placeholder: "Paste two versions of code separated by:\n--- OLD CODE ---\n(old code here)\n--- NEW CODE ---\n(new code here)" },
+  { id: "migrate", label: "Migrate", icon: <ArrowRightLeft className="h-3.5 w-3.5" />, category: "Compare",
+    placeholder: "Paste code and specify the migration target.\nE.g. 'Migrate from React class components to hooks'\n\n(paste your code below)" },
+];
+
+const categories = ["Analyze", "Improve", "Generate", "Compare"];
+
+const outputLanguages = [
+  { code: "en", label: "English" },
+  { code: "hi", label: "हिन्दी" },
+  { code: "te", label: "తెలుగు" },
+  { code: "es", label: "Español" },
+  { code: "zh", label: "中文" },
+  { code: "fr", label: "Français" },
+  { code: "de", label: "Deutsch" },
+  { code: "ja", label: "日本語" },
+  { code: "ko", label: "한국어" },
+  { code: "pt", label: "Português" },
+  { code: "ar", label: "العربية" },
 ];
 
 const Index = () => {
@@ -79,7 +144,9 @@ const Index = () => {
   const [activePanel, setActivePanel] = useState<SidebarPanel>("new");
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [inputMode, setInputMode] = useState<InputMode>("error");
+  const [activeCategory, setActiveCategory] = useState("Analyze");
   const [expertMode, setExpertMode] = useState(false);
+  const [outputLang, setOutputLang] = useState("en");
   const [similarError, setSimilarError] = useState<{ errorMessage: string; timestamp: number } | null>(null);
 
   useEffect(() => {
@@ -110,7 +177,6 @@ const Index = () => {
     setResult(null);
     setSimilarError(null);
 
-    // Check for similar error
     const similar = findSimilarError(errorInput.trim());
     if (similar) {
       setSimilarError({ errorMessage: similar.errorMessage, timestamp: similar.timestamp });
@@ -122,6 +188,7 @@ const Index = () => {
           errorMessage: errorInput.trim(),
           inputMode,
           explanationMode: expertMode ? "expert" : "beginner",
+          outputLanguage: outputLang,
         },
       });
       if (error) throw error;
@@ -172,25 +239,47 @@ const Index = () => {
     setSimilarError(null);
     setActivePanel("new");
     setInputMode("error");
+    setActiveCategory("Analyze");
     if (window.innerWidth < 768) setSidebarOpen(false);
   }, []);
 
   const currentMode = inputModes.find((m) => m.id === inputMode)!;
-  const submitLabel = {
+  const modesInCategory = inputModes.filter(m => m.category === activeCategory);
+
+  const reviewModes = ["review", "refactor", "security", "performance", "complexity"];
+  const isReview = reviewModes.includes(inputMode);
+
+  const submitLabels: Record<string, string> = {
     error: "Explain Error",
     code: "Analyze Code",
     terminal: "Clean & Explain",
     review: "Review Code",
-  }[inputMode];
+    refactor: "Refactor Code",
+    security: "Scan Security",
+    performance: "Analyze Performance",
+    explain: "Explain Code",
+    sql: "Debug SQL",
+    api: "Debug API",
+    log: "Analyze Logs",
+    cicd: "Debug CI/CD",
+    deploy: "Debug Deploy",
+    docs: "Generate Docs",
+    diff: "Analyze Diff",
+    reproduce: "Reproduce Bug",
+    complexity: "Analyze Complexity",
+    env: "Debug Environment",
+    migrate: "Migrate Code",
+    interview: "Generate Questions",
+  };
+  const submitLabel = submitLabels[inputMode] || "Analyze";
 
   const sidebarItems: { id: SidebarPanel; label: string; icon: React.ReactNode }[] = [
     { id: "new", label: "New Analysis", icon: <PlusCircle className="h-4 w-4" /> },
     { id: "history", label: "History", icon: <History className="h-4 w-4" /> },
     { id: "chat", label: "Debug Chat", icon: <MessageSquare className="h-4 w-4" /> },
+    { id: "snippets", label: "Snippets", icon: <BookOpen className="h-4 w-4" /> },
     { id: "trends", label: "Trends", icon: <BarChart3 className="h-4 w-4" /> },
   ];
-
-  const showMainContent = activePanel !== "trends";
 
   return (
     <div className="h-screen flex flex-col bg-background transition-colors duration-300 overflow-hidden">
@@ -257,16 +346,19 @@ const Index = () => {
             {activePanel === "chat" && (
               <DebugChat errorContext={errorInput || undefined} />
             )}
+            {activePanel === "snippets" && (
+              <SnippetLibrary />
+            )}
             {(activePanel === "new" || activePanel === "trends") && (
               <div className="p-4 space-y-3">
                 <p className="text-xs text-muted-foreground font-mono">
-                  Paste an error, code, terminal output, or request a code review.
+                  20+ AI-powered analysis modes for debugging, code review, security scanning, and more.
                 </p>
                 <div className="space-y-2">
                   {["TypeError: Cannot read properties of undefined", "SyntaxError: Unexpected token", "IndentationError: unexpected indent"].map((ex) => (
                     <button
                       key={ex}
-                      onClick={() => { setErrorInput(ex); setInputMode("error"); setActivePanel("new"); }}
+                      onClick={() => { setErrorInput(ex); setInputMode("error"); setActiveCategory("Analyze"); setActivePanel("new"); }}
                       className="w-full text-left text-xs font-mono text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-accent/50 transition-colors border border-transparent hover:border-border"
                     >
                       {ex}
@@ -298,18 +390,40 @@ const Index = () => {
                           setErrorInput(text);
                           setResult(null);
                           setInputMode("error");
+                          setActiveCategory("Analyze");
                         }}
                       />
                     </div>
                   </div>
 
-                  {/* Input mode tabs */}
-                  <div className="flex gap-1 mt-2 flex-wrap">
-                    {inputModes.map((mode) => (
+                  {/* Category tabs */}
+                  <div className="flex gap-1 mt-2 border-b border-border pb-2">
+                    {categories.map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => {
+                          setActiveCategory(cat);
+                          const firstInCat = inputModes.find(m => m.category === cat);
+                          if (firstInCat) setInputMode(firstInCat.id);
+                        }}
+                        className={`px-2.5 py-1 rounded-md text-xs font-mono transition-colors ${
+                          activeCategory === cat
+                            ? "bg-primary/10 text-primary font-medium"
+                            : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Mode tabs within category */}
+                  <div className="flex gap-1 mt-1.5 flex-wrap">
+                    {modesInCategory.map((mode) => (
                       <button
                         key={mode.id}
                         onClick={() => setInputMode(mode.id)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono transition-colors ${
+                        className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono transition-colors ${
                           inputMode === mode.id
                             ? "bg-primary text-primary-foreground"
                             : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
@@ -323,7 +437,7 @@ const Index = () => {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Textarea
-                    placeholder={currentMode.placeholder}
+                    placeholder={currentMode?.placeholder || "Paste your input here…"}
                     className="font-mono text-xs min-h-[140px] bg-background resize-y border-border/60"
                     value={errorInput}
                     onChange={(e) => setErrorInput(e.target.value)}
@@ -331,16 +445,31 @@ const Index = () => {
 
                   {/* Controls row */}
                   <div className="flex items-center justify-between flex-wrap gap-3">
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        id="expert-mode"
-                        checked={expertMode}
-                        onCheckedChange={setExpertMode}
-                        className="data-[state=checked]:bg-primary"
-                      />
-                      <Label htmlFor="expert-mode" className="text-xs font-mono text-muted-foreground cursor-pointer">
-                        {expertMode ? "Expert" : "Beginner"}
-                      </Label>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          id="expert-mode"
+                          checked={expertMode}
+                          onCheckedChange={setExpertMode}
+                          className="data-[state=checked]:bg-primary"
+                        />
+                        <Label htmlFor="expert-mode" className="text-xs font-mono text-muted-foreground cursor-pointer">
+                          {expertMode ? "Expert" : "Beginner"}
+                        </Label>
+                      </div>
+                      {/* Language selector */}
+                      <div className="flex items-center gap-1.5">
+                        <Languages className="h-3.5 w-3.5 text-muted-foreground" />
+                        <select
+                          value={outputLang}
+                          onChange={(e) => setOutputLang(e.target.value)}
+                          className="text-xs font-mono bg-background border border-border rounded px-1.5 py-1 text-foreground cursor-pointer"
+                        >
+                          {outputLanguages.map(l => (
+                            <option key={l.code} value={l.code}>{l.label}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       {errorInput && (
@@ -372,9 +501,7 @@ const Index = () => {
                     <div className="h-12 w-12 rounded-full border-2 border-border" />
                     <div className="absolute inset-0 h-12 w-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                   </div>
-                  <p className="text-sm text-muted-foreground font-mono">
-                    {inputMode === "review" ? "Reviewing your code…" : "AI is analyzing…"}
-                  </p>
+                  <p className="text-sm text-muted-foreground font-mono">AI is analyzing…</p>
                 </div>
               )}
 
@@ -383,23 +510,22 @@ const Index = () => {
                 <>
                   <ResultDisplay
                     result={result}
-                    isReview={inputMode === "review"}
+                    inputMode={inputMode}
+                    isReview={isReview}
                     onShare={handleShare}
                     similarError={similarError}
                   />
-                  {inputMode !== "review" && (
-                    <Card className="border-dashed border-border/60">
-                      <CardContent className="py-4">
-                        <button
-                          onClick={() => { setActivePanel("chat"); setSidebarOpen(true); }}
-                          className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-mono"
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                          Have more questions? Open Debug Chat →
-                        </button>
-                      </CardContent>
-                    </Card>
-                  )}
+                  <Card className="border-dashed border-border/60">
+                    <CardContent className="py-4">
+                      <button
+                        onClick={() => { setActivePanel("chat"); setSidebarOpen(true); }}
+                        className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-mono"
+                      >
+                        <MessageSquare className="h-4 w-4" />
+                        Have more questions? Open Debug Chat →
+                      </button>
+                    </CardContent>
+                  </Card>
                 </>
               )}
 
@@ -408,10 +534,10 @@ const Index = () => {
                 <Alert className="border-dashed border-border/60">
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription className="text-center text-muted-foreground py-3 text-sm font-mono">
-                    Supports errors, code analysis, terminal logs, and code reviews.
+                    20+ AI analysis modes: errors, code review, security, performance, SQL, API debugging, and more.
                     <br />
                     <span className="text-xs opacity-70">
-                      Toggle between modes above. Upload a screenshot or paste text.
+                      Select a category and mode above. Upload a screenshot or paste text.
                     </span>
                   </AlertDescription>
                 </Alert>
