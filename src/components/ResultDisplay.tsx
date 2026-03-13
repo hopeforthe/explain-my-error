@@ -5,7 +5,7 @@ import {
   AlertTriangle, Zap, Code, Lightbulb, Copy, Check, ExternalLink, Globe, Wand2, Share2,
   Shield, Layers, Star, CheckCircle2, TrendingUp, BookOpen, GraduationCap, Volume2, VolumeX,
   GitCommit, TestTube, Loader2, Package, Bug, FileWarning, FileCode, Database, Gauge, Clock,
-  Lock, List, FileText, ArrowRightLeft, HelpCircle, Target,
+  Lock, List, FileText, ArrowRightLeft, HelpCircle, Target, Wrench,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
