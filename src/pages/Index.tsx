@@ -6,39 +6,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  AlertTriangle,
-  Code,
-  Send,
-  Loader2,
-  LogOut,
-  Terminal,
-  PanelLeftClose,
-  PanelLeft,
-  PlusCircle,
-  History,
-  MessageSquare,
-  FileCode,
-  Sparkles,
-  BarChart3,
-  Shield,
-  Zap,
-  BookOpen,
-  Database,
-  Globe,
-  Wrench,
-  FileText,
-  GitCompare,
-  Bug,
-  Gauge,
-  Cog,
-  ArrowRightLeft,
-  GraduationCap,
-  ChevronDown,
-  Layers,
-  Rocket,
-  Languages,
+  AlertTriangle, Code, Send, Loader2, LogOut, Terminal,
+  PanelLeftClose, PanelLeft, PlusCircle, History, MessageSquare,
+  FileCode, Sparkles, BarChart3, Shield, Zap, BookOpen, Database,
+  Globe, Wrench, FileText, GitCompare, Bug, Gauge, Cog,
+  ArrowRightLeft, GraduationCap, Layers, Rocket, Languages,
 } from "lucide-react";
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
@@ -66,7 +41,6 @@ interface ModeConfig {
 }
 
 const inputModes: ModeConfig[] = [
-  // Analyze
   { id: "error", label: "Error", icon: <AlertTriangle className="h-3.5 w-3.5" />, category: "Analyze",
     placeholder: "Paste your error message or stack trace here…\n\ne.g. TypeError: Cannot read properties of undefined (reading 'map')" },
   { id: "code", label: "Bug Detect", icon: <Bug className="h-3.5 w-3.5" />, category: "Analyze",
@@ -74,31 +48,27 @@ const inputModes: ModeConfig[] = [
   { id: "terminal", label: "Terminal", icon: <Terminal className="h-3.5 w-3.5" />, category: "Analyze",
     placeholder: "Paste your full terminal output here…\nThe AI will extract the main error and ignore noise." },
   { id: "api", label: "API Error", icon: <Globe className="h-3.5 w-3.5" />, category: "Analyze",
-    placeholder: "Paste API error responses, curl commands, or HTTP errors here…\n\ncurl -X POST https://api.example.com/data -H 'Authorization: Bearer token'" },
+    placeholder: "Paste API error responses, curl commands, or HTTP errors here…" },
   { id: "log", label: "Log File", icon: <FileText className="h-3.5 w-3.5" />, category: "Analyze",
     placeholder: "Paste log file contents (server.log, error.log, docker logs)…" },
   { id: "sql", label: "SQL Debug", icon: <Database className="h-3.5 w-3.5" />, category: "Analyze",
-    placeholder: "Paste SQL queries or database error messages here…\n\nSELECT * FROM users WHERE id = ..." },
+    placeholder: "Paste SQL queries or database error messages here…" },
   { id: "cicd", label: "CI/CD", icon: <Cog className="h-3.5 w-3.5" />, category: "Analyze",
     placeholder: "Paste CI/CD pipeline errors (GitHub Actions, Docker, Jenkins)…" },
   { id: "deploy", label: "Deploy", icon: <Rocket className="h-3.5 w-3.5" />, category: "Analyze",
     placeholder: "Paste deployment errors from Vercel, Netlify, AWS, Docker…" },
   { id: "env", label: "Environment", icon: <Wrench className="h-3.5 w-3.5" />, category: "Analyze",
-    placeholder: "Paste environment errors (version mismatch, missing packages, dependency conflicts)…" },
-
-  // Improve
+    placeholder: "Paste environment errors (version mismatch, missing packages)…" },
   { id: "review", label: "Code Review", icon: <Sparkles className="h-3.5 w-3.5" />, category: "Improve",
-    placeholder: "Paste code to get improvement suggestions…\nGet code quality, performance, and best practice recommendations." },
+    placeholder: "Paste code to get improvement suggestions…" },
   { id: "refactor", label: "Refactor", icon: <Layers className="h-3.5 w-3.5" />, category: "Improve",
-    placeholder: "Paste code to get refactoring suggestions…\nGet cleaner structure, better naming, and reduced complexity." },
+    placeholder: "Paste code to get refactoring suggestions…" },
   { id: "security", label: "Security Scan", icon: <Shield className="h-3.5 w-3.5" />, category: "Improve",
-    placeholder: "Paste code to scan for security vulnerabilities…\nDetects SQL injection, XSS, exposed secrets, and more." },
+    placeholder: "Paste code to scan for security vulnerabilities…" },
   { id: "performance", label: "Performance", icon: <Zap className="h-3.5 w-3.5" />, category: "Improve",
-    placeholder: "Paste code to analyze performance…\nDetects inefficient loops, memory issues, and optimization opportunities." },
+    placeholder: "Paste code to analyze performance…" },
   { id: "complexity", label: "Complexity", icon: <Gauge className="h-3.5 w-3.5" />, category: "Improve",
-    placeholder: "Paste code to analyze its complexity metrics…\nGet cyclomatic complexity, maintainability score, and simplification suggestions." },
-
-  // Generate
+    placeholder: "Paste code to analyze its complexity metrics…" },
   { id: "explain", label: "Explain Code", icon: <BookOpen className="h-3.5 w-3.5" />, category: "Generate",
     placeholder: "Paste code for a line-by-line explanation…" },
   { id: "docs", label: "Generate Docs", icon: <FileCode className="h-3.5 w-3.5" />, category: "Generate",
@@ -107,12 +77,10 @@ const inputModes: ModeConfig[] = [
     placeholder: "Paste buggy code to generate a minimal reproducible example…" },
   { id: "interview", label: "Interview Prep", icon: <GraduationCap className="h-3.5 w-3.5" />, category: "Generate",
     placeholder: "Paste code or error to generate interview-style questions…" },
-
-  // Compare
   { id: "diff", label: "Code Diff", icon: <GitCompare className="h-3.5 w-3.5" />, category: "Compare",
-    placeholder: "Paste two versions of code separated by:\n--- OLD CODE ---\n(old code here)\n--- NEW CODE ---\n(new code here)" },
+    placeholder: "Paste two versions separated by:\n--- OLD CODE ---\n(old code)\n--- NEW CODE ---\n(new code)" },
   { id: "migrate", label: "Migrate", icon: <ArrowRightLeft className="h-3.5 w-3.5" />, category: "Compare",
-    placeholder: "Paste code and specify the migration target.\nE.g. 'Migrate from React class components to hooks'\n\n(paste your code below)" },
+    placeholder: "Paste code and specify the migration target.\nE.g. 'Migrate from React class components to hooks'" },
 ];
 
 const categories = ["Analyze", "Improve", "Generate", "Compare"];
@@ -137,9 +105,7 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
-  const [freeQueryUsed, setFreeQueryUsed] = useState(
-    () => localStorage.getItem(FREE_QUERY_KEY) === "true"
-  );
+  const [freeQueryUsed, setFreeQueryUsed] = useState(() => localStorage.getItem(FREE_QUERY_KEY) === "true");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activePanel, setActivePanel] = useState<SidebarPanel>("new");
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
@@ -164,39 +130,23 @@ const Index = () => {
   }, []);
 
   const handleSubmit = async () => {
-    if (!errorInput.trim()) {
-      toast.error("Please paste some input first.");
-      return;
-    }
-    if (!session && freeQueryUsed) {
-      setShowAuthModal(true);
-      return;
-    }
+    if (!errorInput.trim()) { toast.error("Please paste some input first."); return; }
+    if (!session && freeQueryUsed) { setShowAuthModal(true); return; }
 
     setLoading(true);
     setResult(null);
     setSimilarError(null);
 
     const similar = findSimilarError(errorInput.trim());
-    if (similar) {
-      setSimilarError({ errorMessage: similar.errorMessage, timestamp: similar.timestamp });
-    }
+    if (similar) setSimilarError({ errorMessage: similar.errorMessage, timestamp: similar.timestamp });
 
     try {
       const { data, error } = await supabase.functions.invoke("explain-error", {
-        body: {
-          errorMessage: errorInput.trim(),
-          inputMode,
-          explanationMode: expertMode ? "expert" : "beginner",
-          outputLanguage: outputLang,
-        },
+        body: { errorMessage: errorInput.trim(), inputMode, explanationMode: expertMode ? "expert" : "beginner", outputLanguage: outputLang },
       });
       if (error) throw error;
 
-      if (!session) {
-        localStorage.setItem(FREE_QUERY_KEY, "true");
-        setFreeQueryUsed(true);
-      }
+      if (!session) { localStorage.setItem(FREE_QUERY_KEY, "true"); setFreeQueryUsed(true); }
 
       const parsed = data as ExplanationResult;
       setResult(parsed);
@@ -227,48 +177,27 @@ const Index = () => {
   };
 
   const handleNewError = useCallback(() => {
-    setErrorInput("");
-    setResult(null);
-    setSimilarError(null);
-    setActivePanel("new");
+    setErrorInput(""); setResult(null); setSimilarError(null); setActivePanel("new");
   }, []);
 
   const handleHistorySelect = useCallback((errorMessage: string) => {
-    setErrorInput(errorMessage);
-    setResult(null);
-    setSimilarError(null);
-    setActivePanel("new");
-    setInputMode("error");
-    setActiveCategory("Analyze");
+    setErrorInput(errorMessage); setResult(null); setSimilarError(null);
+    setActivePanel("new"); setInputMode("error"); setActiveCategory("Analyze");
     if (window.innerWidth < 768) setSidebarOpen(false);
   }, []);
 
   const currentMode = inputModes.find((m) => m.id === inputMode)!;
   const modesInCategory = inputModes.filter(m => m.category === activeCategory);
-
   const reviewModes = ["review", "refactor", "security", "performance", "complexity"];
   const isReview = reviewModes.includes(inputMode);
 
   const submitLabels: Record<string, string> = {
-    error: "Explain Error",
-    code: "Analyze Code",
-    terminal: "Clean & Explain",
-    review: "Review Code",
-    refactor: "Refactor Code",
-    security: "Scan Security",
-    performance: "Analyze Performance",
-    explain: "Explain Code",
-    sql: "Debug SQL",
-    api: "Debug API",
-    log: "Analyze Logs",
-    cicd: "Debug CI/CD",
-    deploy: "Debug Deploy",
-    docs: "Generate Docs",
-    diff: "Analyze Diff",
-    reproduce: "Reproduce Bug",
-    complexity: "Analyze Complexity",
-    env: "Debug Environment",
-    migrate: "Migrate Code",
+    error: "Explain Error", code: "Analyze Code", terminal: "Clean & Explain",
+    review: "Review Code", refactor: "Refactor Code", security: "Scan Security",
+    performance: "Analyze Performance", explain: "Explain Code", sql: "Debug SQL",
+    api: "Debug API", log: "Analyze Logs", cicd: "Debug CI/CD", deploy: "Debug Deploy",
+    docs: "Generate Docs", diff: "Analyze Diff", reproduce: "Reproduce Bug",
+    complexity: "Analyze Complexity", env: "Debug Environment", migrate: "Migrate Code",
     interview: "Generate Questions",
   };
   const submitLabel = submitLabels[inputMode] || "Analyze";
@@ -282,38 +211,39 @@ const Index = () => {
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-background transition-colors duration-300 overflow-hidden">
+    <div className="h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-hidden">
       {/* Header */}
-      <header className="shrink-0 z-50 border-b border-border bg-card/90 backdrop-blur-md">
-        <div className="flex items-center justify-between px-3 py-2">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSidebarOpen(!sidebarOpen)}>
+      <header className="shrink-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-4 py-2.5">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setSidebarOpen(!sidebarOpen)}>
               {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
             </Button>
-            <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
-                <Terminal className="h-3.5 w-3.5 text-primary-foreground" />
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shadow-md">
+                <Terminal className="h-4 w-4 text-primary-foreground" />
               </div>
-              <h1 className="font-mono text-sm font-bold text-foreground hidden sm:block">
-                Explain My Error
-              </h1>
+              <div className="hidden sm:block">
+                <h1 className="font-semibold text-sm text-foreground leading-tight">Explain My Error</h1>
+                <p className="text-[10px] text-muted-foreground leading-none">AI Debugging Assistant</p>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <ThemeToggle />
             {session ? (
               <>
-                <Badge variant="outline" className="hidden font-mono text-[10px] sm:inline-flex">
+                <Badge variant="secondary" className="hidden font-mono text-[10px] sm:inline-flex">
                   Unlimited
                 </Badge>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => supabase.auth.signOut()} title="Sign out">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => supabase.auth.signOut()} title="Sign out">
                   <LogOut className="h-3.5 w-3.5" />
                 </Button>
               </>
             ) : (
-              <Badge variant="outline" className="cursor-pointer font-mono text-[10px]" onClick={() => setShowAuthModal(true)}>
+              <Button variant="outline" size="sm" className="font-mono text-[11px] h-7" onClick={() => setShowAuthModal(true)}>
                 {freeQueryUsed ? "Sign in" : "1 free query"}
-              </Badge>
+              </Button>
             )}
           </div>
         </div>
@@ -321,16 +251,16 @@ const Index = () => {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <aside className={`shrink-0 border-r border-border bg-card flex flex-col transition-all duration-200 ${sidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}>
+        <aside className={`shrink-0 border-r border-border bg-card/60 backdrop-blur-sm flex flex-col transition-all duration-200 ${sidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}>
           <nav className="p-2 space-y-0.5 border-b border-border">
             {sidebarItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActivePanel(item.id)}
-                className={`w-full flex items-center gap-2 rounded-md px-2.5 py-2 text-sm font-mono transition-colors ${
+                className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all duration-150 ${
                   activePanel === item.id
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                    ? "bg-primary/10 text-primary font-medium shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}
               >
                 {item.icon}
@@ -339,27 +269,21 @@ const Index = () => {
             ))}
           </nav>
 
-          <div className="flex-1 overflow-hidden">
-            {activePanel === "history" && (
-              <ErrorHistory onSelect={handleHistorySelect} refreshKey={historyRefreshKey} />
-            )}
-            {activePanel === "chat" && (
-              <DebugChat errorContext={errorInput || undefined} />
-            )}
-            {activePanel === "snippets" && (
-              <SnippetLibrary />
-            )}
+          <div className="flex-1 overflow-hidden scrollbar-thin">
+            {activePanel === "history" && <ErrorHistory onSelect={handleHistorySelect} refreshKey={historyRefreshKey} />}
+            {activePanel === "chat" && <DebugChat errorContext={errorInput || undefined} />}
+            {activePanel === "snippets" && <SnippetLibrary />}
             {(activePanel === "new" || activePanel === "trends") && (
-              <div className="p-4 space-y-3">
-                <p className="text-xs text-muted-foreground font-mono">
+              <div className="p-4 space-y-4">
+                <p className="text-xs text-muted-foreground">
                   20+ AI-powered analysis modes for debugging, code review, security scanning, and more.
                 </p>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {["TypeError: Cannot read properties of undefined", "SyntaxError: Unexpected token", "IndentationError: unexpected indent"].map((ex) => (
                     <button
                       key={ex}
                       onClick={() => { setErrorInput(ex); setInputMode("error"); setActiveCategory("Analyze"); setActivePanel("new"); }}
-                      className="w-full text-left text-xs font-mono text-muted-foreground hover:text-foreground p-2 rounded-md hover:bg-accent/50 transition-colors border border-transparent hover:border-border"
+                      className="w-full text-left text-xs font-mono text-muted-foreground hover:text-foreground p-2.5 rounded-lg hover:bg-muted/50 transition-all border border-transparent hover:border-border"
                     >
                       {ex}
                     </button>
@@ -371,33 +295,28 @@ const Index = () => {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto scrollbar-thin">
           {activePanel === "trends" ? (
             <ErrorTrends refreshKey={historyRefreshKey} />
           ) : (
-            <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-5">
+            <div className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
               {/* Input Section */}
-              <Card className="shadow-sm border-border/60">
-                <CardHeader className="pb-2">
+              <Card className="shadow-md border-border/50 bg-card/80 backdrop-blur-sm">
+                <CardHeader className="pb-3 space-y-3">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <CardTitle className="text-base font-mono flex items-center gap-2">
+                    <CardTitle className="text-base font-semibold flex items-center gap-2">
                       <Code className="h-4 w-4 text-primary" />
                       Input
                     </CardTitle>
-                    <div className="flex items-center gap-2">
-                      <ImageUpload
-                        onTextExtracted={(text) => {
-                          setErrorInput(text);
-                          setResult(null);
-                          setInputMode("error");
-                          setActiveCategory("Analyze");
-                        }}
-                      />
-                    </div>
+                    <ImageUpload
+                      onTextExtracted={(text) => {
+                        setErrorInput(text); setResult(null); setInputMode("error"); setActiveCategory("Analyze");
+                      }}
+                    />
                   </div>
 
                   {/* Category tabs */}
-                  <div className="flex gap-1 mt-2 border-b border-border pb-2">
+                  <div className="flex gap-1 border-b border-border pb-2">
                     {categories.map(cat => (
                       <button
                         key={cat}
@@ -406,10 +325,10 @@ const Index = () => {
                           const firstInCat = inputModes.find(m => m.category === cat);
                           if (firstInCat) setInputMode(firstInCat.id);
                         }}
-                        className={`px-2.5 py-1 rounded-md text-xs font-mono transition-colors ${
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 ${
                           activeCategory === cat
-                            ? "bg-primary/10 text-primary font-medium"
-                            : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                         }`}
                       >
                         {cat}
@@ -418,15 +337,15 @@ const Index = () => {
                   </div>
 
                   {/* Mode tabs within category */}
-                  <div className="flex gap-1 mt-1.5 flex-wrap">
+                  <div className="flex gap-1 flex-wrap">
                     {modesInCategory.map((mode) => (
                       <button
                         key={mode.id}
                         onClick={() => setInputMode(mode.id)}
-                        className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono transition-colors ${
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 ${
                           inputMode === mode.id
-                            ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                            ? "bg-accent text-accent-foreground border border-primary/30 shadow-sm"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                         }`}
                       >
                         {mode.icon}
@@ -435,35 +354,29 @@ const Index = () => {
                     ))}
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-4">
                   <Textarea
                     placeholder={currentMode?.placeholder || "Paste your input here…"}
-                    className="font-mono text-xs min-h-[140px] bg-background resize-y border-border/60"
+                    className="font-mono text-[13px] min-h-[160px] bg-background/50 resize-y border-border/50 focus:border-primary/50 transition-colors"
                     value={errorInput}
                     onChange={(e) => setErrorInput(e.target.value)}
                   />
 
                   {/* Controls row */}
                   <div className="flex items-center justify-between flex-wrap gap-3">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
-                        <Switch
-                          id="expert-mode"
-                          checked={expertMode}
-                          onCheckedChange={setExpertMode}
-                          className="data-[state=checked]:bg-primary"
-                        />
-                        <Label htmlFor="expert-mode" className="text-xs font-mono text-muted-foreground cursor-pointer">
+                        <Switch id="expert-mode" checked={expertMode} onCheckedChange={setExpertMode} />
+                        <Label htmlFor="expert-mode" className="text-xs text-muted-foreground cursor-pointer">
                           {expertMode ? "Expert" : "Beginner"}
                         </Label>
                       </div>
-                      {/* Language selector */}
                       <div className="flex items-center gap-1.5">
                         <Languages className="h-3.5 w-3.5 text-muted-foreground" />
                         <select
                           value={outputLang}
                           onChange={(e) => setOutputLang(e.target.value)}
-                          className="text-xs font-mono bg-background border border-border rounded px-1.5 py-1 text-foreground cursor-pointer"
+                          className="text-xs font-mono bg-background border border-border rounded-md px-2 py-1 text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary/50"
                         >
                           {outputLanguages.map(l => (
                             <option key={l.code} value={l.code}>{l.label}</option>
@@ -473,20 +386,16 @@ const Index = () => {
                     </div>
                     <div className="flex gap-2">
                       {errorInput && (
-                        <Button variant="outline" onClick={handleNewError} className="font-mono text-sm">
+                        <Button variant="ghost" size="sm" onClick={handleNewError} className="text-xs text-muted-foreground">
                           Clear
                         </Button>
                       )}
                       <Button
                         onClick={handleSubmit}
                         disabled={loading || !errorInput.trim()}
-                        className="gap-2 font-mono"
+                        className="gap-2 shadow-md hover:shadow-lg transition-shadow"
                       >
-                        {loading ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Send className="h-4 w-4" />
-                        )}
+                        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                         {loading ? "Analyzing…" : submitLabel}
                       </Button>
                     </div>
@@ -494,14 +403,33 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              {/* Loading state */}
+              {/* Loading state with skeleton */}
               {loading && (
-                <div className="flex flex-col items-center justify-center py-12 space-y-3 animate-in fade-in duration-300">
-                  <div className="relative">
-                    <div className="h-12 w-12 rounded-full border-2 border-border" />
-                    <div className="absolute inset-0 h-12 w-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                <div className="space-y-4 animate-in fade-in duration-300">
+                  <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                    <div className="relative">
+                      <div className="h-14 w-14 rounded-full border-2 border-border" />
+                      <div className="absolute inset-0 h-14 w-14 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                      <div className="absolute inset-2 h-10 w-10 rounded-full border border-primary/30 border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-foreground">AI is analyzing your input</p>
+                      <p className="text-xs text-muted-foreground mt-1">This usually takes a few seconds…</p>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground font-mono">AI is analyzing…</p>
+                  {/* Skeleton cards */}
+                  {[1, 2, 3].map(i => (
+                    <Card key={i} className="border-border/30 bg-card/50">
+                      <CardHeader className="pb-3">
+                        <Skeleton className="h-5 w-40" />
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-4/5" />
+                        <Skeleton className="h-4 w-3/5" />
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               )}
 
@@ -515,11 +443,11 @@ const Index = () => {
                     onShare={handleShare}
                     similarError={similarError}
                   />
-                  <Card className="border-dashed border-border/60">
+                  <Card className="border-dashed border-border/40 bg-card/40">
                     <CardContent className="py-4">
                       <button
                         onClick={() => { setActivePanel("chat"); setSidebarOpen(true); }}
-                        className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-mono"
+                        className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
                       >
                         <MessageSquare className="h-4 w-4" />
                         Have more questions? Open Debug Chat →
@@ -531,16 +459,22 @@ const Index = () => {
 
               {/* Empty state */}
               {!result && !loading && (
-                <Alert className="border-dashed border-border/60">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription className="text-center text-muted-foreground py-3 text-sm font-mono">
-                    20+ AI analysis modes: errors, code review, security, performance, SQL, API debugging, and more.
-                    <br />
-                    <span className="text-xs opacity-70">
-                      Select a category and mode above. Upload a screenshot or paste text.
-                    </span>
-                  </AlertDescription>
-                </Alert>
+                <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20">
+                    <Terminal className="h-8 w-8 text-primary animate-pulse-glow" />
+                  </div>
+                  <div className="text-center space-y-2">
+                    <h2 className="text-lg font-semibold text-foreground">Ready to debug</h2>
+                    <p className="text-sm text-muted-foreground max-w-md">
+                      Paste an error message, code snippet, or log file above. Select a mode and let AI analyze it for you.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-2 pt-2">
+                    {["Error Analysis", "Security Scan", "Code Review", "Performance"].map(label => (
+                      <Badge key={label} variant="secondary" className="text-xs">{label}</Badge>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           )}
