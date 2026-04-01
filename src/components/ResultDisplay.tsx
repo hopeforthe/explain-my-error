@@ -120,6 +120,27 @@ export interface ExplanationResult {
   pullRequestSuggestion?: { title: string; description: string };
   executionPath?: string[];
   affectedFiles?: { file: string; line: number | null; role: string }[];
+  // QA / Tester fields
+  bugTitle?: string;
+  description?: string;
+  stepsToReproduce?: string[];
+  expectedResult?: string;
+  actualResult?: string;
+  possibleRootCause?: string;
+  severity?: string;
+  severityReason?: string;
+  priority?: string;
+  priorityReason?: string;
+  environment?: string;
+  additionalNotes?: string;
+  testCases?: { id: string; type: string; scenario: string; steps: string[]; expectedResult: string; priority: string }[];
+  coverageSummary?: { positiveCount: number; negativeCount: number; edgeCaseCount: number; totalCount: number };
+  featureName?: string;
+  functionalScenarios?: string[];
+  edgeCaseScenarios?: string[];
+  negativeScenarios?: string[];
+  securityScenarios?: string[];
+  performanceScenarios?: string[];
 }
 
 // ── Helpers ──
