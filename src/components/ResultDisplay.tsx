@@ -118,6 +118,8 @@ export interface ExplanationResult {
   debugSimulation?: DebugSimStep[];
   patchDiff?: string;
   pullRequestSuggestion?: { title: string; description: string };
+  executionPath?: string[];
+  affectedFiles?: { file: string; line: number | null; role: string }[];
 }
 
 // ── Helpers ──
