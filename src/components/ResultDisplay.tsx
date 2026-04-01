@@ -613,6 +613,35 @@ export const ResultDisplay = ({
         </CollapsibleSection>
       )}
 
+      {/* Execution Path */}
+      {result.executionPath && result.executionPath.length > 0 && (
+        <CollapsibleSection title="Execution Path" icon={<TrendingUp className="h-4 w-4 text-primary" />} defaultOpen accentColor="border-l-primary">
+          <div className="space-y-2 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-px before:bg-border/50">
+            {result.executionPath.map((step, i) => (
+              <div key={i} className="flex items-start gap-3 pl-1">
+                <div className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-primary/10 border border-primary/20 shrink-0 z-10">
+                  <span className="text-[9px] font-bold text-primary">{i + 1}</span>
+                </div>
+                <span className="text-sm text-foreground font-mono">{step}</span>
+              </div>
+            ))}
+          </div>
+        </CollapsibleSection>
+      )}
+
+      {/* Affected Files */}
+      {result.affectedFiles && result.affectedFiles.length > 0 && (
+        <CollapsibleSection title="Affected Files" icon={<FileCode className="h-4 w-4 text-warning" />} defaultOpen>
+          <div className="space-y-2">{result.affectedFiles.map((f, i) => (
+            <div key={i} className="flex items-center gap-2 text-sm">
+              <Badge variant="outline" className={`shrink-0 font-mono text-[10px] ${f.role.includes("origin") ? severityBadge("high") : severityBadge("medium")}`}>{f.role}</Badge>
+              <span className="font-mono text-foreground">{f.file}</span>
+              {f.line && <span className="text-xs text-muted-foreground font-mono">:{f.line}</span>}
+            </div>
+          ))}</div>
+        </CollapsibleSection>
+      )}
+
       {/* Code Diff Changes */}
       {result.changes && result.changes.length > 0 && (
         <CollapsibleSection title="Code Changes" icon={<ArrowRightLeft className="h-4 w-4 text-primary" />} defaultOpen>
