@@ -116,6 +116,8 @@ export interface ExplanationResult {
   errorCategory?: string;
   debugChecklist?: string[];
   debugSimulation?: DebugSimStep[];
+  patchDiff?: string;
+  pullRequestSuggestion?: { title: string; description: string };
 }
 
 // ── Helpers ──
