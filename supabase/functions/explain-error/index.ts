@@ -434,6 +434,9 @@ serve(async (req) => {
       env: "Debug this environment/setup issue:",
       migrate: "Migrate this code to a newer version:",
       interview: "Generate interview questions based on this code/concept:",
+      bugreport: "Generate a structured bug report from this error/failure:",
+      testcase: "Generate test cases for this feature/module/code:",
+      testscenario: "Generate test scenarios for this feature/module:",
     };
 
     const userPromptPrefix = userPromptPrefixes[inputMode] || "Explain this error:";
