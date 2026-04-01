@@ -312,6 +312,8 @@ ${inputMode === "terminal" ? '- "stackTraceAnalysis": An object with { "rootCaus
 - "errorCategory": One of "Syntax Error", "Runtime Error", "Dependency Error", "API Error", "Security Issue", "Logic Error", "Type Error", "Configuration Error"
 - "debugChecklist": Array of 4-6 step-by-step debugging steps (strings)
 - "debugSimulation": Array of 3-6 simulation steps showing how the error occurs, each: { "step": number, "description": string, "state": string }
+- "patchDiff": A Git-style unified diff string showing the exact change needed. Use standard diff format with --- original and +++ fixed headers, @@ line markers, lines prefixed with - for removed and + for added. If no code was provided, use a representative example.
+- "pullRequestSuggestion": An object with { "title": string (conventional commit style, e.g. "fix: resolve null pointer in auth module"), "description": string (markdown body with Root Cause, Fix Applied, Files Modified, Steps to Test sections) }
 
 ${levelInstruction}
 ${langInstruction}

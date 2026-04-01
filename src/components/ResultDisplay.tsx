@@ -5,7 +5,7 @@ import {
   AlertTriangle, Zap, Code, Lightbulb, Copy, Check, ExternalLink, Globe, Wand2, Share2,
   Shield, Layers, Star, CheckCircle2, TrendingUp, BookOpen, GraduationCap, Volume2, VolumeX,
   GitCommit, TestTube, Loader2, Package, Bug, FileWarning, FileCode, Database, Gauge, Clock,
-  Lock, List, FileText, ArrowRightLeft, HelpCircle, Target, Wrench, ChevronDown,
+  Lock, List, FileText, ArrowRightLeft, HelpCircle, Target, Wrench, ChevronDown, GitCompare,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -116,6 +116,8 @@ export interface ExplanationResult {
   errorCategory?: string;
   debugChecklist?: string[];
   debugSimulation?: DebugSimStep[];
+  patchDiff?: string;
+  pullRequestSuggestion?: { title: string; description: string };
 }
 
 // ── Helpers ──
@@ -835,6 +837,45 @@ export const ResultDisplay = ({
               {s}
             </li>
           ))}</ol>
+        </CollapsibleSection>
+      )}
+
+      {/* Patch Diff */}
+      {result.patchDiff && (
+        <CollapsibleSection title="Patch / Diff" icon={<GitCompare className="h-4 w-4 text-primary" />} defaultOpen accentColor="border-l-primary">
+          <div className="relative group">
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+              <CopyButton text={result.patchDiff} label="Copy Diff" />
+            </div>
+            <pre className="code-block overflow-x-auto text-[12px] leading-relaxed">
+              {result.patchDiff.split("\n").map((line, i) => {
+                let cls = "text-foreground";
+                if (line.startsWith("+") && !line.startsWith("+++")) cls = "text-success";
+                else if (line.startsWith("-") && !line.startsWith("---")) cls = "text-destructive";
+                else if (line.startsWith("@@")) cls = "text-primary";
+                else if (line.startsWith("---") || line.startsWith("+++")) cls = "text-muted-foreground font-semibold";
+                return <span key={i} className={cls}>{line}{"\n"}</span>;
+              })}
+            </pre>
+          </div>
+        </CollapsibleSection>
+      )}
+
+      {/* Pull Request Suggestion */}
+      {result.pullRequestSuggestion && (
+        <CollapsibleSection title="Pull Request Draft" icon={<GitCommit className="h-4 w-4 text-primary" />} defaultOpen accentColor="border-l-primary">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <code className="text-sm font-mono font-semibold text-foreground bg-muted/30 px-2.5 py-1 rounded border border-border/40 flex-1">{result.pullRequestSuggestion.title}</code>
+              <CopyButton text={result.pullRequestSuggestion.title} label="Copy" />
+            </div>
+            <div className="relative group">
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                <CopyButton text={result.pullRequestSuggestion.description} label="Copy Body" />
+              </div>
+              <pre className="code-block overflow-x-auto text-[12px] whitespace-pre-wrap">{result.pullRequestSuggestion.description}</pre>
+            </div>
+          </div>
         </CollapsibleSection>
       )}
 
