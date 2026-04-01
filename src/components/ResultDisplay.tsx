@@ -6,6 +6,7 @@ import {
   Shield, Layers, Star, CheckCircle2, TrendingUp, BookOpen, GraduationCap, Volume2, VolumeX,
   GitCommit, TestTube, Loader2, Package, Bug, FileWarning, FileCode, Database, Gauge, Clock,
   Lock, List, FileText, ArrowRightLeft, HelpCircle, Target, Wrench, ChevronDown, GitCompare,
+  ClipboardList, TestTubes, ListChecks, Clipboard,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -120,6 +121,27 @@ export interface ExplanationResult {
   pullRequestSuggestion?: { title: string; description: string };
   executionPath?: string[];
   affectedFiles?: { file: string; line: number | null; role: string }[];
+  // QA / Tester fields
+  bugTitle?: string;
+  description?: string;
+  stepsToReproduce?: string[];
+  expectedResult?: string;
+  actualResult?: string;
+  possibleRootCause?: string;
+  severity?: string;
+  severityReason?: string;
+  priority?: string;
+  priorityReason?: string;
+  environment?: string;
+  additionalNotes?: string;
+  testCases?: { id: string; type: string; scenario: string; steps: string[]; expectedResult: string; priority: string }[];
+  coverageSummary?: { positiveCount: number; negativeCount: number; edgeCaseCount: number; totalCount: number };
+  featureName?: string;
+  functionalScenarios?: string[];
+  edgeCaseScenarios?: string[];
+  negativeScenarios?: string[];
+  securityScenarios?: string[];
+  performanceScenarios?: string[];
 }
 
 // ── Helpers ──
@@ -335,6 +357,140 @@ export const ResultDisplay = ({
       </Card>
 
       {result.difficultyExplanation && <p className="text-xs text-muted-foreground px-1">{result.difficultyExplanation}</p>}
+
+      {/* ══ QA: Bug Report ══ */}
+      {result.bugTitle && (
+        <CollapsibleSection title="Bug Report" icon={<ClipboardList className="h-4 w-4 text-destructive" />} defaultOpen accentColor="border-l-destructive">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-semibold text-foreground">{result.bugTitle}</h3>
+              <CopyButton text={[
+                `# ${result.bugTitle}`,
+                `\n## Description\n${result.description || ""}`,
+                `\n## Steps to Reproduce\n${(result.stepsToReproduce || []).map((s, i) => `${i+1}. ${s}`).join("\n")}`,
+                `\n## Expected Result\n${result.expectedResult || ""}`,
+                `\n## Actual Result\n${result.actualResult || ""}`,
+                `\n## Root Cause\n${result.possibleRootCause || ""}`,
+                `\n## Severity: ${result.severity || "Unknown"}\n## Priority: ${result.priority || "Unknown"}`,
+              ].join("\n")} label="Copy Report" />
+            </div>
+            {result.description && <p className="text-sm text-foreground leading-relaxed">{result.description}</p>}
+
+            <div className="flex gap-2 flex-wrap">
+              {result.severity && (
+                <Badge variant="outline" className={`font-mono text-[11px] gap-1 ${
+                  result.severity === "Critical" ? severityBadge("critical") : result.severity === "High" ? severityBadge("high") : result.severity === "Medium" ? severityBadge("medium") : severityBadge("low")
+                }`}>
+                  <AlertTriangle className="h-3 w-3" /> Severity: {result.severity}
+                </Badge>
+              )}
+              {result.priority && (
+                <Badge variant="outline" className={`font-mono text-[11px] gap-1 ${
+                  result.priority === "High" ? severityBadge("high") : result.priority === "Medium" ? severityBadge("medium") : severityBadge("low")
+                }`}>
+                  <Target className="h-3 w-3" /> Priority: {result.priority}
+                </Badge>
+              )}
+            </div>
+            {result.severityReason && <p className="text-xs text-muted-foreground">Severity: {result.severityReason}</p>}
+            {result.priorityReason && <p className="text-xs text-muted-foreground">Priority: {result.priorityReason}</p>}
+
+            {result.stepsToReproduce && result.stepsToReproduce.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">Steps to Reproduce:</p>
+                <ol className="space-y-1.5">{result.stepsToReproduce.map((s, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-foreground">
+                    <div className="flex h-5 w-5 items-center justify-center rounded border border-border shrink-0 mt-0.5">
+                      <span className="text-[10px] font-mono text-muted-foreground">{i + 1}</span>
+                    </div>
+                    {s}
+                  </li>
+                ))}</ol>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {result.expectedResult && (
+                <div className="p-3 rounded-lg bg-success/5 border border-success/15">
+                  <p className="text-[10px] font-mono text-success mb-1">Expected Result</p>
+                  <p className="text-sm text-foreground">{result.expectedResult}</p>
+                </div>
+              )}
+              {result.actualResult && (
+                <div className="p-3 rounded-lg bg-destructive/5 border border-destructive/15">
+                  <p className="text-[10px] font-mono text-destructive mb-1">Actual Result</p>
+                  <p className="text-sm text-foreground">{result.actualResult}</p>
+                </div>
+              )}
+            </div>
+
+            {result.possibleRootCause && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-1">Possible Root Cause:</p>
+                <p className="text-sm text-foreground">{result.possibleRootCause}</p>
+              </div>
+            )}
+            {result.environment && result.environment !== "Unknown" && (
+              <p className="text-xs text-muted-foreground">Environment: {result.environment}</p>
+            )}
+            {result.additionalNotes && <p className="text-xs text-muted-foreground italic">{result.additionalNotes}</p>}
+          </div>
+        </CollapsibleSection>
+      )}
+
+      {/* ══ QA: Test Cases ══ */}
+      {result.testCases && result.testCases.length > 0 && (
+        <CollapsibleSection title="Generated Test Cases" icon={<TestTubes className="h-4 w-4 text-primary" />} defaultOpen accentColor="border-l-primary">
+          <div className="space-y-4">
+            {result.coverageSummary && (
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { label: "Total", value: result.coverageSummary.totalCount },
+                  { label: "Positive", value: result.coverageSummary.positiveCount },
+                  { label: "Negative", value: result.coverageSummary.negativeCount },
+                  { label: "Edge", value: result.coverageSummary.edgeCaseCount },
+                ].map((m) => (
+                  <div key={m.label} className="text-center p-2 rounded-lg bg-muted/30 border border-border/40">
+                    <p className="text-lg font-bold text-foreground">{m.value}</p>
+                    <p className="text-[10px] text-muted-foreground font-mono">{m.label}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            {result.testCases.map((tc, i) => (
+              <div key={i} className="space-y-2 border border-border/30 rounded-lg p-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="secondary" className="font-mono text-[10px]">{tc.id}</Badge>
+                  <Badge variant="outline" className={`font-mono text-[10px] ${
+                    tc.type === "positive" ? severityBadge("low") : tc.type === "negative" ? severityBadge("high") : severityBadge("medium")
+                  }`}>{tc.type}</Badge>
+                  <Badge variant="outline" className="font-mono text-[10px]">{tc.priority}</Badge>
+                </div>
+                <p className="text-sm font-medium text-foreground">{tc.scenario}</p>
+                {tc.steps?.length > 0 && (
+                  <ol className="space-y-0.5 ml-1">{tc.steps.map((s, j) => (
+                    <li key={j} className="text-xs text-muted-foreground">{j+1}. {s}</li>
+                  ))}</ol>
+                )}
+                <p className="text-xs text-foreground"><strong>Expected:</strong> {tc.expectedResult}</p>
+              </div>
+            ))}
+          </div>
+        </CollapsibleSection>
+      )}
+
+      {/* ══ QA: Test Scenarios ══ */}
+      {result.featureName && (
+        <CollapsibleSection title={`Test Scenarios: ${result.featureName}`} icon={<ListChecks className="h-4 w-4 text-primary" />} defaultOpen accentColor="border-l-primary">
+          <div className="space-y-4">
+            <ListCard title="Functional Scenarios" icon={<CheckCircle2 className="h-4 w-4 text-success" />} items={result.functionalScenarios || []} accentColor="border-l-success" />
+            <ListCard title="Edge Case Scenarios" icon={<AlertTriangle className="h-4 w-4 text-warning" />} items={result.edgeCaseScenarios || []} accentColor="border-l-warning" />
+            <ListCard title="Negative Scenarios" icon={<Bug className="h-4 w-4 text-destructive" />} items={result.negativeScenarios || []} accentColor="border-l-destructive" />
+            <ListCard title="Security Scenarios" icon={<Shield className="h-4 w-4 text-primary" />} items={result.securityScenarios || []} />
+            <ListCard title="Performance Scenarios" icon={<Zap className="h-4 w-4 text-warning" />} items={result.performanceScenarios || []} />
+          </div>
+        </CollapsibleSection>
+      )}
 
       {/* Extracted error from terminal */}
       {result.extractedError && (

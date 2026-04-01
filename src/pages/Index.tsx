@@ -14,6 +14,7 @@ import {
   FileCode, Sparkles, BarChart3, Shield, Zap, BookOpen, Database,
   Globe, Wrench, FileText, GitCompare, Bug, Gauge, Cog,
   ArrowRightLeft, GraduationCap, Layers, Rocket, Languages,
+  ClipboardList, TestTubes, ListChecks,
 } from "lucide-react";
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
@@ -81,9 +82,15 @@ const inputModes: ModeConfig[] = [
     placeholder: "Paste two versions separated by:\n--- OLD CODE ---\n(old code)\n--- NEW CODE ---\n(new code)" },
   { id: "migrate", label: "Migrate", icon: <ArrowRightLeft className="h-3.5 w-3.5" />, category: "Compare",
     placeholder: "Paste code and specify the migration target.\nE.g. 'Migrate from React class components to hooks'" },
+  { id: "bugreport", label: "Bug Report", icon: <ClipboardList className="h-3.5 w-3.5" />, category: "Tester Tools",
+    placeholder: "Paste an error message, failure log, or bug description…\nThe AI will generate a structured bug report." },
+  { id: "testcase", label: "Test Cases", icon: <TestTubes className="h-3.5 w-3.5" />, category: "Tester Tools",
+    placeholder: "Describe a feature or module to generate test cases…\n\ne.g. User login with email and password" },
+  { id: "testscenario", label: "Scenarios", icon: <ListChecks className="h-3.5 w-3.5" />, category: "Tester Tools",
+    placeholder: "Enter a feature or module name to generate test scenarios…\n\ne.g. Payment Processing Module" },
 ];
 
-const categories = ["Analyze", "Improve", "Generate", "Compare"];
+const categories = ["Analyze", "Improve", "Generate", "Compare", "Tester Tools"];
 
 const outputLanguages = [
   { code: "en", label: "English" },
@@ -198,7 +205,8 @@ const Index = () => {
     api: "Debug API", log: "Analyze Logs", cicd: "Debug CI/CD", deploy: "Debug Deploy",
     docs: "Generate Docs", diff: "Analyze Diff", reproduce: "Reproduce Bug",
     complexity: "Analyze Complexity", env: "Debug Environment", migrate: "Migrate Code",
-    interview: "Generate Questions",
+    interview: "Generate Questions", bugreport: "Generate Report", testcase: "Generate Tests",
+    testscenario: "Generate Scenarios",
   };
   const submitLabel = submitLabels[inputMode] || "Analyze";
 
