@@ -14,6 +14,7 @@ import {
   FileCode, Sparkles, BarChart3, Shield, Zap, BookOpen, Database,
   Globe, Wrench, FileText, GitCompare, Bug, Gauge, Cog,
   ArrowRightLeft, GraduationCap, Layers, Rocket, Languages,
+  ClipboardList, TestTubes, ListChecks,
 } from "lucide-react";
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
