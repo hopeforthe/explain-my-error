@@ -283,6 +283,56 @@ ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
 
+  if (inputMode === "bugreport") {
+    return `You are a QA expert that generates structured bug reports from error messages, logs, or failure descriptions. Analyze the provided input and return a JSON object with these fields:
+${baseFields}
+- "bugTitle": A concise, descriptive bug title
+- "description": Detailed description of the bug (2-4 sentences)
+- "stepsToReproduce": Array of 3-6 step-by-step reproduction instructions
+- "expectedResult": What should have happened
+- "actualResult": What actually happened
+- "possibleRootCause": Brief explanation of the likely root cause
+- "severity": One of "Low", "Medium", "High", "Critical"
+- "severityReason": Why this severity was assigned (1 sentence)
+- "priority": One of "Low", "Medium", "High"
+- "priorityReason": Why this priority was assigned (1 sentence)
+- "environment": Detected environment details (OS, browser, runtime, etc.) or "Unknown"
+- "additionalNotes": Any extra observations or context (1-2 sentences)
+
+${levelInstruction}
+${langInstruction}
+Respond ONLY with valid JSON, no markdown fences.`;
+  }
+
+  if (inputMode === "testcase") {
+    return `You are a QA test case generation expert. Based on the provided feature description, module name, or code, generate comprehensive test cases. Return a JSON object with these fields:
+${baseFields}
+- "summary": Brief summary of what is being tested
+- "testCases": Array of 6-10 test cases, each: { "id": string (e.g. "TC-001"), "type": "positive"|"negative"|"edge", "scenario": string, "steps": array of strings, "expectedResult": string, "priority": "Low"|"Medium"|"High" }
+- "coverageSummary": Object with { "positiveCount": number, "negativeCount": number, "edgeCaseCount": number, "totalCount": number }
+
+${levelInstruction}
+${langInstruction}
+Respond ONLY with valid JSON, no markdown fences.`;
+  }
+
+  if (inputMode === "testscenario") {
+    return `You are a QA scenario planning expert. Given a feature or module name, generate comprehensive test scenarios covering all angles. Return a JSON object with these fields:
+${baseFields}
+- "featureName": The feature or module being tested
+- "summary": Brief overview of testing scope
+- "functionalScenarios": Array of 3-5 functional test scenarios (strings describing what to test)
+- "edgeCaseScenarios": Array of 3-5 edge case scenarios (strings)
+- "negativeScenarios": Array of 3-5 negative test scenarios (strings)
+- "securityScenarios": Array of 2-3 security-related test scenarios (strings)
+- "performanceScenarios": Array of 2-3 performance-related scenarios (strings)
+- "recommendations": Array of 2-3 general QA recommendations
+
+${levelInstruction}
+${langInstruction}
+Respond ONLY with valid JSON, no markdown fences.`;
+  }
+
   // Default: error, code, terminal modes
   const terminalInstruction = inputMode === "terminal"
     ? `The user has pasted a full terminal log. First, extract the MAIN error from the log, ignoring noise/warnings/info lines. Focus on the most relevant error line and stack trace. Then analyze that extracted error.`
