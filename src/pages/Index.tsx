@@ -205,7 +205,8 @@ const Index = () => {
     api: "Debug API", log: "Analyze Logs", cicd: "Debug CI/CD", deploy: "Debug Deploy",
     docs: "Generate Docs", diff: "Analyze Diff", reproduce: "Reproduce Bug",
     complexity: "Analyze Complexity", env: "Debug Environment", migrate: "Migrate Code",
-    interview: "Generate Questions",
+    interview: "Generate Questions", bugreport: "Generate Report", testcase: "Generate Tests",
+    testscenario: "Generate Scenarios",
   };
   const submitLabel = submitLabels[inputMode] || "Analyze";
 
