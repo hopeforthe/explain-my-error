@@ -271,7 +271,45 @@ function TestGenerator({ code, language }: { code: string; language: string }) {
   );
 }
 
-function ListCard({ title, icon, items, accentColor }: { title: string; icon: React.ReactNode; items: string[]; accentColor?: string }) {
+function CodeRunner({ code, language }: { code: string; language: string }) {
+  const [output, setOutput] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const run = () => {
+    setRunning(true); setOutput(null); setError(null);
+    try {
+      if (language?.toLowerCase().includes("javascript") || language?.toLowerCase().includes("typescript")) {
+        const logs: string[] = [];
+        const fakeConsole = { log: (...a: any[]) => logs.push(a.map(String).join(" ")), error: (...a: any[]) => logs.push("ERROR: " + a.map(String).join(" ")), warn: (...a: any[]) => logs.push("WARN: " + a.map(String).join(" ")) };
+        const fn = new Function("console", code);
+        fn(fakeConsole);
+        setOutput(logs.join("\n") || "(no output)");
+      } else {
+        setError(`Code execution is only available for JavaScript/TypeScript in the browser.`);
+      }
+    } catch (e: any) {
+      setError(e?.message || "Execution failed");
+    } finally { setRunning(false); }
+  };
+
+  return (
+    <div className="space-y-2">
+      <Button variant="outline" size="sm" onClick={run} disabled={running} className="gap-1.5 text-xs">
+        {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+        Run Code
+      </Button>
+      {output !== null && (
+        <pre className="code-block text-[12px] bg-success/5 border-success/20">{output}</pre>
+      )}
+      {error && (
+        <pre className="code-block text-[12px] bg-destructive/5 border-destructive/20 text-destructive">{error}</pre>
+      )}
+    </div>
+  );
+}
+
+
   if (!items?.length) return null;
   return (
     <CollapsibleSection title={title} icon={icon} defaultOpen accentColor={accentColor}>
