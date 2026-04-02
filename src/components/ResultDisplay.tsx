@@ -1043,7 +1043,50 @@ export const ResultDisplay = ({
         />
       )}
 
-      {result.queryPlan && (
+      {/* Code Runner for corrected code */}
+      {(result.correctedCode || result.improvedCode) && (
+        <div className="px-1">
+          <CodeRunner code={result.improvedCode || result.correctedCode} language={result.language} />
+        </div>
+      )}
+
+      {/* Bug-Specific Tests */}
+      {result.bugSpecificTests && result.bugSpecificTests.length > 0 && (
+        <CollapsibleSection title="Bug-Specific Tests" icon={<TestTube className="h-4 w-4 text-primary" />} defaultOpen accentColor="border-l-primary">
+          <div className="space-y-3">
+            {result.bugSpecificTests.map((test, i) => (
+              <div key={i} className="relative group">
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <CopyButton text={test} />
+                </div>
+                <pre className="code-block text-[12px]"><code>{test}</code></pre>
+                <CodeRunner code={test} language={result.language} />
+              </div>
+            ))}
+          </div>
+        </CollapsibleSection>
+      )}
+
+      {/* Contextual Suggestions */}
+      {result.contextualSuggestions && (
+        <CollapsibleSection title="Smart Suggestions" icon={<Lightbulb className="h-4 w-4 text-warning" />} defaultOpen={false}>
+          <div className="space-y-4">
+            <ListCard title="Best Practices" icon={<CheckCircle2 className="h-4 w-4 text-success" />} items={result.contextualSuggestions.bestPractices || []} accentColor="border-l-success" />
+            <ListCard title="Common Mistakes to Avoid" icon={<AlertTriangle className="h-4 w-4 text-warning" />} items={result.contextualSuggestions.commonMistakes || []} accentColor="border-l-warning" />
+            {result.contextualSuggestions.interviewTip && (
+              <div className="p-3 rounded-lg bg-primary/5 border border-primary/15">
+                <div className="flex items-center gap-2 mb-1">
+                  <GraduationCap className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-[10px] font-mono text-primary font-semibold uppercase tracking-wider">Interview Tip</p>
+                </div>
+                <p className="text-sm text-foreground">{result.contextualSuggestions.interviewTip}</p>
+              </div>
+            )}
+          </div>
+        </CollapsibleSection>
+      )}
+
+
         <CollapsibleSection title="Query Plan" icon={<Database className="h-4 w-4 text-primary" />} defaultOpen>
           <p className="text-sm text-foreground">{result.queryPlan}</p>
         </CollapsibleSection>
