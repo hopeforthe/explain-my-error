@@ -1086,7 +1086,7 @@ export const ResultDisplay = ({
         </CollapsibleSection>
       )}
 
-
+      {result.queryPlan && (
         <CollapsibleSection title="Query Plan" icon={<Database className="h-4 w-4 text-primary" />} defaultOpen>
           <p className="text-sm text-foreground">{result.queryPlan}</p>
         </CollapsibleSection>
