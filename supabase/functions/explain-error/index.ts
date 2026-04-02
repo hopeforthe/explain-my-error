@@ -454,7 +454,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { errorMessage, inputMode = "error", explanationMode = "beginner", outputLanguage = "en" } = body;
+    const { errorMessage, inputMode = "error", analysisMode = "explain", outputLength = "medium", outputLanguage = "en" } = body;
     
     if (!errorMessage || typeof errorMessage !== "string") {
       return new Response(JSON.stringify({ error: "Please provide an error message or code" }), {
