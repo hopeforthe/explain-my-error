@@ -373,13 +373,40 @@ const Index = () => {
 
                   {/* Controls row */}
                   <div className="flex items-center justify-between flex-wrap gap-3">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <Switch id="expert-mode" checked={expertMode} onCheckedChange={setExpertMode} />
-                        <Label htmlFor="expert-mode" className="text-xs text-muted-foreground cursor-pointer">
-                          {expertMode ? "Expert" : "Beginner"}
-                        </Label>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      {/* Analysis Mode */}
+                      <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-0.5">
+                        {(["simple", "explain", "deep"] as const).map((mode) => (
+                          <button
+                            key={mode}
+                            onClick={() => setAnalysisMode(mode)}
+                            className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                              analysisMode === mode
+                                ? "bg-primary text-primary-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            {mode === "simple" ? "⚡ Simple" : mode === "explain" ? "📖 Explain" : "🔬 Deep"}
+                          </button>
+                        ))}
                       </div>
+                      {/* Output Length */}
+                      <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-0.5">
+                        {(["short", "medium", "detailed"] as const).map((len) => (
+                          <button
+                            key={len}
+                            onClick={() => setOutputLength(len)}
+                            className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all ${
+                              outputLength === len
+                                ? "bg-accent text-accent-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            {len.charAt(0).toUpperCase() + len.slice(1)}
+                          </button>
+                        ))}
+                      </div>
+                      {/* Language */}
                       <div className="flex items-center gap-1.5">
                         <Languages className="h-3.5 w-3.5 text-muted-foreground" />
                         <select
