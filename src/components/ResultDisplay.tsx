@@ -309,7 +309,7 @@ function CodeRunner({ code, language }: { code: string; language: string }) {
   );
 }
 
-
+function ListCard({ title, icon, items, accentColor }: { title: string; icon: React.ReactNode; items: string[]; accentColor?: string }) {
   if (!items?.length) return null;
   return (
     <CollapsibleSection title={title} icon={icon} defaultOpen accentColor={accentColor}>
