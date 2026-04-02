@@ -466,7 +466,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = buildPrompt(inputMode, explanationMode, outputLanguage);
+    const systemPrompt = buildPrompt(inputMode, analysisMode, outputLength, outputLanguage);
     
     const userPromptPrefixes: Record<string, string> = {
       error: "Explain this error:",
