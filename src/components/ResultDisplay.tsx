@@ -6,7 +6,7 @@ import {
   Shield, Layers, Star, CheckCircle2, TrendingUp, BookOpen, GraduationCap, Volume2, VolumeX,
   GitCommit, TestTube, Loader2, Package, Bug, FileWarning, FileCode, Database, Gauge, Clock,
   Lock, List, FileText, ArrowRightLeft, HelpCircle, Target, Wrench, ChevronDown, GitCompare,
-  ClipboardList, TestTubes, ListChecks, Clipboard,
+  ClipboardList, TestTubes, ListChecks, Clipboard, Play, Square,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
