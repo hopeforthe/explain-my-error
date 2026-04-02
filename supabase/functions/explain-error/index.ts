@@ -5,10 +5,20 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-function buildPrompt(inputMode: string, explanationMode: string, outputLanguage: string): string {
-  const levelInstruction = explanationMode === "expert"
-    ? "Use technical language, reference specifications, internals, and advanced concepts. Assume the reader is an experienced developer."
-    : "Use simple, beginner-friendly language. Avoid jargon. Explain concepts as if teaching someone new to programming.";
+function buildPrompt(inputMode: string, analysisMode: string, outputLength: string, outputLanguage: string): string {
+  const modeInstruction = analysisMode === "simple"
+    ? "Be extremely concise. Provide ONLY the root cause (1-2 lines) and the fix (code snippet). No lengthy explanations. No extra sections. Direct and actionable."
+    : analysisMode === "deep"
+    ? "Provide full, deep analysis. Include root cause, execution flow, affected files, test cases, edge cases, PR-style output, debug simulation, and comprehensive checklist. Use technical language and advanced concepts."
+    : "Provide a clear, structured explanation with examples. Balance depth and clarity. Explain concepts for an intermediate developer.";
+
+  const lengthInstruction = outputLength === "short"
+    ? "Keep ALL text fields extremely brief. Explanations should be 1-2 sentences max. Limit arrays to 2 items. Prioritize brevity."
+    : outputLength === "detailed"
+    ? "Provide thorough, detailed explanations. Include more items in arrays (4-6). Add context and nuance."
+    : "Use moderate length. Explanations 2-3 sentences. Arrays with 2-4 items.";
+
+  const contextAware = `IMPORTANT: First assess the complexity of the input. For simple/obvious errors (typos, missing imports, syntax), keep the response proportionally simple regardless of mode. For complex multi-file bugs, provide deeper analysis. Adapt depth to match the actual complexity of the problem.`;
 
   const langInstruction = outputLanguage && outputLanguage !== "en"
     ? `IMPORTANT: Write ALL explanations, descriptions, suggestions, and text content in ${
