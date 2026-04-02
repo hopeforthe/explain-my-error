@@ -118,7 +118,8 @@ const Index = () => {
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [inputMode, setInputMode] = useState<InputMode>("error");
   const [activeCategory, setActiveCategory] = useState("Analyze");
-  const [expertMode, setExpertMode] = useState(false);
+  const [analysisMode, setAnalysisMode] = useState<"simple" | "explain" | "deep">("explain");
+  const [outputLength, setOutputLength] = useState<"short" | "medium" | "detailed">("medium");
   const [outputLang, setOutputLang] = useState("en");
   const [similarError, setSimilarError] = useState<{ errorMessage: string; timestamp: number } | null>(null);
 
