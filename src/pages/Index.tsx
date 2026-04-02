@@ -150,7 +150,7 @@ const Index = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("explain-error", {
-        body: { errorMessage: errorInput.trim(), inputMode, explanationMode: expertMode ? "expert" : "beginner", outputLanguage: outputLang },
+        body: { errorMessage: errorInput.trim(), inputMode, analysisMode, outputLength, outputLanguage: outputLang },
       });
       if (error) throw error;
 
