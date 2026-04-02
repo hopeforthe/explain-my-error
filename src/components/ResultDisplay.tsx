@@ -349,6 +349,35 @@ export const ResultDisplay = ({
         </Card>
       )}
 
+      {/* ══ Quick Summary (always at top) ══ */}
+      {result.quickSummary && (
+        <Card className="shadow-md border-primary/30 bg-gradient-to-r from-primary/5 to-transparent backdrop-blur-sm">
+          <CardContent className="py-4 space-y-3">
+            <div className="flex items-start gap-2">
+              <Target className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="text-[10px] font-mono text-primary font-semibold uppercase tracking-wider mb-1">Root Cause</p>
+                <p className="text-sm font-medium text-foreground leading-relaxed">{result.quickSummary.rootCause}</p>
+              </div>
+            </div>
+            {result.quickSummary.quickFix && (
+              <div className="flex items-start gap-2">
+                <Zap className="h-4 w-4 text-success mt-0.5 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-[10px] font-mono text-success font-semibold uppercase tracking-wider mb-1">Quick Fix</p>
+                  <div className="relative group">
+                    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <CopyButton text={result.quickSummary.quickFix} />
+                    </div>
+                    <pre className="code-block text-[12px]"><code>{result.quickSummary.quickFix}</code></pre>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Badge Row */}
       <Card className="shadow-sm border-border/40 bg-card/80 backdrop-blur-sm">
         <CardContent className="py-3">
