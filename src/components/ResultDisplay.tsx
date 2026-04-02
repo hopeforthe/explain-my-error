@@ -121,6 +121,9 @@ export interface ExplanationResult {
   pullRequestSuggestion?: { title: string; description: string };
   executionPath?: string[];
   affectedFiles?: { file: string; line: number | null; role: string }[];
+  quickSummary?: { rootCause: string; quickFix: string };
+  contextualSuggestions?: { bestPractices: string[]; commonMistakes: string[]; interviewTip: string | null };
+  bugSpecificTests?: string[];
   // QA / Tester fields
   bugTitle?: string;
   description?: string;
