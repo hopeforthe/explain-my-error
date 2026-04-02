@@ -410,6 +410,7 @@ ${terminalInstruction}${codeInstruction}
 
 Respond with a JSON object containing exactly these fields:
 ${baseFields}
+- "quickSummary": Object with { "rootCause": string (1-2 line root cause), "quickFix": string (the most important code fix, a short snippet) } — ALWAYS include this, shown prominently at the top
 - "difficulty": Error difficulty level - one of "Easy", "Medium", "Advanced"
 - "difficultyExplanation": A short one-sentence explanation of why this difficulty level was assigned
 - "explanation": A clear explanation of what the error/issue means (2-4 sentences). Include the root cause, what condition triggered it, and which part of the code is responsible.
@@ -424,12 +425,14 @@ ${inputMode === "terminal" ? '- "extractedError": The main error extracted from 
 - "dependencyFix": If the error is dependency-related, an object with { "detected": true, "packageName": string, "installCommands": object with keys like "npm", "pip" etc. mapping to install command strings, "explanation": string }. If not dependency-related, { "detected": false }.
 ${inputMode === "terminal" ? '- "stackTraceAnalysis": An object with { "rootCauseFile": string, "problemLine": number or string, "reason": string, "suggestedFix": string }' : ""}
 - "errorCategory": One of "Syntax Error", "Runtime Error", "Dependency Error", "API Error", "Security Issue", "Logic Error", "Type Error", "Configuration Error"
-- "executionPath": Array of 3-6 strings describing the execution path that leads to the error (e.g. ["Request received at /api/auth", "JWT validation called", "Token expired check failed", "Error thrown at line 42"])
-- "affectedFiles": Array of 1-4 objects identifying files involved: { "file": string (file path), "line": number or null, "role": string (e.g. "origin of bug", "cascading failure", "missing import") }
-- "debugChecklist": Array of 4-6 step-by-step debugging/verification steps (strings) developers can follow to confirm the fix works
-- "debugSimulation": Array of 3-6 simulation steps showing how the error occurs, each: { "step": number, "description": string, "state": string }
-- "patchDiff": A Git-style unified diff string showing the exact change needed. Use standard diff format with --- a/file and +++ b/file headers, @@ line markers, lines prefixed with - for removed and + for added.
-- "pullRequestSuggestion": An object with { "title": string (conventional commit style, e.g. "fix: resolve null pointer in auth module"), "description": string (markdown body with sections: ## Root Cause, ## Fix Applied, ## Files Modified, ## Steps to Reproduce, ## Steps to Verify) }
+- "contextualSuggestions": Object with { "bestPractices": array of 1-3 strings, "commonMistakes": array of 1-3 strings, "interviewTip": string or null (a related interview insight if applicable) }
+- "bugSpecificTests": Array of 1-3 test case strings (code) that specifically test the detected bug, NOT generic tests
+${analysisMode === "deep" ? `- "executionPath": Array of 3-6 strings describing the execution path that leads to the error
+- "affectedFiles": Array of 1-4 objects identifying files involved: { "file": string (file path), "line": number or null, "role": string }
+- "debugChecklist": Array of 4-6 step-by-step debugging/verification steps
+- "debugSimulation": Array of 3-6 simulation steps: { "step": number, "description": string, "state": string }
+- "patchDiff": A Git-style unified diff string
+- "pullRequestSuggestion": Object with { "title": string, "description": string }` : ""}
 
 IMPORTANT RULES:
 - Always prioritize minimal, safe fixes over rewrites.
