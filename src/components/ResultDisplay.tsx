@@ -6,7 +6,7 @@ import {
   Shield, Layers, Star, CheckCircle2, TrendingUp, BookOpen, GraduationCap, Volume2, VolumeX,
   GitCommit, TestTube, Loader2, Package, Bug, FileWarning, FileCode, Database, Gauge, Clock,
   Lock, List, FileText, ArrowRightLeft, HelpCircle, Target, Wrench, ChevronDown, GitCompare,
-  ClipboardList, TestTubes, ListChecks, Clipboard,
+  ClipboardList, TestTubes, ListChecks, Clipboard, Play, Square,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -121,6 +121,9 @@ export interface ExplanationResult {
   pullRequestSuggestion?: { title: string; description: string };
   executionPath?: string[];
   affectedFiles?: { file: string; line: number | null; role: string }[];
+  quickSummary?: { rootCause: string; quickFix: string };
+  contextualSuggestions?: { bestPractices: string[]; commonMistakes: string[]; interviewTip: string | null };
+  bugSpecificTests?: string[];
   // QA / Tester fields
   bugTitle?: string;
   description?: string;
@@ -268,6 +271,44 @@ function TestGenerator({ code, language }: { code: string; language: string }) {
   );
 }
 
+function CodeRunner({ code, language }: { code: string; language: string }) {
+  const [output, setOutput] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const run = () => {
+    setRunning(true); setOutput(null); setError(null);
+    try {
+      if (language?.toLowerCase().includes("javascript") || language?.toLowerCase().includes("typescript")) {
+        const logs: string[] = [];
+        const fakeConsole = { log: (...a: any[]) => logs.push(a.map(String).join(" ")), error: (...a: any[]) => logs.push("ERROR: " + a.map(String).join(" ")), warn: (...a: any[]) => logs.push("WARN: " + a.map(String).join(" ")) };
+        const fn = new Function("console", code);
+        fn(fakeConsole);
+        setOutput(logs.join("\n") || "(no output)");
+      } else {
+        setError(`Code execution is only available for JavaScript/TypeScript in the browser.`);
+      }
+    } catch (e: any) {
+      setError(e?.message || "Execution failed");
+    } finally { setRunning(false); }
+  };
+
+  return (
+    <div className="space-y-2">
+      <Button variant="outline" size="sm" onClick={run} disabled={running} className="gap-1.5 text-xs">
+        {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+        Run Code
+      </Button>
+      {output !== null && (
+        <pre className="code-block text-[12px] bg-success/5 border-success/20">{output}</pre>
+      )}
+      {error && (
+        <pre className="code-block text-[12px] bg-destructive/5 border-destructive/20 text-destructive">{error}</pre>
+      )}
+    </div>
+  );
+}
+
 function ListCard({ title, icon, items, accentColor }: { title: string; icon: React.ReactNode; items: string[]; accentColor?: string }) {
   if (!items?.length) return null;
   return (
@@ -304,6 +345,35 @@ export const ResultDisplay = ({
             <span className="text-xs text-foreground">
               <strong>Similar Error Found</strong> — previously analyzed on {new Date(similarError.timestamp).toLocaleDateString()}
             </span>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ══ Quick Summary (always at top) ══ */}
+      {result.quickSummary && (
+        <Card className="shadow-md border-primary/30 bg-gradient-to-r from-primary/5 to-transparent backdrop-blur-sm">
+          <CardContent className="py-4 space-y-3">
+            <div className="flex items-start gap-2">
+              <Target className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="text-[10px] font-mono text-primary font-semibold uppercase tracking-wider mb-1">Root Cause</p>
+                <p className="text-sm font-medium text-foreground leading-relaxed">{result.quickSummary.rootCause}</p>
+              </div>
+            </div>
+            {result.quickSummary.quickFix && (
+              <div className="flex items-start gap-2">
+                <Zap className="h-4 w-4 text-success mt-0.5 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-[10px] font-mono text-success font-semibold uppercase tracking-wider mb-1">Quick Fix</p>
+                  <div className="relative group">
+                    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <CopyButton text={result.quickSummary.quickFix} />
+                    </div>
+                    <pre className="code-block text-[12px]"><code>{result.quickSummary.quickFix}</code></pre>
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -971,6 +1041,49 @@ export const ResultDisplay = ({
           title={isReview ? "Improved Code" : "Corrected Code"}
           icon={<Wand2 className="h-4 w-4 text-success" />}
         />
+      )}
+
+      {/* Code Runner for corrected code */}
+      {(result.correctedCode || result.improvedCode) && (
+        <div className="px-1">
+          <CodeRunner code={result.improvedCode || result.correctedCode} language={result.language} />
+        </div>
+      )}
+
+      {/* Bug-Specific Tests */}
+      {result.bugSpecificTests && result.bugSpecificTests.length > 0 && (
+        <CollapsibleSection title="Bug-Specific Tests" icon={<TestTube className="h-4 w-4 text-primary" />} defaultOpen accentColor="border-l-primary">
+          <div className="space-y-3">
+            {result.bugSpecificTests.map((test, i) => (
+              <div key={i} className="relative group">
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <CopyButton text={test} />
+                </div>
+                <pre className="code-block text-[12px]"><code>{test}</code></pre>
+                <CodeRunner code={test} language={result.language} />
+              </div>
+            ))}
+          </div>
+        </CollapsibleSection>
+      )}
+
+      {/* Contextual Suggestions */}
+      {result.contextualSuggestions && (
+        <CollapsibleSection title="Smart Suggestions" icon={<Lightbulb className="h-4 w-4 text-warning" />} defaultOpen={false}>
+          <div className="space-y-4">
+            <ListCard title="Best Practices" icon={<CheckCircle2 className="h-4 w-4 text-success" />} items={result.contextualSuggestions.bestPractices || []} accentColor="border-l-success" />
+            <ListCard title="Common Mistakes to Avoid" icon={<AlertTriangle className="h-4 w-4 text-warning" />} items={result.contextualSuggestions.commonMistakes || []} accentColor="border-l-warning" />
+            {result.contextualSuggestions.interviewTip && (
+              <div className="p-3 rounded-lg bg-primary/5 border border-primary/15">
+                <div className="flex items-center gap-2 mb-1">
+                  <GraduationCap className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-[10px] font-mono text-primary font-semibold uppercase tracking-wider">Interview Tip</p>
+                </div>
+                <p className="text-sm text-foreground">{result.contextualSuggestions.interviewTip}</p>
+              </div>
+            )}
+          </div>
+        </CollapsibleSection>
       )}
 
       {result.queryPlan && (

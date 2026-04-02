@@ -5,10 +5,20 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-function buildPrompt(inputMode: string, explanationMode: string, outputLanguage: string): string {
-  const levelInstruction = explanationMode === "expert"
-    ? "Use technical language, reference specifications, internals, and advanced concepts. Assume the reader is an experienced developer."
-    : "Use simple, beginner-friendly language. Avoid jargon. Explain concepts as if teaching someone new to programming.";
+function buildPrompt(inputMode: string, analysisMode: string, outputLength: string, outputLanguage: string): string {
+  const modeInstruction = analysisMode === "simple"
+    ? "Be extremely concise. Provide ONLY the root cause (1-2 lines) and the fix (code snippet). No lengthy explanations. No extra sections. Direct and actionable."
+    : analysisMode === "deep"
+    ? "Provide full, deep analysis. Include root cause, execution flow, affected files, test cases, edge cases, PR-style output, debug simulation, and comprehensive checklist. Use technical language and advanced concepts."
+    : "Provide a clear, structured explanation with examples. Balance depth and clarity. Explain concepts for an intermediate developer.";
+
+  const lengthInstruction = outputLength === "short"
+    ? "Keep ALL text fields extremely brief. Explanations should be 1-2 sentences max. Limit arrays to 2 items. Prioritize brevity."
+    : outputLength === "detailed"
+    ? "Provide thorough, detailed explanations. Include more items in arrays (4-6). Add context and nuance."
+    : "Use moderate length. Explanations 2-3 sentences. Arrays with 2-4 items.";
+
+  const contextAware = `IMPORTANT: First assess the complexity of the input. For simple/obvious errors (typos, missing imports, syntax), keep the response proportionally simple regardless of mode. For complex multi-file bugs, provide deeper analysis. Adapt depth to match the actual complexity of the problem.`;
 
   const langInstruction = outputLanguage && outputLanguage !== "en"
     ? `IMPORTANT: Write ALL explanations, descriptions, suggestions, and text content in ${
@@ -31,7 +41,9 @@ ${baseFields}
 - "summary": A brief summary of the review
 - "bugWarnings": Array of 0-4 potential future bug warnings. Each object: { "type": string, "description": string, "severity": "low"|"medium"|"high", "line": number or null }
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -46,7 +58,9 @@ ${baseFields}
 - "bugWarnings": Array of 0-3 potential issues. Each: { "type": string, "description": string, "severity": "low"|"medium"|"high", "line": number or null }
 - "complexityAnalysis": Object with { "before": string (e.g. "High"), "after": string (e.g. "Low"), "explanation": string }
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -60,7 +74,9 @@ ${baseFields}
 - "recommendations": Array of 2-4 general security recommendations
 - "improvedCode": Secured version of the code
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -75,7 +91,9 @@ ${baseFields}
 - "improvedCode": Optimized version of the code
 - "recommendations": Array of 2-4 general performance tips
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -88,7 +106,9 @@ ${baseFields}
 - "keyConceptsCovered": Array of 2-4 programming concepts used in the code
 - "flowDescription": A step-by-step description of the code's execution flow (array of strings)
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -103,7 +123,9 @@ ${baseFields}
 - "queryPlan": Brief explanation of how the query would execute
 - "recommendations": Array of 2-4 best practice tips
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -121,7 +143,9 @@ ${baseFields}
 - "correctedCode": A corrected API request example
 - "curlExample": A working curl command example
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -136,7 +160,9 @@ ${baseFields}
 - "timeline": Array of event objects showing the sequence: { "time": string or null, "event": string, "severity": "info"|"warning"|"error"|"critical" }
 - "recommendations": Array of 2-4 actionable fixes
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -152,7 +178,9 @@ ${baseFields}
 - "correctedCode": Corrected pipeline configuration or command
 - "environmentIssues": Array of environment-related problems found (strings)
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -169,7 +197,9 @@ ${baseFields}
 - "environmentIssues": Array of environment/config issues (strings)
 - "checklist": Array of 3-5 deployment verification steps
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -183,7 +213,9 @@ ${baseFields}
 - "usageExamples": Array of 2-3 usage example strings (code)
 - "apiDocs": If applicable, API documentation in markdown
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -198,7 +230,9 @@ ${baseFields}
 - "suggestions": Array of 2-3 improvement suggestions
 - "correctedCode": If bugs found, the corrected new version
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -214,7 +248,9 @@ ${baseFields}
 - "debugSteps": Array of 3-5 step-by-step debugging instructions
 - "correctedCode": The fixed version
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -231,7 +267,9 @@ ${baseFields}
 - "simplificationSuggestions": Array of 2-4 suggestions to reduce complexity
 - "improvedCode": Simplified version of the code
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -247,7 +285,9 @@ ${baseFields}
 - "fixes": Array of 2-3 fix objects, each: { "title": string, "description": string, "code": string }
 - "setupChecklist": Array of 3-5 environment verification steps
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -264,7 +304,9 @@ ${baseFields}
 - "warnings": Array of potential issues after migration
 - "deprecations": Array of deprecated features used
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -278,7 +320,9 @@ ${baseFields}
 - "keyTakeaways": Array of 3-4 important points to remember
 - "commonMistakes": Array of 2-3 common mistakes developers make
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -299,7 +343,9 @@ ${baseFields}
 - "environment": Detected environment details (OS, browser, runtime, etc.) or "Unknown"
 - "additionalNotes": Any extra observations or context (1-2 sentences)
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -311,7 +357,9 @@ ${baseFields}
 - "testCases": Array of 6-10 test cases, each: { "id": string (e.g. "TC-001"), "type": "positive"|"negative"|"edge", "scenario": string, "steps": array of strings, "expectedResult": string, "priority": "Low"|"Medium"|"High" }
 - "coverageSummary": Object with { "positiveCount": number, "negativeCount": number, "edgeCaseCount": number, "totalCount": number }
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -328,7 +376,9 @@ ${baseFields}
 - "performanceScenarios": Array of 2-3 performance-related scenarios (strings)
 - "recommendations": Array of 2-3 general QA recommendations
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 Respond ONLY with valid JSON, no markdown fences.`;
   }
@@ -360,6 +410,7 @@ ${terminalInstruction}${codeInstruction}
 
 Respond with a JSON object containing exactly these fields:
 ${baseFields}
+- "quickSummary": Object with { "rootCause": string (1-2 line root cause), "quickFix": string (the most important code fix, a short snippet) } — ALWAYS include this, shown prominently at the top
 - "difficulty": Error difficulty level - one of "Easy", "Medium", "Advanced"
 - "difficultyExplanation": A short one-sentence explanation of why this difficulty level was assigned
 - "explanation": A clear explanation of what the error/issue means (2-4 sentences). Include the root cause, what condition triggered it, and which part of the code is responsible.
@@ -374,12 +425,14 @@ ${inputMode === "terminal" ? '- "extractedError": The main error extracted from 
 - "dependencyFix": If the error is dependency-related, an object with { "detected": true, "packageName": string, "installCommands": object with keys like "npm", "pip" etc. mapping to install command strings, "explanation": string }. If not dependency-related, { "detected": false }.
 ${inputMode === "terminal" ? '- "stackTraceAnalysis": An object with { "rootCauseFile": string, "problemLine": number or string, "reason": string, "suggestedFix": string }' : ""}
 - "errorCategory": One of "Syntax Error", "Runtime Error", "Dependency Error", "API Error", "Security Issue", "Logic Error", "Type Error", "Configuration Error"
-- "executionPath": Array of 3-6 strings describing the execution path that leads to the error (e.g. ["Request received at /api/auth", "JWT validation called", "Token expired check failed", "Error thrown at line 42"])
-- "affectedFiles": Array of 1-4 objects identifying files involved: { "file": string (file path), "line": number or null, "role": string (e.g. "origin of bug", "cascading failure", "missing import") }
-- "debugChecklist": Array of 4-6 step-by-step debugging/verification steps (strings) developers can follow to confirm the fix works
-- "debugSimulation": Array of 3-6 simulation steps showing how the error occurs, each: { "step": number, "description": string, "state": string }
-- "patchDiff": A Git-style unified diff string showing the exact change needed. Use standard diff format with --- a/file and +++ b/file headers, @@ line markers, lines prefixed with - for removed and + for added.
-- "pullRequestSuggestion": An object with { "title": string (conventional commit style, e.g. "fix: resolve null pointer in auth module"), "description": string (markdown body with sections: ## Root Cause, ## Fix Applied, ## Files Modified, ## Steps to Reproduce, ## Steps to Verify) }
+- "contextualSuggestions": Object with { "bestPractices": array of 1-3 strings, "commonMistakes": array of 1-3 strings, "interviewTip": string or null (a related interview insight if applicable) }
+- "bugSpecificTests": Array of 1-3 test case strings (code) that specifically test the detected bug, NOT generic tests
+${analysisMode === "deep" ? `- "executionPath": Array of 3-6 strings describing the execution path that leads to the error
+- "affectedFiles": Array of 1-4 objects identifying files involved: { "file": string (file path), "line": number or null, "role": string }
+- "debugChecklist": Array of 4-6 step-by-step debugging/verification steps
+- "debugSimulation": Array of 3-6 simulation steps: { "step": number, "description": string, "state": string }
+- "patchDiff": A Git-style unified diff string
+- "pullRequestSuggestion": Object with { "title": string, "description": string }` : ""}
 
 IMPORTANT RULES:
 - Always prioritize minimal, safe fixes over rewrites.
@@ -388,7 +441,9 @@ IMPORTANT RULES:
 - Follow best practices for the detected framework or language.
 - If the root cause is uncertain, present multiple hypotheses ranked by likelihood.
 
-${levelInstruction}
+${modeInstruction}
+${lengthInstruction}
+${contextAware}
 ${langInstruction}
 
 Respond ONLY with valid JSON, no markdown fences.`;
@@ -399,7 +454,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { errorMessage, inputMode = "error", explanationMode = "beginner", outputLanguage = "en" } = body;
+    const { errorMessage, inputMode = "error", analysisMode = "explain", outputLength = "medium", outputLanguage = "en" } = body;
     
     if (!errorMessage || typeof errorMessage !== "string") {
       return new Response(JSON.stringify({ error: "Please provide an error message or code" }), {
@@ -411,7 +466,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = buildPrompt(inputMode, explanationMode, outputLanguage);
+    const systemPrompt = buildPrompt(inputMode, analysisMode, outputLength, outputLanguage);
     
     const userPromptPrefixes: Record<string, string> = {
       error: "Explain this error:",
