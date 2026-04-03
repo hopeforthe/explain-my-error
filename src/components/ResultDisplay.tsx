@@ -148,6 +148,13 @@ export interface ExplanationResult {
 }
 
 // ── Helpers ──
+const safeStr = (v: unknown): string => {
+  if (v === null || v === undefined) return "";
+  if (typeof v === "string") return v;
+  if (typeof v === "number" || typeof v === "boolean") return String(v);
+  try { return JSON.stringify(v); } catch { return String(v); }
+};
+
 const severityBadge = (s: string) => {
   switch (s) {
     case "critical": case "high": return "bg-destructive/10 text-destructive border-destructive/20";
@@ -315,7 +322,7 @@ function ListCard({ title, icon, items, accentColor }: { title: string; icon: Re
     <CollapsibleSection title={title} icon={icon} defaultOpen accentColor={accentColor}>
       <ul className="space-y-2">{items.map((s, i) => (
         <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
-          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />{s}
+          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />{safeStr(s)}
         </li>
       ))}</ul>
     </CollapsibleSection>
@@ -473,7 +480,7 @@ export const ResultDisplay = ({
                     <div className="flex h-5 w-5 items-center justify-center rounded border border-border shrink-0 mt-0.5">
                       <span className="text-[10px] font-mono text-muted-foreground">{i + 1}</span>
                     </div>
-                    {s}
+                    {safeStr(s)}
                   </li>
                 ))}</ol>
               </div>
@@ -483,13 +490,13 @@ export const ResultDisplay = ({
               {result.expectedResult && (
                 <div className="p-3 rounded-lg bg-success/5 border border-success/15">
                   <p className="text-[10px] font-mono text-success mb-1">Expected Result</p>
-                  <p className="text-sm text-foreground">{result.expectedResult}</p>
+                  <p className="text-sm text-foreground">{safeStr(result.expectedResult)}</p>
                 </div>
               )}
               {result.actualResult && (
                 <div className="p-3 rounded-lg bg-destructive/5 border border-destructive/15">
                   <p className="text-[10px] font-mono text-destructive mb-1">Actual Result</p>
-                  <p className="text-sm text-foreground">{result.actualResult}</p>
+                  <p className="text-sm text-foreground">{safeStr(result.actualResult)}</p>
                 </div>
               )}
             </div>
@@ -497,7 +504,7 @@ export const ResultDisplay = ({
             {result.possibleRootCause && (
               <div>
                 <p className="text-xs font-semibold text-muted-foreground mb-1">Possible Root Cause:</p>
-                <p className="text-sm text-foreground">{result.possibleRootCause}</p>
+                <p className="text-sm text-foreground">{safeStr(result.possibleRootCause)}</p>
               </div>
             )}
             {result.environment && result.environment !== "Unknown" && (
@@ -575,8 +582,8 @@ export const ResultDisplay = ({
           <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm font-mono">
             <span className="text-muted-foreground">Root File:</span><span className="text-foreground font-medium">{result.stackTraceAnalysis.rootCauseFile}</span>
             <span className="text-muted-foreground">Line:</span><span className="text-foreground font-medium">{result.stackTraceAnalysis.problemLine}</span>
-            <span className="text-muted-foreground">Reason:</span><span className="text-foreground">{result.stackTraceAnalysis.reason}</span>
-            <span className="text-muted-foreground">Fix:</span><span className="text-foreground">{result.stackTraceAnalysis.suggestedFix}</span>
+            <span className="text-muted-foreground">Reason:</span><span className="text-foreground">{safeStr(result.stackTraceAnalysis.reason)}</span>
+            <span className="text-muted-foreground">Fix:</span><span className="text-foreground">{safeStr(result.stackTraceAnalysis.suggestedFix)}</span>
           </div>
         </CollapsibleSection>
       )}
@@ -613,7 +620,7 @@ export const ResultDisplay = ({
           icon={<Lightbulb className="h-4 w-4 text-warning" />}
           defaultOpen
         >
-          <p className="text-sm text-foreground leading-relaxed">{result.summary || result.explanation}</p>
+          <p className="text-sm text-foreground leading-relaxed">{safeStr(result.summary || result.explanation)}</p>
         </CollapsibleSection>
       )}
 
@@ -800,9 +807,9 @@ export const ResultDisplay = ({
       {result.rootCause && (
         <CollapsibleSection title="Root Cause" icon={<Target className="h-4 w-4 text-primary" />} defaultOpen accentColor="border-l-primary">
           <div className="space-y-2">
-            <p className="text-sm text-foreground">{result.rootCause.description}</p>
-            <p className="text-xs text-muted-foreground">Evidence: {result.rootCause.evidence}</p>
-            <p className="text-xs text-foreground"><strong>Fix:</strong> {result.rootCause.suggestedFix}</p>
+            <p className="text-sm text-foreground">{safeStr(result.rootCause.description)}</p>
+            <p className="text-xs text-muted-foreground">Evidence: {safeStr(result.rootCause.evidence)}</p>
+            <p className="text-xs text-foreground"><strong>Fix:</strong> {safeStr(result.rootCause.suggestedFix)}</p>
           </div>
         </CollapsibleSection>
       )}
@@ -815,7 +822,7 @@ export const ResultDisplay = ({
               <div key={i} className="flex items-center gap-3 pl-1">
                 <Badge variant="outline" className={`shrink-0 font-mono text-[10px] ${severityBadge(t.severity)}`}>{t.severity}</Badge>
                 {t.time && <span className="text-xs text-muted-foreground font-mono shrink-0">{t.time}</span>}
-                <span className="text-sm text-foreground">{t.event}</span>
+                <span className="text-sm text-foreground">{safeStr(t.event)}</span>
               </div>
             ))}
           </div>
@@ -831,8 +838,8 @@ export const ResultDisplay = ({
                 <span className="text-[10px] font-bold text-primary">{s.step}</span>
               </div>
               <div>
-                <p className="text-sm text-foreground">{s.description}</p>
-                <p className="text-xs text-muted-foreground font-mono mt-0.5">State: {s.state}</p>
+                <p className="text-sm text-foreground">{safeStr(s.description)}</p>
+                <p className="text-xs text-muted-foreground font-mono mt-0.5">State: {safeStr(s.state)}</p>
               </div>
             </div>
           ))}</div>
@@ -848,7 +855,7 @@ export const ResultDisplay = ({
                 <div className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-primary/10 border border-primary/20 shrink-0 z-10">
                   <span className="text-[9px] font-bold text-primary">{i + 1}</span>
                 </div>
-                <span className="text-sm text-foreground font-mono">{step}</span>
+                <span className="text-sm text-foreground font-mono">{safeStr(step)}</span>
               </div>
             ))}
           </div>
@@ -875,7 +882,7 @@ export const ResultDisplay = ({
             <div key={i} className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className={`font-mono text-[10px] ${c.type === "added" ? severityBadge("low") : c.type === "removed" ? severityBadge("high") : severityBadge("medium")}`}>{c.type}</Badge>
-                <span className="text-sm text-foreground">{c.description}</span>
+                <span className="text-sm text-foreground">{safeStr(c.description)}</span>
               </div>
               {c.oldCode && <pre className="rounded-lg bg-destructive/5 border border-destructive/15 p-3 font-mono text-xs text-foreground">- {c.oldCode}</pre>}
               {c.newCode && <pre className="rounded-lg bg-success/5 border border-success/15 p-3 font-mono text-xs text-foreground">+ {c.newCode}</pre>}
@@ -1020,7 +1027,7 @@ export const ResultDisplay = ({
                 ))
               : (result.fixes as string[]).map((fix, i) => (
                   <div key={i} className="flex items-start gap-2 text-sm text-foreground">
-                    <Badge variant="outline" className="shrink-0 font-mono text-[10px] mt-0.5 bg-success/10 text-success border-success/20">{i + 1}</Badge>{fix}
+                    <Badge variant="outline" className="shrink-0 font-mono text-[10px] mt-0.5 bg-success/10 text-success border-success/20">{i + 1}</Badge>{safeStr(fix)}
                   </div>
                 ))}
           </div>
@@ -1118,7 +1125,7 @@ export const ResultDisplay = ({
               <div>
                 <p className="text-xs font-semibold text-muted-foreground mb-2">Best Practices:</p>
                 <ul className="space-y-1.5">{result.learningConcept.bestPractices.map((bp, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-foreground"><CheckCircle2 className="h-3.5 w-3.5 mt-0.5 text-success shrink-0" />{bp}</li>
+                  <li key={i} className="flex items-start gap-2 text-sm text-foreground"><CheckCircle2 className="h-3.5 w-3.5 mt-0.5 text-success shrink-0" />{safeStr(bp)}</li>
                 ))}</ul>
               </div>
             )}
@@ -1134,7 +1141,7 @@ export const ResultDisplay = ({
               <div className="flex h-5 w-5 items-center justify-center rounded border border-border shrink-0 mt-0.5">
                 <span className="text-[10px] font-mono text-muted-foreground">{i + 1}</span>
               </div>
-              {s}
+              {safeStr(s)}
             </li>
           ))}</ol>
         </CollapsibleSection>
