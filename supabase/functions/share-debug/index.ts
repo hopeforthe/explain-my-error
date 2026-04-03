@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const MAX_INPUT_LENGTH = 50_000;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -13,8 +15,14 @@ serve(async (req) => {
     const { input, inputMode, result } = await req.json();
     if (!input || !result) {
       return new Response(JSON.stringify({ error: "Missing input or result" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Input size validation
+    if (typeof input === "string" && input.length > MAX_INPUT_LENGTH) {
+      return new Response(JSON.stringify({ error: "Input too large." }), {
+        status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -25,7 +33,7 @@ serve(async (req) => {
     const { data, error } = await supabase
       .from("shared_debugs")
       .insert({
-        input_text: input,
+        input_text: typeof input === "string" ? input.slice(0, MAX_INPUT_LENGTH) : String(input).slice(0, MAX_INPUT_LENGTH),
         input_mode: inputMode || "error",
         result: result,
       })
@@ -39,9 +47,8 @@ serve(async (req) => {
     });
   } catch (e) {
     console.error("share-debug error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

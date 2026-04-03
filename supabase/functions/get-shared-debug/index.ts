@@ -11,10 +11,9 @@ serve(async (req) => {
 
   try {
     const { id } = await req.json();
-    if (!id) {
-      return new Response(JSON.stringify({ error: "Missing id" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    if (!id || typeof id !== "string" || id.length > 100) {
+      return new Response(JSON.stringify({ error: "Missing or invalid id" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -35,9 +34,8 @@ serve(async (req) => {
     });
   } catch (e) {
     console.error("get-shared-debug error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
