@@ -620,7 +620,7 @@ export const ResultDisplay = ({
           icon={<Lightbulb className="h-4 w-4 text-warning" />}
           defaultOpen
         >
-          <p className="text-sm text-foreground leading-relaxed">{result.summary || result.explanation}</p>
+          <p className="text-sm text-foreground leading-relaxed">{safeStr(result.summary || result.explanation)}</p>
         </CollapsibleSection>
       )}
 
