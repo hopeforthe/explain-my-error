@@ -480,7 +480,7 @@ export const ResultDisplay = ({
                     <div className="flex h-5 w-5 items-center justify-center rounded border border-border shrink-0 mt-0.5">
                       <span className="text-[10px] font-mono text-muted-foreground">{i + 1}</span>
                     </div>
-                    {s}
+                    {safeStr(s)}
                   </li>
                 ))}</ol>
               </div>
@@ -490,7 +490,7 @@ export const ResultDisplay = ({
               {result.expectedResult && (
                 <div className="p-3 rounded-lg bg-success/5 border border-success/15">
                   <p className="text-[10px] font-mono text-success mb-1">Expected Result</p>
-                  <p className="text-sm text-foreground">{result.expectedResult}</p>
+                  <p className="text-sm text-foreground">{safeStr(result.expectedResult)}</p>
                 </div>
               )}
               {result.actualResult && (
