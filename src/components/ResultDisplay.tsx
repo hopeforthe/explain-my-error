@@ -1027,7 +1027,7 @@ export const ResultDisplay = ({
                 ))
               : (result.fixes as string[]).map((fix, i) => (
                   <div key={i} className="flex items-start gap-2 text-sm text-foreground">
-                    <Badge variant="outline" className="shrink-0 font-mono text-[10px] mt-0.5 bg-success/10 text-success border-success/20">{i + 1}</Badge>{fix}
+                    <Badge variant="outline" className="shrink-0 font-mono text-[10px] mt-0.5 bg-success/10 text-success border-success/20">{i + 1}</Badge>{safeStr(fix)}
                   </div>
                 ))}
           </div>
