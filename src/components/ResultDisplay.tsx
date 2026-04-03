@@ -504,7 +504,7 @@ export const ResultDisplay = ({
             {result.possibleRootCause && (
               <div>
                 <p className="text-xs font-semibold text-muted-foreground mb-1">Possible Root Cause:</p>
-                <p className="text-sm text-foreground">{result.possibleRootCause}</p>
+                <p className="text-sm text-foreground">{safeStr(result.possibleRootCause)}</p>
               </div>
             )}
             {result.environment && result.environment !== "Unknown" && (
