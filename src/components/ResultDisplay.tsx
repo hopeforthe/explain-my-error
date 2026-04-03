@@ -807,9 +807,9 @@ export const ResultDisplay = ({
       {result.rootCause && (
         <CollapsibleSection title="Root Cause" icon={<Target className="h-4 w-4 text-primary" />} defaultOpen accentColor="border-l-primary">
           <div className="space-y-2">
-            <p className="text-sm text-foreground">{result.rootCause.description}</p>
-            <p className="text-xs text-muted-foreground">Evidence: {result.rootCause.evidence}</p>
-            <p className="text-xs text-foreground"><strong>Fix:</strong> {result.rootCause.suggestedFix}</p>
+            <p className="text-sm text-foreground">{safeStr(result.rootCause.description)}</p>
+            <p className="text-xs text-muted-foreground">Evidence: {safeStr(result.rootCause.evidence)}</p>
+            <p className="text-xs text-foreground"><strong>Fix:</strong> {safeStr(result.rootCause.suggestedFix)}</p>
           </div>
         </CollapsibleSection>
       )}
