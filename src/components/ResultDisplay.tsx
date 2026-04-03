@@ -822,7 +822,7 @@ export const ResultDisplay = ({
               <div key={i} className="flex items-center gap-3 pl-1">
                 <Badge variant="outline" className={`shrink-0 font-mono text-[10px] ${severityBadge(t.severity)}`}>{t.severity}</Badge>
                 {t.time && <span className="text-xs text-muted-foreground font-mono shrink-0">{t.time}</span>}
-                <span className="text-sm text-foreground">{t.event}</span>
+                <span className="text-sm text-foreground">{safeStr(t.event)}</span>
               </div>
             ))}
           </div>
