@@ -855,7 +855,7 @@ export const ResultDisplay = ({
                 <div className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-primary/10 border border-primary/20 shrink-0 z-10">
                   <span className="text-[9px] font-bold text-primary">{i + 1}</span>
                 </div>
-                <span className="text-sm text-foreground font-mono">{step}</span>
+                <span className="text-sm text-foreground font-mono">{safeStr(step)}</span>
               </div>
             ))}
           </div>
