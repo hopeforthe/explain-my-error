@@ -322,7 +322,7 @@ function ListCard({ title, icon, items, accentColor }: { title: string; icon: Re
     <CollapsibleSection title={title} icon={icon} defaultOpen accentColor={accentColor}>
       <ul className="space-y-2">{items.map((s, i) => (
         <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
-          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />{s}
+          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />{safeStr(s)}
         </li>
       ))}</ul>
     </CollapsibleSection>
