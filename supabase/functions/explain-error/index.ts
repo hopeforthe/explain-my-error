@@ -1,9 +1,56 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+const MAX_INPUT_LENGTH = 30_000;
+const RATE_LIMIT_MAX = 30; // requests per hour
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+
+function getClientIp(req: Request): string {
+  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") || "unknown";
+}
+
+async function checkRateLimit(ip: string, functionName: string): Promise<boolean> {
+  try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
+
+    // Check existing record
+    const { data } = await supabase
+      .from("rate_limits")
+      .select("id, request_count, window_start")
+      .eq("ip", ip)
+      .eq("function_name", functionName)
+      .single();
+
+    if (data) {
+      if (new Date(data.window_start).getTime() < Date.now() - RATE_LIMIT_WINDOW_MS) {
+        // Reset window
+        await supabase.from("rate_limits").update({ request_count: 1, window_start: new Date().toISOString() }).eq("id", data.id);
+        return true;
+      }
+      if (data.request_count >= RATE_LIMIT_MAX) return false;
+      await supabase.from("rate_limits").update({ request_count: data.request_count + 1 }).eq("id", data.id);
+      return true;
+    }
+
+    // Create new record
+    await supabase.from("rate_limits").insert({ ip, function_name: functionName, request_count: 1 });
+    return true;
+  } catch (e) {
+    console.error("Rate limit check failed:", e);
+    return true; // Fail open
+  }
+}
 
 function buildPrompt(inputMode: string, analysisMode: string, outputLength: string, outputLanguage: string): string {
   const modeInstruction = analysisMode === "simple"
@@ -385,11 +432,11 @@ Respond ONLY with valid JSON, no markdown fences.`;
 
   // Default: error, code, terminal modes
   const terminalInstruction = inputMode === "terminal"
-    ? `The user has pasted a full terminal log. First, extract the MAIN error from the log, ignoring noise/warnings/info lines. Focus on the most relevant error line and stack trace. Then analyze that extracted error.`
+    ? "The user has pasted a full terminal log. First, extract the MAIN error from the log, ignoring noise/warnings/info lines. Focus on the most relevant error line and stack trace. Then analyze that extracted error."
     : "";
 
   const codeInstruction = inputMode === "code"
-    ? `The user has pasted source code (not just an error message). Analyze the code, detect potential bugs, problematic patterns, or errors. Identify the specific lines that could cause issues.`
+    ? "The user has pasted source code (not just an error message). Analyze the code, detect potential bugs, problematic patterns, or errors. Identify the specific lines that could cause issues."
     : "";
 
   return `You are an expert AI software debugging and code repair agent. Your job is to diagnose complex programming errors and generate safe, minimal fixes.
@@ -463,8 +510,31 @@ serve(async (req) => {
       });
     }
 
+    // Input size validation
+    if (errorMessage.length > MAX_INPUT_LENGTH) {
+      return new Response(JSON.stringify({ error: "Input too large. Please limit your input to 30,000 characters." }), {
+        status: 413,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Server-side rate limiting
+    const clientIp = getClientIp(req);
+    const allowed = await checkRateLimit(clientIp, "explain-error");
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
+      return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const systemPrompt = buildPrompt(inputMode, analysisMode, outputLength, outputLanguage);
     
@@ -524,7 +594,7 @@ serve(async (req) => {
       }
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI service error" }), {
+      return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -559,7 +629,7 @@ serve(async (req) => {
     });
   } catch (e) {
     console.error("explain-error error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

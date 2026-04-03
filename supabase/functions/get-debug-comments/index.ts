@@ -11,8 +11,8 @@ serve(async (req) => {
 
   try {
     const { debugId } = await req.json();
-    if (!debugId) {
-      return new Response(JSON.stringify({ error: "Missing debugId" }), {
+    if (!debugId || typeof debugId !== "string" || debugId.length > 100) {
+      return new Response(JSON.stringify({ error: "Missing or invalid debugId" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -32,7 +32,7 @@ serve(async (req) => {
     });
   } catch (e) {
     console.error("get-debug-comments error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
