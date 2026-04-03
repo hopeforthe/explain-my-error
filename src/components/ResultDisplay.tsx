@@ -882,7 +882,7 @@ export const ResultDisplay = ({
             <div key={i} className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className={`font-mono text-[10px] ${c.type === "added" ? severityBadge("low") : c.type === "removed" ? severityBadge("high") : severityBadge("medium")}`}>{c.type}</Badge>
-                <span className="text-sm text-foreground">{c.description}</span>
+                <span className="text-sm text-foreground">{safeStr(c.description)}</span>
               </div>
               {c.oldCode && <pre className="rounded-lg bg-destructive/5 border border-destructive/15 p-3 font-mono text-xs text-foreground">- {c.oldCode}</pre>}
               {c.newCode && <pre className="rounded-lg bg-success/5 border border-success/15 p-3 font-mono text-xs text-foreground">+ {c.newCode}</pre>}
