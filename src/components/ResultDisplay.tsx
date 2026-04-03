@@ -1125,7 +1125,7 @@ export const ResultDisplay = ({
               <div>
                 <p className="text-xs font-semibold text-muted-foreground mb-2">Best Practices:</p>
                 <ul className="space-y-1.5">{result.learningConcept.bestPractices.map((bp, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-foreground"><CheckCircle2 className="h-3.5 w-3.5 mt-0.5 text-success shrink-0" />{bp}</li>
+                  <li key={i} className="flex items-start gap-2 text-sm text-foreground"><CheckCircle2 className="h-3.5 w-3.5 mt-0.5 text-success shrink-0" />{safeStr(bp)}</li>
                 ))}</ul>
               </div>
             )}
