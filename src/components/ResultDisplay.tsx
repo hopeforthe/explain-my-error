@@ -582,8 +582,8 @@ export const ResultDisplay = ({
           <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm font-mono">
             <span className="text-muted-foreground">Root File:</span><span className="text-foreground font-medium">{result.stackTraceAnalysis.rootCauseFile}</span>
             <span className="text-muted-foreground">Line:</span><span className="text-foreground font-medium">{result.stackTraceAnalysis.problemLine}</span>
-            <span className="text-muted-foreground">Reason:</span><span className="text-foreground">{result.stackTraceAnalysis.reason}</span>
-            <span className="text-muted-foreground">Fix:</span><span className="text-foreground">{result.stackTraceAnalysis.suggestedFix}</span>
+            <span className="text-muted-foreground">Reason:</span><span className="text-foreground">{safeStr(result.stackTraceAnalysis.reason)}</span>
+            <span className="text-muted-foreground">Fix:</span><span className="text-foreground">{safeStr(result.stackTraceAnalysis.suggestedFix)}</span>
           </div>
         </CollapsibleSection>
       )}
