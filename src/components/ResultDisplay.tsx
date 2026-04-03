@@ -838,8 +838,8 @@ export const ResultDisplay = ({
                 <span className="text-[10px] font-bold text-primary">{s.step}</span>
               </div>
               <div>
-                <p className="text-sm text-foreground">{s.description}</p>
-                <p className="text-xs text-muted-foreground font-mono mt-0.5">State: {s.state}</p>
+                <p className="text-sm text-foreground">{safeStr(s.description)}</p>
+                <p className="text-xs text-muted-foreground font-mono mt-0.5">State: {safeStr(s.state)}</p>
               </div>
             </div>
           ))}</div>
