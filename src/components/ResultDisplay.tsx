@@ -496,7 +496,7 @@ export const ResultDisplay = ({
               {result.actualResult && (
                 <div className="p-3 rounded-lg bg-destructive/5 border border-destructive/15">
                   <p className="text-[10px] font-mono text-destructive mb-1">Actual Result</p>
-                  <p className="text-sm text-foreground">{result.actualResult}</p>
+                  <p className="text-sm text-foreground">{safeStr(result.actualResult)}</p>
                 </div>
               )}
             </div>
