@@ -1141,7 +1141,7 @@ export const ResultDisplay = ({
               <div className="flex h-5 w-5 items-center justify-center rounded border border-border shrink-0 mt-0.5">
                 <span className="text-[10px] font-mono text-muted-foreground">{i + 1}</span>
               </div>
-              {s}
+              {safeStr(s)}
             </li>
           ))}</ol>
         </CollapsibleSection>
