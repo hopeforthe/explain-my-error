@@ -410,18 +410,7 @@ const Index = () => {
                         ))}
                       </div>
                       {/* Language */}
-                      <div className="flex items-center gap-1.5">
-                        <Languages className="h-3.5 w-3.5 text-muted-foreground" />
-                        <select
-                          value={outputLang}
-                          onChange={(e) => setOutputLang(e.target.value)}
-                          className="text-xs font-mono bg-background border border-border rounded-md px-2 py-1 text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary/50"
-                        >
-                          {outputLanguages.map(l => (
-                            <option key={l.code} value={l.code}>{l.label}</option>
-                          ))}
-                        </select>
-                      </div>
+                      <LanguageSelector value={outputLang} onChange={setOutputLang} />
                     </div>
                     <div className="flex gap-2">
                       {errorInput && (
