@@ -13,7 +13,7 @@ import {
   PanelLeftClose, PanelLeft, PlusCircle, History, MessageSquare,
   FileCode, Sparkles, BarChart3, Shield, Zap, BookOpen, Database,
   Globe, Wrench, FileText, GitCompare, Bug, Gauge, Cog,
-  ArrowRightLeft, GraduationCap, Layers, Rocket, Languages,
+  ArrowRightLeft, GraduationCap, Layers, Rocket,
   ClipboardList, TestTubes, ListChecks,
 } from "lucide-react";
 import { toast } from "sonner";
