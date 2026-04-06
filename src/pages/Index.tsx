@@ -94,19 +94,6 @@ const inputModes: ModeConfig[] = [
 
 const categories = ["Analyze", "Improve", "Generate", "Compare", "Tester Tools"];
 
-const outputLanguages = [
-  { code: "en", label: "English" },
-  { code: "hi", label: "हिन्दी" },
-  { code: "te", label: "తెలుగు" },
-  { code: "es", label: "Español" },
-  { code: "zh", label: "中文" },
-  { code: "fr", label: "Français" },
-  { code: "de", label: "Deutsch" },
-  { code: "ja", label: "日本語" },
-  { code: "ko", label: "한국어" },
-  { code: "pt", label: "Português" },
-  { code: "ar", label: "العربية" },
-];
 
 const Index = () => {
   const [errorInput, setErrorInput] = useState("");
