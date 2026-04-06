@@ -28,7 +28,8 @@ import { SnippetLibrary } from "@/components/SnippetLibrary";
 import { addErrorHistory, findSimilarError } from "@/lib/errorHistory";
 import type { Session } from "@supabase/supabase-js";
 
-const FREE_QUERY_KEY = "eme_free_query_used";
+const FREE_QUERY_KEY = "eme_free_query_count";
+const MAX_FREE_QUERIES = 10;
 
 type SidebarPanel = "new" | "history" | "chat" | "trends" | "snippets";
 type InputMode = string;
@@ -112,7 +113,10 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
-  const [freeQueryUsed, setFreeQueryUsed] = useState(() => localStorage.getItem(FREE_QUERY_KEY) === "true");
+  const [freeQueryCount, setFreeQueryCount] = useState(() => {
+    const stored = localStorage.getItem(FREE_QUERY_KEY);
+    return stored ? parseInt(stored, 10) : 0;
+  });
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activePanel, setActivePanel] = useState<SidebarPanel>("new");
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
@@ -139,7 +143,7 @@ const Index = () => {
 
   const handleSubmit = async () => {
     if (!errorInput.trim()) { toast.error("Please paste some input first."); return; }
-    if (!session && freeQueryUsed) { setShowAuthModal(true); return; }
+    if (!session && freeQueryCount >= MAX_FREE_QUERIES) { setShowAuthModal(true); return; }
 
     setLoading(true);
     setResult(null);
@@ -154,7 +158,11 @@ const Index = () => {
       });
       if (error) throw error;
 
-      if (!session) { localStorage.setItem(FREE_QUERY_KEY, "true"); setFreeQueryUsed(true); }
+      if (!session) {
+        const newCount = freeQueryCount + 1;
+        localStorage.setItem(FREE_QUERY_KEY, String(newCount));
+        setFreeQueryCount(newCount);
+      }
 
       const parsed = data as ExplanationResult;
       setResult(parsed);
@@ -250,9 +258,16 @@ const Index = () => {
                 </Button>
               </>
             ) : (
-              <Button variant="outline" size="sm" className="font-mono text-[11px] h-7" onClick={() => setShowAuthModal(true)}>
-                {freeQueryUsed ? "Sign in" : "1 free query"}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="hidden font-mono text-[10px] sm:inline-flex">
+                  {freeQueryCount >= MAX_FREE_QUERIES
+                    ? "0 free left"
+                    : `${MAX_FREE_QUERIES - freeQueryCount}/${MAX_FREE_QUERIES} free`}
+                </Badge>
+                <Button variant="outline" size="sm" className="font-mono text-[11px] h-7" onClick={() => setShowAuthModal(true)}>
+                  Sign in
+                </Button>
+              </div>
             )}
           </div>
         </div>
