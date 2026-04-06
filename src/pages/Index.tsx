@@ -220,7 +220,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-hidden">
+    <div className="h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-x-hidden overflow-y-hidden">
       {/* Header */}
       <header className="shrink-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
         <div className="flex items-center justify-between px-4 py-2.5">
@@ -260,7 +260,7 @@ const Index = () => {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <aside className={`shrink-0 border-r border-border bg-card/60 backdrop-blur-sm flex flex-col transition-all duration-200 ${sidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}>
+        <aside className={`shrink-0 border-r border-border bg-card/60 backdrop-blur-sm flex flex-col transition-all duration-200 ${sidebarOpen ? "w-64 max-w-[80vw]" : "w-0 overflow-hidden"}`}>
           <nav className="p-2 space-y-0.5 border-b border-border">
             {sidebarItems.map((item) => (
               <button
@@ -304,11 +304,11 @@ const Index = () => {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto scrollbar-thin">
+        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden scrollbar-thin">
           {activePanel === "trends" ? (
             <ErrorTrends refreshKey={historyRefreshKey} />
           ) : (
-            <div className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+            <div className="max-w-3xl mx-auto p-3 sm:p-6 lg:p-8 space-y-6 w-full">
               {/* Input Section */}
               <Card className="shadow-md border-border/50 bg-card/80 backdrop-blur-sm">
                 <CardHeader className="pb-3 space-y-3">
@@ -325,7 +325,7 @@ const Index = () => {
                   </div>
 
                   {/* Category tabs */}
-                  <div className="flex gap-1 border-b border-border pb-2">
+                  <div className="flex gap-1 border-b border-border pb-2 overflow-x-auto scrollbar-thin -mx-1 px-1">
                     {categories.map(cat => (
                       <button
                         key={cat}
@@ -334,7 +334,7 @@ const Index = () => {
                           const firstInCat = inputModes.find(m => m.category === cat);
                           if (firstInCat) setInputMode(firstInCat.id);
                         }}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 ${
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 whitespace-nowrap ${
                           activeCategory === cat
                             ? "bg-primary text-primary-foreground shadow-sm"
                             : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
