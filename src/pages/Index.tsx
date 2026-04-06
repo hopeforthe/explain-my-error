@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { ResultDisplay, type ExplanationResult } from "@/components/ResultDisplay";
 import { ImageUpload } from "@/components/ImageUpload";
 import { DebugChat } from "@/components/DebugChat";
