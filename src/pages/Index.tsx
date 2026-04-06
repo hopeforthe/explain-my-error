@@ -13,12 +13,13 @@ import {
   PanelLeftClose, PanelLeft, PlusCircle, History, MessageSquare,
   FileCode, Sparkles, BarChart3, Shield, Zap, BookOpen, Database,
   Globe, Wrench, FileText, GitCompare, Bug, Gauge, Cog,
-  ArrowRightLeft, GraduationCap, Layers, Rocket, Languages,
+  ArrowRightLeft, GraduationCap, Layers, Rocket,
   ClipboardList, TestTubes, ListChecks,
 } from "lucide-react";
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { ResultDisplay, type ExplanationResult } from "@/components/ResultDisplay";
 import { ImageUpload } from "@/components/ImageUpload";
 import { DebugChat } from "@/components/DebugChat";
@@ -93,19 +94,6 @@ const inputModes: ModeConfig[] = [
 
 const categories = ["Analyze", "Improve", "Generate", "Compare", "Tester Tools"];
 
-const outputLanguages = [
-  { code: "en", label: "English" },
-  { code: "hi", label: "हिन्दी" },
-  { code: "te", label: "తెలుగు" },
-  { code: "es", label: "Español" },
-  { code: "zh", label: "中文" },
-  { code: "fr", label: "Français" },
-  { code: "de", label: "Deutsch" },
-  { code: "ja", label: "日本語" },
-  { code: "ko", label: "한국어" },
-  { code: "pt", label: "Português" },
-  { code: "ar", label: "العربية" },
-];
 
 const Index = () => {
   const [errorInput, setErrorInput] = useState("");
@@ -422,18 +410,7 @@ const Index = () => {
                         ))}
                       </div>
                       {/* Language */}
-                      <div className="flex items-center gap-1.5">
-                        <Languages className="h-3.5 w-3.5 text-muted-foreground" />
-                        <select
-                          value={outputLang}
-                          onChange={(e) => setOutputLang(e.target.value)}
-                          className="text-xs font-mono bg-background border border-border rounded-md px-2 py-1 text-foreground cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary/50"
-                        >
-                          {outputLanguages.map(l => (
-                            <option key={l.code} value={l.code}>{l.label}</option>
-                          ))}
-                        </select>
-                      </div>
+                      <LanguageSelector value={outputLang} onChange={setOutputLang} />
                     </div>
                     <div className="flex gap-2">
                       {errorInput && (
