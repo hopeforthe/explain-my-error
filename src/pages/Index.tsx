@@ -2,11 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-
-
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import {
   AlertTriangle, Code, Send, Loader2, LogOut, Terminal,
@@ -14,7 +12,7 @@ import {
   FileCode, Sparkles, BarChart3, Shield, Zap, BookOpen, Database,
   Globe, Wrench, FileText, GitCompare, Bug, Gauge, Cog,
   ArrowRightLeft, GraduationCap, Layers, Rocket,
-  ClipboardList, TestTubes, ListChecks,
+  ClipboardList, TestTubes, ListChecks, ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
@@ -49,7 +47,7 @@ const inputModes: ModeConfig[] = [
   { id: "code", label: "Bug Detect", icon: <Bug className="h-3.5 w-3.5" />, category: "Analyze",
     placeholder: "Paste your source code here to detect bugs…" },
   { id: "terminal", label: "Terminal", icon: <Terminal className="h-3.5 w-3.5" />, category: "Analyze",
-    placeholder: "Paste your full terminal output here…\nThe AI will extract the main error and ignore noise." },
+    placeholder: "Paste your full terminal output here…" },
   { id: "api", label: "API Error", icon: <Globe className="h-3.5 w-3.5" />, category: "Analyze",
     placeholder: "Paste API error responses, curl commands, or HTTP errors here…" },
   { id: "log", label: "Log File", icon: <FileText className="h-3.5 w-3.5" />, category: "Analyze",
@@ -83,17 +81,24 @@ const inputModes: ModeConfig[] = [
   { id: "diff", label: "Code Diff", icon: <GitCompare className="h-3.5 w-3.5" />, category: "Compare",
     placeholder: "Paste two versions separated by:\n--- OLD CODE ---\n(old code)\n--- NEW CODE ---\n(new code)" },
   { id: "migrate", label: "Migrate", icon: <ArrowRightLeft className="h-3.5 w-3.5" />, category: "Compare",
-    placeholder: "Paste code and specify the migration target.\nE.g. 'Migrate from React class components to hooks'" },
+    placeholder: "Paste code and specify the migration target." },
   { id: "bugreport", label: "Bug Report", icon: <ClipboardList className="h-3.5 w-3.5" />, category: "Tester Tools",
-    placeholder: "Paste an error message, failure log, or bug description…\nThe AI will generate a structured bug report." },
+    placeholder: "Paste an error message, failure log, or bug description…" },
   { id: "testcase", label: "Test Cases", icon: <TestTubes className="h-3.5 w-3.5" />, category: "Tester Tools",
-    placeholder: "Describe a feature or module to generate test cases…\n\ne.g. User login with email and password" },
+    placeholder: "Describe a feature or module to generate test cases…" },
   { id: "testscenario", label: "Scenarios", icon: <ListChecks className="h-3.5 w-3.5" />, category: "Tester Tools",
-    placeholder: "Enter a feature or module name to generate test scenarios…\n\ne.g. Payment Processing Module" },
+    placeholder: "Enter a feature or module name to generate test scenarios…" },
 ];
 
 const categories = ["Analyze", "Improve", "Generate", "Compare", "Tester Tools"];
 
+const categoryIcons: Record<string, React.ReactNode> = {
+  Analyze: <Bug className="h-3.5 w-3.5" />,
+  Improve: <Sparkles className="h-3.5 w-3.5" />,
+  Generate: <FileCode className="h-3.5 w-3.5" />,
+  Compare: <GitCompare className="h-3.5 w-3.5" />,
+  "Tester Tools": <TestTubes className="h-3.5 w-3.5" />,
+};
 
 const Index = () => {
   const [errorInput, setErrorInput] = useState("");
@@ -215,44 +220,71 @@ const Index = () => {
     { id: "trends", label: "Trends", icon: <BarChart3 className="h-4 w-4" /> },
   ];
 
+  const remaining = MAX_FREE_QUERIES - freeQueryCount;
+
   return (
     <div className="h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-x-hidden overflow-y-hidden">
-      {/* Header */}
-      <header className="shrink-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
-        <div className="flex items-center justify-between px-4 py-2.5">
+      {/* ─── Header ─── */}
+      <header className="shrink-0 z-50 border-b border-border/60 bg-card/70 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-4 h-14">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
               {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
             </Button>
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary shadow-md">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 shadow-md shadow-primary/20">
                 <Terminal className="h-4 w-4 text-primary-foreground" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="font-semibold text-sm text-foreground leading-tight">Explain My Error</h1>
-                <p className="text-[10px] text-muted-foreground leading-none">AI Debugging Assistant</p>
+                <h1 className="font-semibold text-sm text-foreground tracking-tight">Explain My Error</h1>
+                <p className="text-[11px] text-muted-foreground leading-none">AI Debugging Assistant</p>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <ThemeToggle />
             {session ? (
-              <>
-                <Badge variant="secondary" className="hidden font-mono text-[10px] sm:inline-flex">
-                  Unlimited
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="hidden sm:inline-flex text-[10px] font-medium border-primary/20 bg-primary/10 text-primary">
+                  Pro · Unlimited
                 </Badge>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => supabase.auth.signOut()} title="Sign out">
                   <LogOut className="h-3.5 w-3.5" />
                 </Button>
-              </>
+              </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="hidden font-mono text-[10px] sm:inline-flex">
-                  {freeQueryCount >= MAX_FREE_QUERIES
-                    ? "0 free left"
-                    : `${MAX_FREE_QUERIES - freeQueryCount}/${MAX_FREE_QUERIES} free`}
-                </Badge>
-                <Button variant="outline" size="sm" className="font-mono text-[11px] h-7" onClick={() => setShowAuthModal(true)}>
+                {remaining > 0 && (
+                  <div className="hidden sm:flex items-center gap-1.5">
+                    <div className="flex gap-[3px]">
+                      {Array.from({ length: MAX_FREE_QUERIES }).map((_, i) => (
+                        <div
+                          key={i}
+                          className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                            i < remaining ? "bg-primary" : "bg-border"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground font-medium">{remaining} left</span>
+                  </div>
+                )}
+                {remaining <= 0 && (
+                  <Badge variant="destructive" className="hidden sm:inline-flex text-[10px]">
+                    Limit reached
+                  </Badge>
+                )}
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="h-8 text-xs font-medium shadow-sm shadow-primary/20 hover:shadow-md hover:shadow-primary/25 transition-all"
+                  onClick={() => setShowAuthModal(true)}
+                >
                   Sign in
                 </Button>
               </div>
@@ -262,40 +294,51 @@ const Index = () => {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <aside className={`shrink-0 border-r border-border bg-card/60 backdrop-blur-sm flex flex-col transition-all duration-200 ${sidebarOpen ? "w-64 max-w-[80vw]" : "w-0 overflow-hidden"}`}>
-          <nav className="p-2 space-y-0.5 border-b border-border">
+        {/* ─── Sidebar ─── */}
+        <aside
+          className={`shrink-0 border-r border-border/50 bg-card/50 backdrop-blur-sm flex flex-col transition-all duration-300 ease-in-out ${
+            sidebarOpen ? "w-60 max-w-[75vw]" : "w-0 overflow-hidden"
+          }`}
+        >
+          <nav className="p-3 space-y-1">
             {sidebarItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActivePanel(item.id)}
-                className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all duration-150 ${
+                className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] transition-all duration-150 group ${
                   activePanel === item.id
-                    ? "bg-primary/10 text-primary font-medium shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                 }`}
               >
-                {item.icon}
-                {item.label}
+                <span className={activePanel === item.id ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}>{item.icon}</span>
+                <span className="flex-1 text-left">{item.label}</span>
+                {activePanel === item.id && <ChevronRight className="h-3 w-3 text-primary/50" />}
               </button>
             ))}
           </nav>
 
-          <div className="flex-1 overflow-hidden scrollbar-thin">
+          <div className="h-px bg-border/50 mx-3" />
+
+          <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin">
             {activePanel === "history" && <ErrorHistory onSelect={handleHistorySelect} refreshKey={historyRefreshKey} />}
             {activePanel === "chat" && <DebugChat errorContext={errorInput || undefined} />}
             {activePanel === "snippets" && <SnippetLibrary />}
             {(activePanel === "new" || activePanel === "trends") && (
               <div className="p-4 space-y-4">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   20+ AI-powered analysis modes for debugging, code review, security scanning, and more.
                 </p>
-                <div className="space-y-1.5">
-                  {["TypeError: Cannot read properties of undefined", "SyntaxError: Unexpected token", "IndentationError: unexpected indent"].map((ex) => (
+                <div className="space-y-1">
+                  {[
+                    "TypeError: Cannot read properties of undefined",
+                    "SyntaxError: Unexpected token",
+                    "IndentationError: unexpected indent",
+                  ].map((ex) => (
                     <button
                       key={ex}
                       onClick={() => { setErrorInput(ex); setInputMode("error"); setActiveCategory("Analyze"); setActivePanel("new"); }}
-                      className="w-full text-left text-xs font-mono text-muted-foreground hover:text-foreground p-2.5 rounded-lg hover:bg-muted/50 transition-all border border-transparent hover:border-border"
+                      className="w-full text-left text-[11px] font-mono text-muted-foreground hover:text-foreground p-2.5 rounded-lg hover:bg-muted/60 transition-all border border-transparent hover:border-border/60"
                     >
                       {ex}
                     </button>
@@ -306,18 +349,20 @@ const Index = () => {
           </div>
         </aside>
 
-        {/* Main content */}
+        {/* ─── Main Content ─── */}
         <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden scrollbar-thin">
           {activePanel === "trends" ? (
             <ErrorTrends refreshKey={historyRefreshKey} />
           ) : (
-            <div className="max-w-3xl mx-auto p-3 sm:p-6 lg:p-8 space-y-6 w-full">
-              {/* Input Section */}
-              <Card className="shadow-md border-border/50 bg-card/80 backdrop-blur-sm">
-                <CardHeader className="pb-3 space-y-3">
+            <div className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6 w-full">
+              {/* Input Card */}
+              <Card className="shadow-lg shadow-primary/[0.03] border-border/40 bg-card/90 backdrop-blur-sm">
+                <CardHeader className="pb-4 space-y-4">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <CardTitle className="text-base font-semibold flex items-center gap-2">
-                      <Code className="h-4 w-4 text-primary" />
+                    <CardTitle className="text-base font-semibold flex items-center gap-2.5 tracking-tight">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10">
+                        <Code className="h-3.5 w-3.5 text-primary" />
+                      </div>
                       Input
                     </CardTitle>
                     <ImageUpload
@@ -328,8 +373,8 @@ const Index = () => {
                   </div>
 
                   {/* Category tabs */}
-                  <div className="flex gap-1 border-b border-border pb-2 overflow-x-auto scrollbar-thin -mx-1 px-1">
-                    {categories.map(cat => (
+                  <div className="flex gap-1 overflow-x-auto scrollbar-thin -mx-1 px-1 pb-1">
+                    {categories.map((cat) => (
                       <button
                         key={cat}
                         onClick={() => {
@@ -337,27 +382,28 @@ const Index = () => {
                           const firstInCat = inputModes.find(m => m.category === cat);
                           if (firstInCat) setInputMode(firstInCat.id);
                         }}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 whitespace-nowrap ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap ${
                           activeCategory === cat
-                            ? "bg-primary text-primary-foreground shadow-sm"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                            ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                         }`}
                       >
+                        {categoryIcons[cat]}
                         {cat}
                       </button>
                     ))}
                   </div>
 
-                  {/* Mode tabs within category */}
-                  <div className="flex gap-1 flex-wrap">
+                  {/* Sub-mode pills */}
+                  <div className="flex gap-1.5 flex-wrap">
                     {modesInCategory.map((mode) => (
                       <button
                         key={mode.id}
                         onClick={() => setInputMode(mode.id)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 ${
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all duration-200 ${
                           inputMode === mode.id
-                            ? "bg-accent text-accent-foreground border border-primary/30 shadow-sm"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                            ? "bg-accent text-accent-foreground border border-primary/20 shadow-sm"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent"
                         }`}
                       >
                         {mode.icon}
@@ -366,26 +412,27 @@ const Index = () => {
                     ))}
                   </div>
                 </CardHeader>
+
                 <CardContent className="space-y-4">
                   <Textarea
                     placeholder={currentMode?.placeholder || "Paste your input here…"}
-                    className="font-mono text-[13px] min-h-[160px] bg-background/50 resize-y border-border/50 focus:border-primary/50 transition-colors"
+                    className="font-mono text-[13px] min-h-[180px] bg-background/60 resize-y border-border/40 focus:border-primary/40 transition-all duration-200 placeholder:text-muted-foreground/60"
                     value={errorInput}
                     onChange={(e) => setErrorInput(e.target.value)}
                   />
 
-                  {/* Controls row */}
+                  {/* Controls */}
                   <div className="flex items-center justify-between flex-wrap gap-3">
-                    <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {/* Analysis Mode */}
-                      <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-0.5">
+                      <div className="flex items-center bg-muted/40 rounded-lg p-0.5 border border-border/40">
                         {(["simple", "explain", "deep"] as const).map((mode) => (
                           <button
                             key={mode}
                             onClick={() => setAnalysisMode(mode)}
-                            className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                            className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all duration-200 ${
                               analysisMode === mode
-                                ? "bg-primary text-primary-foreground shadow-sm"
+                                ? "bg-card text-foreground shadow-sm"
                                 : "text-muted-foreground hover:text-foreground"
                             }`}
                           >
@@ -394,14 +441,14 @@ const Index = () => {
                         ))}
                       </div>
                       {/* Output Length */}
-                      <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-0.5">
+                      <div className="flex items-center bg-muted/40 rounded-lg p-0.5 border border-border/40">
                         {(["short", "medium", "detailed"] as const).map((len) => (
                           <button
                             key={len}
                             onClick={() => setOutputLength(len)}
-                            className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all ${
+                            className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all duration-200 ${
                               outputLength === len
-                                ? "bg-accent text-accent-foreground shadow-sm"
+                                ? "bg-card text-foreground shadow-sm"
                                 : "text-muted-foreground hover:text-foreground"
                             }`}
                           >
@@ -409,19 +456,19 @@ const Index = () => {
                           </button>
                         ))}
                       </div>
-                      {/* Language */}
                       <LanguageSelector value={outputLang} onChange={setOutputLang} />
                     </div>
+
                     <div className="flex gap-2">
                       {errorInput && (
-                        <Button variant="ghost" size="sm" onClick={handleNewError} className="text-xs text-muted-foreground">
+                        <Button variant="ghost" size="sm" onClick={handleNewError} className="text-xs text-muted-foreground hover:text-foreground">
                           Clear
                         </Button>
                       )}
                       <Button
                         onClick={handleSubmit}
                         disabled={loading || !errorInput.trim()}
-                        className="gap-2 shadow-md hover:shadow-lg transition-shadow"
+                        className="gap-2 font-medium shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-200 bg-gradient-to-r from-primary to-primary/90"
                       >
                         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                         {loading ? "Analyzing…" : submitLabel}
@@ -431,27 +478,24 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              {/* Loading state with skeleton */}
+              {/* Loading skeleton */}
               {loading && (
-                <div className="space-y-4 animate-in fade-in duration-300">
-                  <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="flex flex-col items-center justify-center py-10 space-y-5">
                     <div className="relative">
-                      <div className="h-14 w-14 rounded-full border-2 border-border" />
-                      <div className="absolute inset-0 h-14 w-14 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                      <div className="absolute inset-2 h-10 w-10 rounded-full border border-primary/30 border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+                      <div className="h-16 w-16 rounded-full border-2 border-border/60" />
+                      <div className="absolute inset-0 h-16 w-16 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                      <div className="absolute inset-2.5 h-11 w-11 rounded-full border border-primary/30 border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
                     </div>
                     <div className="text-center">
                       <p className="text-sm font-medium text-foreground">AI is analyzing your input</p>
-                      <p className="text-xs text-muted-foreground mt-1">This usually takes a few seconds…</p>
+                      <p className="text-xs text-muted-foreground mt-1.5">This usually takes a few seconds…</p>
                     </div>
                   </div>
-                  {/* Skeleton cards */}
                   {[1, 2, 3].map(i => (
-                    <Card key={i} className="border-border/30 bg-card/50">
-                      <CardHeader className="pb-3">
-                        <Skeleton className="h-5 w-40" />
-                      </CardHeader>
-                      <CardContent className="space-y-2">
+                    <Card key={i} className="border-border/30 bg-card/40">
+                      <CardHeader className="pb-3"><Skeleton className="h-5 w-40" /></CardHeader>
+                      <CardContent className="space-y-2.5">
                         <Skeleton className="h-4 w-full" />
                         <Skeleton className="h-4 w-4/5" />
                         <Skeleton className="h-4 w-3/5" />
@@ -463,7 +507,7 @@ const Index = () => {
 
               {/* Results */}
               {result && !loading && (
-                <>
+                <div className="animate-in fade-in slide-in-from-bottom-3 duration-500">
                   <ResultDisplay
                     result={result}
                     inputMode={inputMode}
@@ -471,35 +515,35 @@ const Index = () => {
                     onShare={handleShare}
                     similarError={similarError}
                   />
-                  <Card className="border-dashed border-border/40 bg-card/40">
+                  <Card className="mt-6 border-dashed border-border/30 bg-card/30">
                     <CardContent className="py-4">
                       <button
                         onClick={() => { setActivePanel("chat"); setSidebarOpen(true); }}
-                        className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                        className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
                       >
                         <MessageSquare className="h-4 w-4" />
                         Have more questions? Open Debug Chat →
                       </button>
                     </CardContent>
                   </Card>
-                </>
+                </div>
               )}
 
               {/* Empty state */}
               {!result && !loading && (
-                <div className="flex flex-col items-center justify-center py-16 space-y-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20">
-                    <Terminal className="h-8 w-8 text-primary animate-pulse-glow" />
+                <div className="flex flex-col items-center justify-center py-20 space-y-5 animate-in fade-in duration-500">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 border border-primary/15 shadow-lg shadow-primary/5">
+                    <Terminal className="h-9 w-9 text-primary animate-pulse-glow" />
                   </div>
                   <div className="text-center space-y-2">
-                    <h2 className="text-lg font-semibold text-foreground">Ready to debug</h2>
-                    <p className="text-sm text-muted-foreground max-w-md">
-                      Paste an error message, code snippet, or log file above. Select a mode and let AI analyze it for you.
+                    <h2 className="text-xl font-semibold text-foreground tracking-tight">Ready to debug</h2>
+                    <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
+                      Paste an error message, code snippet, or log file above. Select a mode and let AI analyze it.
                     </p>
                   </div>
-                  <div className="flex flex-wrap justify-center gap-2 pt-2">
+                  <div className="flex flex-wrap justify-center gap-2 pt-1">
                     {["Error Analysis", "Security Scan", "Code Review", "Performance"].map(label => (
-                      <Badge key={label} variant="secondary" className="text-xs">{label}</Badge>
+                      <Badge key={label} variant="secondary" className="text-[11px] font-medium">{label}</Badge>
                     ))}
                   </div>
                 </div>
