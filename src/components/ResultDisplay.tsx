@@ -223,17 +223,17 @@ function CollapsibleSection({ title, icon, children, defaultOpen = true, accentC
   const [open, setOpen] = useState(defaultOpen);
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <Card className={`shadow-sm border-border/40 bg-card/80 backdrop-blur-sm overflow-hidden ${accentColor ? `border-l-2 ${accentColor}` : ''}`}>
+      <Card className={`shadow-sm border-border/30 glass rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-md ${accentColor ? `border-l-2 ${accentColor}` : ''}`}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="pb-3 cursor-pointer hover:bg-muted/30 transition-colors group">
+          <CardHeader className="pb-3 cursor-pointer hover:bg-muted/20 transition-colors duration-200 group px-5 pt-5">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2">{icon}{title}</CardTitle>
-              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+              <CardTitle className="text-sm font-bold flex items-center gap-2.5 tracking-tight">{icon}{title}</CardTitle>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
             </div>
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="pt-0">{children}</CardContent>
+          <CardContent className="pt-0 px-5 pb-5">{children}</CardContent>
         </CollapsibleContent>
       </Card>
     </Collapsible>
