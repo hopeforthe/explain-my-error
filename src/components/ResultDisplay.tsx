@@ -178,7 +178,7 @@ function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) 
   return (
     <Button variant="ghost" size="sm" onClick={async () => {
       try { await navigator.clipboard.writeText(text); setCopied(true); toast.success("Copied"); setTimeout(() => setCopied(false), 2000); } catch { toast.error("Failed to copy"); }
-    }} className="gap-1.5 text-xs h-7 text-muted-foreground hover:text-foreground">
+    }} className="gap-1.5 text-xs h-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all duration-200">
       {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
       {copied ? "Copied!" : label}
     </Button>
@@ -189,10 +189,10 @@ function CodeBlock({ code, title, icon }: { code: string; title: string; icon: R
   return (
     <CollapsibleSection title={title} icon={icon} defaultOpen>
       <div className="relative group">
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
           <CopyButton text={code} />
         </div>
-        <pre className="code-block overflow-x-auto"><code>{code}</code></pre>
+        <pre className="code-block overflow-x-auto rounded-xl"><code>{code}</code></pre>
       </div>
     </CollapsibleSection>
   );
@@ -223,17 +223,17 @@ function CollapsibleSection({ title, icon, children, defaultOpen = true, accentC
   const [open, setOpen] = useState(defaultOpen);
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <Card className={`shadow-sm border-border/40 bg-card/80 backdrop-blur-sm overflow-hidden ${accentColor ? `border-l-2 ${accentColor}` : ''}`}>
+      <Card className={`shadow-sm border-border/30 glass rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-md ${accentColor ? `border-l-2 ${accentColor}` : ''}`}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="pb-3 cursor-pointer hover:bg-muted/30 transition-colors group">
+          <CardHeader className="pb-3 cursor-pointer hover:bg-muted/20 transition-colors duration-200 group px-5 pt-5">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2">{icon}{title}</CardTitle>
-              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+              <CardTitle className="text-sm font-bold flex items-center gap-2.5 tracking-tight">{icon}{title}</CardTitle>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
             </div>
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="pt-0">{children}</CardContent>
+          <CardContent className="pt-0 px-5 pb-5">{children}</CardContent>
         </CollapsibleContent>
       </Card>
     </Collapsible>
@@ -343,11 +343,11 @@ export const ResultDisplay = ({
   const voiceText = [result.explanation || result.summary, result.causes?.length ? `Common causes: ${result.causes.join(". ")}` : ""].filter(Boolean).join(". ");
 
   return (
-    <div className="space-y-4 animate-slide-up">
+    <div className="space-y-5 animate-slide-up">
       {/* Similar error */}
       {similarError && (
-        <Card className="border-primary/30 bg-primary/5 shadow-sm">
-          <CardContent className="py-3 flex items-center gap-2">
+        <Card className="border-primary/20 bg-primary/5 shadow-sm rounded-2xl">
+          <CardContent className="py-3.5 px-5 flex items-center gap-2.5">
             <Star className="h-4 w-4 text-primary shrink-0" />
             <span className="text-xs text-foreground">
               <strong>Similar Error Found</strong> — previously analyzed on {new Date(similarError.timestamp).toLocaleDateString()}
@@ -358,25 +358,29 @@ export const ResultDisplay = ({
 
       {/* ══ Quick Summary (always at top) ══ */}
       {result.quickSummary && (
-        <Card className="shadow-md border-primary/30 bg-gradient-to-r from-primary/5 to-transparent backdrop-blur-sm">
-          <CardContent className="py-4 space-y-3">
-            <div className="flex items-start gap-2">
-              <Target className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+        <Card className="shadow-lg border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-transparent glass rounded-2xl overflow-hidden">
+          <CardContent className="py-5 px-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 mt-0.5 shrink-0">
+                <Target className="h-4 w-4 text-primary" />
+              </div>
               <div>
-                <p className="text-[10px] font-mono text-primary font-semibold uppercase tracking-wider mb-1">Root Cause</p>
+                <p className="text-[10px] font-mono text-primary font-bold uppercase tracking-wider mb-1.5">Root Cause</p>
                 <p className="text-sm font-medium text-foreground leading-relaxed">{result.quickSummary.rootCause}</p>
               </div>
             </div>
             {result.quickSummary.quickFix && (
-              <div className="flex items-start gap-2">
-                <Zap className="h-4 w-4 text-success mt-0.5 shrink-0" />
+              <div className="flex items-start gap-3">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-success/10 mt-0.5 shrink-0">
+                  <Zap className="h-4 w-4 text-success" />
+                </div>
                 <div className="flex-1">
-                  <p className="text-[10px] font-mono text-success font-semibold uppercase tracking-wider mb-1">Quick Fix</p>
+                  <p className="text-[10px] font-mono text-success font-bold uppercase tracking-wider mb-1.5">Quick Fix</p>
                   <div className="relative group">
-                    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
                       <CopyButton text={result.quickSummary.quickFix} />
                     </div>
-                    <pre className="code-block text-[12px]"><code>{result.quickSummary.quickFix}</code></pre>
+                    <pre className="code-block text-[12px] rounded-xl"><code>{result.quickSummary.quickFix}</code></pre>
                   </div>
                 </div>
               </div>
@@ -386,12 +390,12 @@ export const ResultDisplay = ({
       )}
 
       {/* Badge Row */}
-      <Card className="shadow-sm border-border/40 bg-card/80 backdrop-blur-sm">
-        <CardContent className="py-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge className="font-mono text-[11px]">{result.language || "Unknown"}</Badge>
+      <Card className="shadow-sm border-border/30 glass rounded-2xl">
+        <CardContent className="py-3.5 px-5">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <Badge className="font-mono text-[11px] rounded-lg">{result.language || "Unknown"}</Badge>
             {result.framework && result.framework !== "None" && (
-              <Badge variant="secondary" className="font-mono text-[11px] gap-1"><Layers className="h-3 w-3" /> {result.framework}</Badge>
+              <Badge variant="secondary" className="font-mono text-[11px] gap-1.5 rounded-lg"><Layers className="h-3 w-3" /> {result.framework}</Badge>
             )}
             {result.difficulty && (
               <Badge variant="outline" className={`font-mono text-[11px] gap-1 ${difficultyBadge(result.difficulty)}`}>
