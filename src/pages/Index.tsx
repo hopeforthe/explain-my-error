@@ -225,64 +225,63 @@ const Index = () => {
   return (
     <div className="h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-x-hidden overflow-y-hidden">
       {/* ─── Header ─── */}
-      <header className="shrink-0 z-50 border-b border-border/60 bg-card/70 backdrop-blur-xl">
-        <div className="flex items-center justify-between px-4 h-14">
-          <div className="flex items-center gap-3">
+      <header className="shrink-0 z-50 border-b border-border/50 glass">
+        <div className="flex items-center justify-between px-5 h-[56px]">
+          <div className="flex items-center gap-3.5">
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-foreground transition-colors"
+              className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all duration-200"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
               {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
             </Button>
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 shadow-md shadow-primary/20">
-                <Terminal className="h-4 w-4 text-primary-foreground" />
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl btn-gradient-primary shadow-lg shadow-primary/25">
+                <Terminal className="h-[18px] w-[18px] text-primary-foreground" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="font-semibold text-sm text-foreground tracking-tight">Explain My Error</h1>
-                <p className="text-[11px] text-muted-foreground leading-none">AI Debugging Assistant</p>
+                <h1 className="font-bold text-[15px] text-foreground tracking-tight leading-tight">Explain My Error</h1>
+                <p className="text-[11px] text-muted-foreground leading-none mt-0.5">AI Debugging Assistant</p>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             <ThemeToggle />
             {session ? (
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="hidden sm:inline-flex text-[10px] font-medium border-primary/20 bg-primary/10 text-primary">
+              <div className="flex items-center gap-2.5">
+                <Badge variant="secondary" className="hidden sm:inline-flex text-[10px] font-semibold border-primary/20 bg-primary/10 text-primary rounded-lg px-2.5 py-0.5">
                   Pro · Unlimited
                 </Badge>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => supabase.auth.signOut()} title="Sign out">
-                  <LogOut className="h-3.5 w-3.5" />
+                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all duration-200" onClick={() => supabase.auth.signOut()} title="Sign out">
+                  <LogOut className="h-4 w-4" />
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 {remaining > 0 && (
-                  <div className="hidden sm:flex items-center gap-1.5">
+                  <div className="hidden sm:flex items-center gap-2 bg-muted/40 rounded-xl px-3 py-1.5 border border-border/40">
                     <div className="flex gap-[3px]">
                       {Array.from({ length: MAX_FREE_QUERIES }).map((_, i) => (
                         <div
                           key={i}
-                          className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                            i < remaining ? "bg-primary" : "bg-border"
+                          className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${
+                            i < remaining ? "bg-primary shadow-sm shadow-primary/30" : "bg-border"
                           }`}
                         />
                       ))}
                     </div>
-                    <span className="text-[10px] text-muted-foreground font-medium">{remaining} left</span>
+                    <span className="text-[10px] text-muted-foreground font-semibold">{remaining} left</span>
                   </div>
                 )}
                 {remaining <= 0 && (
-                  <Badge variant="destructive" className="hidden sm:inline-flex text-[10px]">
+                  <Badge variant="destructive" className="hidden sm:inline-flex text-[10px] rounded-lg">
                     Limit reached
                   </Badge>
                 )}
                 <Button
-                  variant="default"
                   size="sm"
-                  className="h-8 text-xs font-medium shadow-sm shadow-primary/20 hover:shadow-md hover:shadow-primary/25 transition-all"
+                  className="h-9 px-4 text-xs font-semibold rounded-xl btn-gradient-primary text-primary-foreground"
                   onClick={() => setShowAuthModal(true)}
                 >
                   Sign in
