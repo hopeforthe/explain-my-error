@@ -353,14 +353,14 @@ const Index = () => {
           {activePanel === "trends" ? (
             <ErrorTrends refreshKey={historyRefreshKey} />
           ) : (
-            <div className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6 w-full">
+            <div className="max-w-3xl mx-auto p-5 sm:p-8 lg:p-10 space-y-8 w-full">
               {/* Input Card */}
-              <Card className="shadow-lg shadow-primary/[0.03] border-border/40 bg-card/90 backdrop-blur-sm">
-                <CardHeader className="pb-4 space-y-4">
+              <Card className="shadow-lg shadow-primary/[0.04] border-border/30 glass rounded-2xl overflow-hidden">
+                <CardHeader className="pb-5 space-y-5 px-6 pt-6">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <CardTitle className="text-base font-semibold flex items-center gap-2.5 tracking-tight">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10">
-                        <Code className="h-3.5 w-3.5 text-primary" />
+                    <CardTitle className="text-base font-bold flex items-center gap-3 tracking-tight">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+                        <Code className="h-4 w-4 text-primary" />
                       </div>
                       Input
                     </CardTitle>
@@ -372,7 +372,7 @@ const Index = () => {
                   </div>
 
                   {/* Category tabs */}
-                  <div className="flex gap-1 overflow-x-auto scrollbar-thin -mx-1 px-1 pb-1">
+                  <div className="flex gap-1.5 overflow-x-auto scrollbar-thin -mx-1 px-1 pb-1">
                     {categories.map((cat) => (
                       <button
                         key={cat}
@@ -381,10 +381,10 @@ const Index = () => {
                           const firstInCat = inputModes.find(m => m.category === cat);
                           if (firstInCat) setInputMode(firstInCat.id);
                         }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 whitespace-nowrap ${
+                        className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
                           activeCategory === cat
-                            ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                            ? "btn-gradient-primary text-primary-foreground shadow-md shadow-primary/20"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                         }`}
                       >
                         {categoryIcons[cat]}
@@ -394,15 +394,15 @@ const Index = () => {
                   </div>
 
                   {/* Sub-mode pills */}
-                  <div className="flex gap-1.5 flex-wrap">
+                  <div className="flex gap-2 flex-wrap">
                     {modesInCategory.map((mode) => (
                       <button
                         key={mode.id}
                         onClick={() => setInputMode(mode.id)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all duration-200 ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 ${
                           inputMode === mode.id
                             ? "bg-accent text-accent-foreground border border-primary/20 shadow-sm"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/40 border border-transparent"
                         }`}
                       >
                         {mode.icon}
@@ -412,24 +412,24 @@ const Index = () => {
                   </div>
                 </CardHeader>
 
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-5 px-6 pb-6">
                   <Textarea
                     placeholder={currentMode?.placeholder || "Paste your input here…"}
-                    className="font-mono text-[13px] min-h-[180px] bg-background/60 resize-y border-border/40 focus:border-primary/40 transition-all duration-200 placeholder:text-muted-foreground/60"
+                    className="font-mono text-[13px] min-h-[200px] bg-background/50 resize-y rounded-xl border-border/30 focus:border-primary/40 focus:shadow-md focus:shadow-primary/5 transition-all duration-300 placeholder:text-muted-foreground/50"
                     value={errorInput}
                     onChange={(e) => setErrorInput(e.target.value)}
                   />
 
                   {/* Controls */}
                   <div className="flex items-center justify-between flex-wrap gap-3">
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-2.5 flex-wrap">
                       {/* Analysis Mode */}
-                      <div className="flex items-center bg-muted/40 rounded-lg p-0.5 border border-border/40">
+                      <div className="flex items-center bg-muted/30 rounded-xl p-1 border border-border/30">
                         {(["simple", "explain", "deep"] as const).map((mode) => (
                           <button
                             key={mode}
                             onClick={() => setAnalysisMode(mode)}
-                            className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all duration-200 ${
+                            className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 ${
                               analysisMode === mode
                                 ? "bg-card text-foreground shadow-sm"
                                 : "text-muted-foreground hover:text-foreground"
@@ -440,12 +440,12 @@ const Index = () => {
                         ))}
                       </div>
                       {/* Output Length */}
-                      <div className="flex items-center bg-muted/40 rounded-lg p-0.5 border border-border/40">
+                      <div className="flex items-center bg-muted/30 rounded-xl p-1 border border-border/30">
                         {(["short", "medium", "detailed"] as const).map((len) => (
                           <button
                             key={len}
                             onClick={() => setOutputLength(len)}
-                            className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all duration-200 ${
+                            className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 ${
                               outputLength === len
                                 ? "bg-card text-foreground shadow-sm"
                                 : "text-muted-foreground hover:text-foreground"
@@ -458,16 +458,16 @@ const Index = () => {
                       <LanguageSelector value={outputLang} onChange={setOutputLang} />
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2.5">
                       {errorInput && (
-                        <Button variant="ghost" size="sm" onClick={handleNewError} className="text-xs text-muted-foreground hover:text-foreground">
+                        <Button variant="ghost" size="sm" onClick={handleNewError} className="text-xs rounded-xl text-muted-foreground hover:text-foreground h-10">
                           Clear
                         </Button>
                       )}
                       <Button
                         onClick={handleSubmit}
                         disabled={loading || !errorInput.trim()}
-                        className="gap-2 font-medium shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-200 bg-gradient-to-r from-primary to-primary/90"
+                        className="gap-2.5 h-11 px-6 font-semibold text-sm rounded-xl btn-gradient-primary text-primary-foreground disabled:opacity-40"
                       >
                         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                         {loading ? "Analyzing…" : submitLabel}
@@ -479,25 +479,25 @@ const Index = () => {
 
               {/* Loading skeleton */}
               {loading && (
-                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="flex flex-col items-center justify-center py-10 space-y-5">
+                <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="flex flex-col items-center justify-center py-12 space-y-6">
                     <div className="relative">
-                      <div className="h-16 w-16 rounded-full border-2 border-border/60" />
+                      <div className="h-16 w-16 rounded-full border-2 border-border/40" />
                       <div className="absolute inset-0 h-16 w-16 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                       <div className="absolute inset-2.5 h-11 w-11 rounded-full border border-primary/30 border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
                     </div>
                     <div className="text-center">
-                      <p className="text-sm font-medium text-foreground">AI is analyzing your input</p>
-                      <p className="text-xs text-muted-foreground mt-1.5">This usually takes a few seconds…</p>
+                      <p className="text-sm font-semibold text-foreground">AI is analyzing your input</p>
+                      <p className="text-xs text-muted-foreground mt-2">This usually takes a few seconds…</p>
                     </div>
                   </div>
                   {[1, 2, 3].map(i => (
-                    <Card key={i} className="border-border/30 bg-card/40">
-                      <CardHeader className="pb-3"><Skeleton className="h-5 w-40" /></CardHeader>
-                      <CardContent className="space-y-2.5">
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-4/5" />
-                        <Skeleton className="h-4 w-3/5" />
+                    <Card key={i} className="border-border/20 bg-card/30 rounded-2xl">
+                      <CardHeader className="pb-3"><Skeleton className="h-5 w-40 rounded-lg" /></CardHeader>
+                      <CardContent className="space-y-3">
+                        <Skeleton className="h-4 w-full rounded-lg" />
+                        <Skeleton className="h-4 w-4/5 rounded-lg" />
+                        <Skeleton className="h-4 w-3/5 rounded-lg" />
                       </CardContent>
                     </Card>
                   ))}
@@ -514,11 +514,11 @@ const Index = () => {
                     onShare={handleShare}
                     similarError={similarError}
                   />
-                  <Card className="mt-6 border-dashed border-border/30 bg-card/30">
-                    <CardContent className="py-4">
+                  <Card className="mt-8 border-dashed border-border/20 bg-card/20 rounded-2xl hover:bg-card/40 transition-colors duration-300">
+                    <CardContent className="py-5">
                       <button
                         onClick={() => { setActivePanel("chat"); setSidebarOpen(true); }}
-                        className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+                        className="w-full flex items-center justify-center gap-2.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-200"
                       >
                         <MessageSquare className="h-4 w-4" />
                         Have more questions? Open Debug Chat →
@@ -530,19 +530,19 @@ const Index = () => {
 
               {/* Empty state */}
               {!result && !loading && (
-                <div className="flex flex-col items-center justify-center py-20 space-y-5 animate-in fade-in duration-500">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 border border-primary/15 shadow-lg shadow-primary/5">
-                    <Terminal className="h-9 w-9 text-primary animate-pulse-glow" />
+                <div className="flex flex-col items-center justify-center py-24 space-y-6 animate-in fade-in duration-500">
+                  <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-primary/8 border border-primary/10 shadow-xl shadow-primary/5">
+                    <Terminal className="h-10 w-10 text-primary animate-pulse-glow" />
                   </div>
-                  <div className="text-center space-y-2">
-                    <h2 className="text-xl font-semibold text-foreground tracking-tight">Ready to debug</h2>
-                    <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-                      Paste an error message, code snippet, or log file above. Select a mode and let AI analyze it.
+                  <div className="text-center space-y-3">
+                    <h2 className="text-2xl font-bold text-foreground tracking-tight">Ready to debug</h2>
+                    <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
+                      Paste an error message, code snippet, or log file above. Select a mode and let AI analyze it instantly.
                     </p>
                   </div>
-                  <div className="flex flex-wrap justify-center gap-2 pt-1">
+                  <div className="flex flex-wrap justify-center gap-2.5 pt-2">
                     {["Error Analysis", "Security Scan", "Code Review", "Performance"].map(label => (
-                      <Badge key={label} variant="secondary" className="text-[11px] font-medium">{label}</Badge>
+                      <Badge key={label} variant="secondary" className="text-[11px] font-semibold rounded-lg px-3 py-1">{label}</Badge>
                     ))}
                   </div>
                 </div>
