@@ -178,7 +178,7 @@ function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) 
   return (
     <Button variant="ghost" size="sm" onClick={async () => {
       try { await navigator.clipboard.writeText(text); setCopied(true); toast.success("Copied"); setTimeout(() => setCopied(false), 2000); } catch { toast.error("Failed to copy"); }
-    }} className="gap-1.5 text-xs h-7 text-muted-foreground hover:text-foreground">
+    }} className="gap-1.5 text-xs h-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all duration-200">
       {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
       {copied ? "Copied!" : label}
     </Button>
@@ -189,10 +189,10 @@ function CodeBlock({ code, title, icon }: { code: string; title: string; icon: R
   return (
     <CollapsibleSection title={title} icon={icon} defaultOpen>
       <div className="relative group">
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
           <CopyButton text={code} />
         </div>
-        <pre className="code-block overflow-x-auto"><code>{code}</code></pre>
+        <pre className="code-block overflow-x-auto rounded-xl"><code>{code}</code></pre>
       </div>
     </CollapsibleSection>
   );
