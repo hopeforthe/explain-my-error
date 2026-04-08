@@ -358,7 +358,7 @@ export const ResultDisplay = ({
 
       {/* ══ Quick Summary (always at top) ══ */}
       {result.quickSummary && (
-        <Card className="shadow-lg border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-transparent glass rounded-2xl overflow-hidden">
+        <Card className="shadow-lg border-primary/10 bg-gradient-to-br from-primary/4 via-transparent to-transparent glass rounded-2xl overflow-hidden">
           <CardContent className="py-5 px-6 space-y-4">
             <div className="flex items-start gap-3">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 mt-0.5 shrink-0">
