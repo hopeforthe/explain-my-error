@@ -90,11 +90,15 @@ export default {
         },
         'float': {
           '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-4px)' }
+          '50%': { transform: 'translateY(-6px)' }
         },
         'shimmer': {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' }
+        },
+        'glow-pulse': {
+          '0%, 100%': { boxShadow: '0 0 20px -4px hsl(258 90% 66% / 0.3)' },
+          '50%': { boxShadow: '0 0 32px -4px hsl(258 90% 66% / 0.5)' }
         }
       },
       animation: {
@@ -103,7 +107,8 @@ export default {
         'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
         'slide-up': 'slide-up 0.3s ease-out',
         'float': 'float 3s ease-in-out infinite',
-        'shimmer': 'shimmer 2s linear infinite'
+        'shimmer': 'shimmer 2s linear infinite',
+        'glow-pulse': 'glow-pulse 2.5s ease-in-out infinite'
       },
       boxShadow: {
         '2xs': 'var(--shadow-2xs)',
@@ -113,9 +118,9 @@ export default {
         lg: 'var(--shadow-lg)',
         xl: 'var(--shadow-xl)',
         '2xl': 'var(--shadow-2xl)',
-        'glow-sm': '0 0 12px -2px hsl(245 72% 65% / 0.2)',
-        'glow': '0 0 20px -4px hsl(245 72% 65% / 0.3)',
-        'glow-lg': '0 0 32px -4px hsl(245 72% 65% / 0.35)'
+        'glow-sm': '0 0 12px -2px hsl(258 90% 66% / 0.2)',
+        'glow': '0 0 24px -4px hsl(258 90% 66% / 0.35)',
+        'glow-lg': '0 0 36px -4px hsl(258 90% 66% / 0.4)'
       },
       fontFamily: {
         sans: [
