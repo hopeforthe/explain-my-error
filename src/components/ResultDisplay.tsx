@@ -343,7 +343,7 @@ export const ResultDisplay = ({
   const voiceText = [result.explanation || result.summary, result.causes?.length ? `Common causes: ${result.causes.join(". ")}` : ""].filter(Boolean).join(". ");
 
   return (
-    <div className="space-y-5 animate-slide-up">
+    <div className="space-y-5 animate-slide-up" style={{ '--slide-up-delay': '0ms' } as React.CSSProperties}>
       {/* Similar error */}
       {similarError && (
         <Card className="border-primary/20 bg-primary/5 shadow-sm rounded-2xl">
