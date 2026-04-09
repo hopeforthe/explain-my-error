@@ -502,23 +502,23 @@ const Index = () => {
 
               {/* Loading */}
               {loading && (
-                <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="flex flex-col items-center justify-center py-20 space-y-7">
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <div className="flex flex-col items-center justify-center py-24 space-y-8">
                     <div className="relative">
-                      <div className="h-16 w-16 rounded-full border border-border/15" />
-                      <div className="absolute inset-0 h-16 w-16 rounded-full border-2 border-primary/50 border-t-transparent animate-spin" />
-                      <div className="absolute inset-2 h-12 w-12 rounded-full border border-accent-foreground/15 border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.8s' }} />
-                      <div className="absolute inset-[20px] h-5 w-5 rounded-full bg-primary/15 animate-pulse-glow" />
+                      <div className="h-16 w-16 rounded-full border border-border/20" />
+                      <div className="absolute inset-0 h-16 w-16 rounded-full border-2 border-primary/40 border-t-transparent animate-spin" style={{ animationDuration: '1.2s' }} />
+                      <div className="absolute inset-2 h-12 w-12 rounded-full border border-primary/15 border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '2s' }} />
+                      <div className="absolute inset-[22px] h-4 w-4 rounded-full bg-primary/20 animate-pulse-glow" />
                     </div>
-                    <div className="text-center">
-                      <p className="text-sm font-semibold text-foreground/75">Analyzing your input…</p>
-                      <p className="text-[11px] text-muted-foreground/35 mt-2">This usually takes a few seconds</p>
+                    <div className="text-center space-y-2">
+                      <p className="text-sm font-medium text-foreground/70">Analyzing your input…</p>
+                      <p className="text-[11px] text-muted-foreground/40">This usually takes a few seconds</p>
                     </div>
                   </div>
                   {[1, 2, 3].map(i => (
-                    <Card key={i} className="border-border/8 bg-card/15 rounded-2xl">
+                    <Card key={i} className="border-border/15 bg-card/30 rounded-2xl">
                       <CardHeader className="pb-3"><Skeleton className="h-4 w-36 rounded-lg" /></CardHeader>
-                      <CardContent className="space-y-2.5">
+                      <CardContent className="space-y-3">
                         <Skeleton className="h-3 w-full rounded-lg" />
                         <Skeleton className="h-3 w-4/5 rounded-lg" />
                         <Skeleton className="h-3 w-3/5 rounded-lg" />
@@ -538,11 +538,11 @@ const Index = () => {
                     onShare={handleShare}
                     similarError={similarError}
                   />
-                  <Card className="mt-8 border-dashed border-border/8 bg-card/10 rounded-2xl hover:bg-card/20 transition-colors duration-300">
-                    <CardContent className="py-4">
+                  <Card className="mt-10 border-dashed border-border/15 bg-card/20 rounded-2xl hover:bg-card/30 transition-colors duration-300">
+                    <CardContent className="py-5">
                       <button
                         onClick={() => { setActivePanel("chat"); setSidebarOpen(true); }}
-                        className="w-full flex items-center justify-center gap-2 text-[12px] font-medium text-muted-foreground/40 hover:text-primary transition-colors duration-250"
+                        className="w-full flex items-center justify-center gap-2 text-[12px] font-medium text-muted-foreground/50 hover:text-primary transition-colors duration-300"
                       >
                         <MessageSquare className="h-3.5 w-3.5" />
                         Have questions? Open Debug Chat →
@@ -554,22 +554,22 @@ const Index = () => {
 
               {/* Empty state */}
               {!result && !loading && (
-                <div className="flex flex-col items-center justify-center py-32 space-y-8 animate-in fade-in duration-700">
+                <div className="flex flex-col items-center justify-center py-36 space-y-10 animate-in fade-in duration-700">
                   <div className="relative">
-                    <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-primary/5 border border-primary/8 shadow-glow animate-float">
-                      <Terminal className="h-10 w-10 text-primary/50" />
+                    <div className="flex h-28 w-28 items-center justify-center rounded-3xl bg-accent border border-border/20 animate-float">
+                      <Terminal className="h-11 w-11 text-primary/40" />
                     </div>
-                    <div className="absolute -inset-6 rounded-[32px] bg-primary/3 blur-2xl -z-10" />
+                    <div className="absolute -inset-8 rounded-[36px] bg-primary/3 blur-3xl -z-10" />
                   </div>
-                  <div className="text-center space-y-3">
-                    <h2 className="text-xl font-bold text-foreground/75 tracking-tight">Ready to debug</h2>
-                    <p className="text-[13px] text-muted-foreground/35 max-w-sm leading-relaxed">
-                      Paste an error message, code snippet, or log file. Select a mode and let AI analyze it.
+                  <div className="text-center space-y-4">
+                    <h2 className="text-2xl font-semibold text-foreground/80 tracking-tight">Ready to debug</h2>
+                    <p className="text-[13px] text-muted-foreground/45 max-w-md leading-relaxed mx-auto">
+                      Paste an error message, code snippet, or log file. Select a mode and let AI analyze it for you.
                     </p>
                   </div>
-                  <div className="flex flex-wrap justify-center gap-2 pt-2">
+                  <div className="flex flex-wrap justify-center gap-2.5 pt-2">
                     {["Error Analysis", "Security Scan", "Code Review", "Performance"].map(label => (
-                      <Badge key={label} variant="secondary" className="text-[10px] font-medium rounded-full px-3 py-1 bg-muted/15 text-muted-foreground/35 border-border/10">{label}</Badge>
+                      <Badge key={label} variant="secondary" className="text-[10px] font-medium rounded-full px-3.5 py-1.5 bg-muted/30 text-muted-foreground/40 border-border/15">{label}</Badge>
                     ))}
                   </div>
                 </div>
