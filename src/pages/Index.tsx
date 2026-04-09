@@ -302,8 +302,8 @@ const Index = () => {
       <div className="flex flex-1 overflow-hidden">
         {/* ─── Sidebar ─── */}
         <aside
-          className={`shrink-0 border-r border-border/15 glass flex flex-col transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-            sidebarOpen ? "w-60 max-w-[70vw]" : "w-0 overflow-hidden"
+          className={`shrink-0 border-r border-border/30 glass flex flex-col transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            sidebarOpen ? "w-56 max-w-[70vw]" : "w-0 overflow-hidden"
           }`}
         >
           <nav className="p-3 space-y-0.5">
@@ -311,20 +311,20 @@ const Index = () => {
               <button
                 key={item.id}
                 onClick={() => setActivePanel(item.id)}
-                className={`w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[12px] transition-all duration-250 group ${
+                className={`w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[12px] transition-all duration-300 group ${
                   activePanel === item.id
-                    ? "bg-primary/10 text-primary font-semibold shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
+                    ? "bg-accent text-accent-foreground font-semibold"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
                 }`}
               >
-                <span className={`transition-colors duration-250 ${activePanel === item.id ? "text-primary" : "text-muted-foreground/50 group-hover:text-foreground"}`}>{item.icon}</span>
+                <span className={`transition-colors duration-300 ${activePanel === item.id ? "text-primary" : "text-muted-foreground/50 group-hover:text-foreground"}`}>{item.icon}</span>
                 <span className="flex-1 text-left">{item.label}</span>
-                {activePanel === item.id && <div className="h-1.5 w-1.5 rounded-full bg-primary shadow-glow-sm" />}
+                {activePanel === item.id && <div className="h-1 w-1 rounded-full bg-primary" />}
               </button>
             ))}
           </nav>
 
-          <div className="h-px bg-border/10 mx-4" />
+          <div className="h-px bg-border/20 mx-4" />
 
           <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin">
             {activePanel === "history" && <ErrorHistory onSelect={handleHistorySelect} refreshKey={historyRefreshKey} />}
