@@ -232,24 +232,24 @@ const Index = () => {
   return (
     <div className="h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-x-hidden overflow-y-hidden">
       {/* ─── Header ─── */}
-      <header className="shrink-0 z-50 border-b border-border/20 glass">
-        <div className="flex items-center justify-between px-6 h-[56px]">
+      <header className="shrink-0 z-50 border-b border-border/40 glass">
+        <div className="flex items-center justify-between px-6 h-[60px]">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all duration-250"
+              className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-300"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
               {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
             </Button>
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl btn-gradient-primary shadow-glow-sm animate-glow-pulse">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl btn-gradient-primary shadow-glow-sm">
                 <Terminal className="h-4 w-4 text-primary-foreground" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="font-bold text-sm text-foreground tracking-tight leading-tight">Explain My Error</h1>
-                <p className="text-[10px] text-muted-foreground/60 leading-none mt-0.5">AI Debugging Assistant</p>
+                <h1 className="font-semibold text-[15px] text-foreground tracking-tight leading-tight">Explain My Error</h1>
+                <p className="text-[10px] text-muted-foreground/50 leading-none mt-0.5 tracking-wide">Debug smarter, not harder</p>
               </div>
             </div>
           </div>
