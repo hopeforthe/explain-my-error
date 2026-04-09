@@ -223,17 +223,17 @@ function CollapsibleSection({ title, icon, children, defaultOpen = true, accentC
   const [open, setOpen] = useState(defaultOpen);
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <Card className={`shadow-sm border-border/10 dark:glass-card glass rounded-2xl overflow-hidden transition-all duration-250 hover:shadow-md hover:border-border/15 hover-lift ${accentColor ? `border-l-2 ${accentColor}` : ''}`}>
+      <Card className={`shadow-sm border-border/20 bg-card rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-md hover:border-border/30 ${accentColor ? `border-l-2 ${accentColor}` : ''}`}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="pb-3 cursor-pointer hover:bg-muted/8 transition-colors duration-250 group px-5 pt-5">
+          <CardHeader className="pb-3 cursor-pointer hover:bg-muted/15 transition-colors duration-300 group px-6 pt-5">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-[13px] font-bold flex items-center gap-2.5 tracking-tight text-foreground/80">{icon}{title}</CardTitle>
+              <CardTitle className="text-[13px] font-semibold flex items-center gap-2.5 tracking-tight text-foreground/80">{icon}{title}</CardTitle>
               <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground/30 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
             </div>
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="pt-0 px-5 pb-5">{children}</CardContent>
+          <CardContent className="pt-0 px-6 pb-6">{children}</CardContent>
         </CollapsibleContent>
       </Card>
     </Collapsible>
@@ -343,11 +343,11 @@ export const ResultDisplay = ({
   const voiceText = [result.explanation || result.summary, result.causes?.length ? `Common causes: ${result.causes.join(". ")}` : ""].filter(Boolean).join(". ");
 
   return (
-    <div className="space-y-5 animate-slide-up" style={{ '--slide-up-delay': '0ms' } as React.CSSProperties}>
+    <div className="space-y-6 animate-slide-up" style={{ '--slide-up-delay': '0ms' } as React.CSSProperties}>
       {/* Similar error */}
       {similarError && (
-        <Card className="border-primary/20 bg-primary/5 shadow-sm rounded-2xl">
-          <CardContent className="py-3.5 px-5 flex items-center gap-2.5">
+        <Card className="border-primary/20 bg-accent shadow-sm rounded-2xl">
+          <CardContent className="py-4 px-6 flex items-center gap-3">
             <Star className="h-4 w-4 text-primary shrink-0" />
             <span className="text-xs text-foreground">
               <strong>Similar Error Found</strong> — previously analyzed on {new Date(similarError.timestamp).toLocaleDateString()}
@@ -358,26 +358,26 @@ export const ResultDisplay = ({
 
       {/* ══ Quick Summary (always at top) ══ */}
       {result.quickSummary && (
-        <Card className="shadow-lg border-primary/8 bg-gradient-to-br from-primary/4 via-transparent to-transparent dark:glass-card glass rounded-2xl overflow-hidden">
-          <CardContent className="py-5 px-6 space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 mt-0.5 shrink-0">
+        <Card className="shadow-lg border-border/20 bg-gradient-to-br from-accent/50 via-card to-card rounded-2xl overflow-hidden">
+          <CardContent className="py-6 px-7 space-y-5">
+            <div className="flex items-start gap-3.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent mt-0.5 shrink-0">
                 <Target className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-[10px] font-mono text-primary font-bold uppercase tracking-wider mb-1.5">Root Cause</p>
+                <p className="text-[10px] font-mono text-primary font-semibold uppercase tracking-wider mb-2">Root Cause</p>
                 <p className="text-sm font-medium text-foreground leading-relaxed">{result.quickSummary.rootCause}</p>
               </div>
             </div>
             {result.quickSummary.quickFix && (
-              <div className="flex items-start gap-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-success/10 mt-0.5 shrink-0">
+              <div className="flex items-start gap-3.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-success/10 mt-0.5 shrink-0">
                   <Zap className="h-4 w-4 text-success" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-[10px] font-mono text-success font-bold uppercase tracking-wider mb-1.5">Quick Fix</p>
+                  <p className="text-[10px] font-mono text-success font-semibold uppercase tracking-wider mb-2">Quick Fix</p>
                   <div className="relative group">
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                    <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
                       <CopyButton text={result.quickSummary.quickFix} />
                     </div>
                     <pre className="code-block text-[12px] rounded-xl"><code>{result.quickSummary.quickFix}</code></pre>

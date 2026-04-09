@@ -232,24 +232,24 @@ const Index = () => {
   return (
     <div className="h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-x-hidden overflow-y-hidden">
       {/* ─── Header ─── */}
-      <header className="shrink-0 z-50 border-b border-border/20 glass">
-        <div className="flex items-center justify-between px-6 h-[56px]">
+      <header className="shrink-0 z-50 border-b border-border/40 glass">
+        <div className="flex items-center justify-between px-6 h-[60px]">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all duration-250"
+              className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-300"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
               {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
             </Button>
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl btn-gradient-primary shadow-glow-sm animate-glow-pulse">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl btn-gradient-primary shadow-glow-sm">
                 <Terminal className="h-4 w-4 text-primary-foreground" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="font-bold text-sm text-foreground tracking-tight leading-tight">Explain My Error</h1>
-                <p className="text-[10px] text-muted-foreground/60 leading-none mt-0.5">AI Debugging Assistant</p>
+                <h1 className="font-semibold text-[15px] text-foreground tracking-tight leading-tight">Explain My Error</h1>
+                <p className="text-[10px] text-muted-foreground/50 leading-none mt-0.5 tracking-wide">Debug smarter, not harder</p>
               </div>
             </div>
           </div>
@@ -302,8 +302,8 @@ const Index = () => {
       <div className="flex flex-1 overflow-hidden">
         {/* ─── Sidebar ─── */}
         <aside
-          className={`shrink-0 border-r border-border/15 glass flex flex-col transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-            sidebarOpen ? "w-60 max-w-[70vw]" : "w-0 overflow-hidden"
+          className={`shrink-0 border-r border-border/30 glass flex flex-col transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            sidebarOpen ? "w-56 max-w-[70vw]" : "w-0 overflow-hidden"
           }`}
         >
           <nav className="p-3 space-y-0.5">
@@ -311,20 +311,20 @@ const Index = () => {
               <button
                 key={item.id}
                 onClick={() => setActivePanel(item.id)}
-                className={`w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[12px] transition-all duration-250 group ${
+                className={`w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[12px] transition-all duration-300 group ${
                   activePanel === item.id
-                    ? "bg-primary/10 text-primary font-semibold shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
+                    ? "bg-accent text-accent-foreground font-semibold"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
                 }`}
               >
-                <span className={`transition-colors duration-250 ${activePanel === item.id ? "text-primary" : "text-muted-foreground/50 group-hover:text-foreground"}`}>{item.icon}</span>
+                <span className={`transition-colors duration-300 ${activePanel === item.id ? "text-primary" : "text-muted-foreground/50 group-hover:text-foreground"}`}>{item.icon}</span>
                 <span className="flex-1 text-left">{item.label}</span>
-                {activePanel === item.id && <div className="h-1.5 w-1.5 rounded-full bg-primary shadow-glow-sm" />}
+                {activePanel === item.id && <div className="h-1 w-1 rounded-full bg-primary" />}
               </button>
             ))}
           </nav>
 
-          <div className="h-px bg-border/10 mx-4" />
+          <div className="h-px bg-border/20 mx-4" />
 
           <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin">
             {activePanel === "history" && <ErrorHistory onSelect={handleHistorySelect} refreshKey={historyRefreshKey} />}
@@ -360,14 +360,14 @@ const Index = () => {
           {activePanel === "trends" ? (
             <ErrorTrends refreshKey={historyRefreshKey} />
           ) : (
-            <div className="max-w-3xl mx-auto p-5 sm:p-8 lg:p-10 space-y-8 w-full">
+            <div className="max-w-3xl mx-auto p-6 sm:p-10 lg:p-12 space-y-10 w-full">
               {/* Input Card */}
-              <Card className="shadow-lg shadow-primary/[0.04] border-border/15 dark:glass-card glass rounded-2xl overflow-hidden hover-lift">
-                <CardHeader className="pb-5 space-y-5 px-6 pt-7">
+              <Card className="shadow-lg border-border/30 bg-card rounded-2xl overflow-hidden transition-all duration-300">
+                <CardHeader className="pb-6 space-y-5 px-7 pt-8">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <CardTitle className="text-sm font-bold flex items-center gap-2.5 tracking-tight text-foreground/90">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/8">
-                        <Code className="h-3.5 w-3.5 text-primary" />
+                    <CardTitle className="text-base font-semibold flex items-center gap-3 tracking-tight text-foreground">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent">
+                        <Code className="h-4 w-4 text-accent-foreground" />
                       </div>
                       Input
                     </CardTitle>
@@ -388,10 +388,10 @@ const Index = () => {
                           const firstInCat = inputModes.find(m => m.category === cat);
                           if (firstInCat) setInputMode(firstInCat.id);
                         }}
-                        className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-semibold transition-all duration-250 whitespace-nowrap ${
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-semibold transition-all duration-300 whitespace-nowrap ${
                           activeCategory === cat
-                            ? "btn-gradient-primary text-primary-foreground shadow-glow-sm"
-                            : "text-muted-foreground/50 hover:text-foreground hover:bg-muted/20"
+                            ? "bg-primary text-primary-foreground shadow-glow-sm"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
                         }`}
                       >
                         {categoryIcons[cat]}
@@ -406,10 +406,10 @@ const Index = () => {
                       <button
                         key={mode.id}
                         onClick={() => setInputMode(mode.id)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold transition-all duration-250 ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-medium transition-all duration-300 ${
                           inputMode === mode.id
-                            ? "bg-accent text-accent-foreground border border-primary/15 shadow-sm"
-                            : "text-muted-foreground/40 hover:text-foreground hover:bg-muted/15 border border-transparent"
+                            ? "bg-accent text-accent-foreground border border-primary/20"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/20 border border-transparent"
                         }`}
                       >
                         {mode.icon}
@@ -419,10 +419,10 @@ const Index = () => {
                   </div>
                 </CardHeader>
 
-                <CardContent className="space-y-5 px-6 pb-7">
+                <CardContent className="space-y-6 px-7 pb-8">
                   <Textarea
                     placeholder={currentMode?.placeholder || "Paste your error… we'll decode it ✨"}
-                    className="font-mono text-[13px] min-h-[200px] bg-background/20 resize-y rounded-xl border-border/15 focus:border-primary/40 input-glow transition-all duration-300 placeholder:text-muted-foreground/25"
+                    className="font-mono text-[13px] min-h-[200px] bg-muted/20 resize-y rounded-xl border-border/30 focus:border-primary/50 input-glow transition-all duration-300 placeholder:text-muted-foreground/30"
                     value={errorInput}
                     onChange={(e) => setErrorInput(e.target.value)}
                   />
@@ -430,12 +430,12 @@ const Index = () => {
                   {/* Quick example chips */}
                   {!errorInput && (
                     <div className="flex flex-wrap gap-2">
-                      <span className="text-[10px] text-muted-foreground/35 mr-0.5 self-center">Try:</span>
+                      <span className="text-[10px] text-muted-foreground/40 mr-1 self-center font-medium">Try:</span>
                       {exampleChips.map(chip => (
                         <button
                           key={chip}
                           onClick={() => { setErrorInput(chip); setInputMode("error"); setActiveCategory("Analyze"); }}
-                          className="text-[10px] font-mono text-muted-foreground/35 hover:text-primary bg-muted/10 hover:bg-primary/8 px-3 py-1.5 rounded-full border border-border/8 hover:border-primary/20 transition-all duration-250"
+                          className="text-[10px] font-mono text-muted-foreground/40 hover:text-primary bg-muted/15 hover:bg-accent px-3 py-1.5 rounded-full border border-border/20 hover:border-primary/20 transition-all duration-300"
                         >
                           {chip.length > 35 ? chip.slice(0, 35) + "…" : chip}
                         </button>
@@ -444,18 +444,18 @@ const Index = () => {
                   )}
 
                   {/* Controls */}
-                  <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       {/* Analysis Mode */}
-                      <div className="flex items-center bg-muted/10 rounded-full p-0.5 border border-border/10">
+                      <div className="flex items-center bg-muted/20 rounded-full p-0.5 border border-border/20">
                         {(["simple", "explain", "deep"] as const).map((mode) => (
                           <button
                             key={mode}
                             onClick={() => setAnalysisMode(mode)}
-                            className={`px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all duration-250 ${
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-medium transition-all duration-300 ${
                               analysisMode === mode
                                 ? "bg-card text-foreground shadow-sm"
-                                : "text-muted-foreground/40 hover:text-foreground"
+                                : "text-muted-foreground/50 hover:text-foreground"
                             }`}
                           >
                             {mode === "simple" ? "⚡ Simple" : mode === "explain" ? "📖 Explain" : "🔬 Deep"}
@@ -463,15 +463,15 @@ const Index = () => {
                         ))}
                       </div>
                       {/* Output Length */}
-                      <div className="flex items-center bg-muted/10 rounded-full p-0.5 border border-border/10">
+                      <div className="flex items-center bg-muted/20 rounded-full p-0.5 border border-border/20">
                         {(["short", "medium", "detailed"] as const).map((len) => (
                           <button
                             key={len}
                             onClick={() => setOutputLength(len)}
-                            className={`px-2.5 py-1.5 rounded-full text-[10px] font-semibold transition-all duration-250 ${
+                            className={`px-2.5 py-1.5 rounded-full text-[10px] font-medium transition-all duration-300 ${
                               outputLength === len
                                 ? "bg-card text-foreground shadow-sm"
-                                : "text-muted-foreground/40 hover:text-foreground"
+                                : "text-muted-foreground/50 hover:text-foreground"
                             }`}
                           >
                             {len.charAt(0).toUpperCase() + len.slice(1)}
@@ -481,16 +481,16 @@ const Index = () => {
                       <LanguageSelector value={outputLang} onChange={setOutputLang} />
                     </div>
 
-                    <div className="flex gap-2.5">
+                    <div className="flex gap-3">
                       {errorInput && (
-                        <Button variant="ghost" size="sm" onClick={handleNewError} className="text-[11px] rounded-full text-muted-foreground/40 hover:text-foreground h-10">
+                        <Button variant="ghost" size="sm" onClick={handleNewError} className="text-[11px] rounded-full text-muted-foreground/50 hover:text-foreground h-10 transition-all duration-300">
                           Clear
                         </Button>
                       )}
                       <Button
                         onClick={handleSubmit}
                         disabled={loading || !errorInput.trim()}
-                        className="gap-2 h-11 px-7 font-semibold text-[13px] rounded-full btn-gradient-primary text-primary-foreground disabled:opacity-25 shadow-glow hover:shadow-glow-lg transition-all duration-300"
+                        className="gap-2.5 h-11 px-8 font-semibold text-[13px] rounded-full btn-gradient-primary text-primary-foreground disabled:opacity-20 shadow-glow hover:shadow-glow-lg transition-all duration-300"
                       >
                         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                         {loading ? "Analyzing…" : submitLabel}
@@ -502,23 +502,23 @@ const Index = () => {
 
               {/* Loading */}
               {loading && (
-                <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="flex flex-col items-center justify-center py-20 space-y-7">
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <div className="flex flex-col items-center justify-center py-24 space-y-8">
                     <div className="relative">
-                      <div className="h-16 w-16 rounded-full border border-border/15" />
-                      <div className="absolute inset-0 h-16 w-16 rounded-full border-2 border-primary/50 border-t-transparent animate-spin" />
-                      <div className="absolute inset-2 h-12 w-12 rounded-full border border-accent-foreground/15 border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.8s' }} />
-                      <div className="absolute inset-[20px] h-5 w-5 rounded-full bg-primary/15 animate-pulse-glow" />
+                      <div className="h-16 w-16 rounded-full border border-border/20" />
+                      <div className="absolute inset-0 h-16 w-16 rounded-full border-2 border-primary/40 border-t-transparent animate-spin" style={{ animationDuration: '1.2s' }} />
+                      <div className="absolute inset-2 h-12 w-12 rounded-full border border-primary/15 border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '2s' }} />
+                      <div className="absolute inset-[22px] h-4 w-4 rounded-full bg-primary/20 animate-pulse-glow" />
                     </div>
-                    <div className="text-center">
-                      <p className="text-sm font-semibold text-foreground/75">Analyzing your input…</p>
-                      <p className="text-[11px] text-muted-foreground/35 mt-2">This usually takes a few seconds</p>
+                    <div className="text-center space-y-2">
+                      <p className="text-sm font-medium text-foreground/70">Analyzing your input…</p>
+                      <p className="text-[11px] text-muted-foreground/40">This usually takes a few seconds</p>
                     </div>
                   </div>
                   {[1, 2, 3].map(i => (
-                    <Card key={i} className="border-border/8 bg-card/15 rounded-2xl">
+                    <Card key={i} className="border-border/15 bg-card/30 rounded-2xl">
                       <CardHeader className="pb-3"><Skeleton className="h-4 w-36 rounded-lg" /></CardHeader>
-                      <CardContent className="space-y-2.5">
+                      <CardContent className="space-y-3">
                         <Skeleton className="h-3 w-full rounded-lg" />
                         <Skeleton className="h-3 w-4/5 rounded-lg" />
                         <Skeleton className="h-3 w-3/5 rounded-lg" />
@@ -538,11 +538,11 @@ const Index = () => {
                     onShare={handleShare}
                     similarError={similarError}
                   />
-                  <Card className="mt-8 border-dashed border-border/8 bg-card/10 rounded-2xl hover:bg-card/20 transition-colors duration-300">
-                    <CardContent className="py-4">
+                  <Card className="mt-10 border-dashed border-border/15 bg-card/20 rounded-2xl hover:bg-card/30 transition-colors duration-300">
+                    <CardContent className="py-5">
                       <button
                         onClick={() => { setActivePanel("chat"); setSidebarOpen(true); }}
-                        className="w-full flex items-center justify-center gap-2 text-[12px] font-medium text-muted-foreground/40 hover:text-primary transition-colors duration-250"
+                        className="w-full flex items-center justify-center gap-2 text-[12px] font-medium text-muted-foreground/50 hover:text-primary transition-colors duration-300"
                       >
                         <MessageSquare className="h-3.5 w-3.5" />
                         Have questions? Open Debug Chat →
@@ -554,22 +554,22 @@ const Index = () => {
 
               {/* Empty state */}
               {!result && !loading && (
-                <div className="flex flex-col items-center justify-center py-32 space-y-8 animate-in fade-in duration-700">
+                <div className="flex flex-col items-center justify-center py-36 space-y-10 animate-in fade-in duration-700">
                   <div className="relative">
-                    <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-primary/5 border border-primary/8 shadow-glow animate-float">
-                      <Terminal className="h-10 w-10 text-primary/50" />
+                    <div className="flex h-28 w-28 items-center justify-center rounded-3xl bg-accent border border-border/20 animate-float">
+                      <Terminal className="h-11 w-11 text-primary/40" />
                     </div>
-                    <div className="absolute -inset-6 rounded-[32px] bg-primary/3 blur-2xl -z-10" />
+                    <div className="absolute -inset-8 rounded-[36px] bg-primary/3 blur-3xl -z-10" />
                   </div>
-                  <div className="text-center space-y-3">
-                    <h2 className="text-xl font-bold text-foreground/75 tracking-tight">Ready to debug</h2>
-                    <p className="text-[13px] text-muted-foreground/35 max-w-sm leading-relaxed">
-                      Paste an error message, code snippet, or log file. Select a mode and let AI analyze it.
+                  <div className="text-center space-y-4">
+                    <h2 className="text-2xl font-semibold text-foreground/80 tracking-tight">Ready to debug</h2>
+                    <p className="text-[13px] text-muted-foreground/45 max-w-md leading-relaxed mx-auto">
+                      Paste an error message, code snippet, or log file. Select a mode and let AI analyze it for you.
                     </p>
                   </div>
-                  <div className="flex flex-wrap justify-center gap-2 pt-2">
+                  <div className="flex flex-wrap justify-center gap-2.5 pt-2">
                     {["Error Analysis", "Security Scan", "Code Review", "Performance"].map(label => (
-                      <Badge key={label} variant="secondary" className="text-[10px] font-medium rounded-full px-3 py-1 bg-muted/15 text-muted-foreground/35 border-border/10">{label}</Badge>
+                      <Badge key={label} variant="secondary" className="text-[10px] font-medium rounded-full px-3.5 py-1.5 bg-muted/30 text-muted-foreground/40 border-border/15">{label}</Badge>
                     ))}
                   </div>
                 </div>
