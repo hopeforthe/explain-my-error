@@ -81,6 +81,7 @@ export const ErrorHistory = ({ onSelect, refreshKey }: ErrorHistoryProps) => {
                   <button
                     onClick={(e) => handleDelete(item.id, e)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 p-1 hover:text-destructive"
+                    aria-label="Delete history item"
                   >
                     <Trash2 className="h-3 w-3" />
                   </button>

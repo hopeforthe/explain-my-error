@@ -444,7 +444,7 @@ export const ResultDisplay = ({
         <CollapsibleSection title="Bug Report" icon={<ClipboardList className="h-4 w-4 text-destructive" />} defaultOpen accentColor="border-l-destructive">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold text-foreground">{result.bugTitle}</h3>
+              <h2 className="text-base font-semibold text-foreground">{result.bugTitle}</h2>
               <CopyButton text={[
                 `# ${result.bugTitle}`,
                 `\n## Description\n${result.description || ""}`,

@@ -161,6 +161,7 @@ const SharedDebug = () => {
                     value={commentName}
                     onChange={(e) => setCommentName(e.target.value)}
                     className="font-mono text-xs h-8"
+                    aria-label="Your name (optional)"
                   />
                   <div className="flex gap-2">
                     <Textarea
@@ -168,6 +169,7 @@ const SharedDebug = () => {
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
                       className="font-mono text-xs min-h-[60px] flex-1"
+                      aria-label="Comment"
                     />
                     <Button
                       size="icon"

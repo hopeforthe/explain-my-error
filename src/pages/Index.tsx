@@ -261,7 +261,7 @@ const Index = () => {
                 <Badge variant="secondary" className="hidden sm:inline-flex text-[10px] font-semibold border-primary/15 bg-primary/8 text-primary rounded-full px-2.5 py-0.5">
                   Pro
                 </Badge>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all duration-250" onClick={() => supabase.auth.signOut()} title="Sign out">
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all duration-250" onClick={() => supabase.auth.signOut()} title="Sign out" aria-label="Sign out">
                   <LogOut className="h-3.5 w-3.5" />
                 </Button>
               </div>
