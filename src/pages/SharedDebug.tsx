@@ -73,7 +73,7 @@ const SharedDebug = () => {
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
               <Terminal className="h-3.5 w-3.5 text-primary-foreground" />
             </div>
-            <h1 className="font-mono text-sm font-bold text-foreground">Explain My Error</h1>
+            <h1 className="font-mono text-sm font-bold text-foreground">Shared Debug Results — Explain My Error</h1>
             <Badge variant="outline" className="font-mono text-[10px]">Shared</Badge>
           </div>
           <div className="flex items-center gap-2">

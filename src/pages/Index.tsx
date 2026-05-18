@@ -240,6 +240,7 @@ const Index = () => {
               size="icon"
               className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all duration-300"
               onClick={() => setSidebarOpen(!sidebarOpen)}
+              aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
             >
               {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
             </Button>
@@ -248,7 +249,7 @@ const Index = () => {
                 <Terminal className="h-4 w-4 text-primary-foreground" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="font-semibold text-[15px] text-foreground tracking-tight leading-tight">Explain My Error</h1>
+                <h1 className="font-semibold text-[15px] text-foreground tracking-tight leading-tight">Explain My Error — AI-powered debugger for developers</h1>
                 <p className="text-[10px] text-muted-foreground/50 leading-none mt-0.5 tracking-wide">Debug smarter, not harder</p>
               </div>
             </div>

@@ -43,7 +43,8 @@ const ResetPassword = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-lg font-mono text-center">Set New Password</CardTitle>
+          <h1 className="text-xl font-semibold text-center text-foreground">Reset Your Account Password</h1>
+          <CardTitle className="text-sm font-mono text-center text-muted-foreground">Set New Password</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleReset} className="space-y-4">
@@ -53,6 +54,7 @@ const ResetPassword = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
+              aria-label="New password"
             />
             <Button type="submit" className="w-full gap-2" disabled={loading}>
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
