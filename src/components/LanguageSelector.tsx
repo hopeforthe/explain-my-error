@@ -215,6 +215,7 @@ export function LanguageSelector({ value, onChange }: LanguageSelectorProps) {
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="w-full bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none"
+              aria-label="Search languages"
             />
           </div>
           <div className="max-h-60 overflow-y-auto overscroll-contain p-1">

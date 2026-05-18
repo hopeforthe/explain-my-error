@@ -89,6 +89,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
+            aria-label="Email address"
           />
           <Input
             type="password"
@@ -96,6 +97,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete={isLogin ? "current-password" : "new-password"}
+            aria-label="Password"
           />
           <Button type="submit" className="w-full gap-2" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}

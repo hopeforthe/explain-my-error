@@ -134,8 +134,9 @@ export const DebugChat = ({ errorContext }: DebugChatProps) => {
             placeholder="Ask a follow-up question…"
             className="font-mono text-sm bg-background"
             disabled={isStreaming}
+            aria-label="Chat message"
           />
-          <Button type="submit" size="icon" disabled={isStreaming || !input.trim()}>
+          <Button type="submit" size="icon" disabled={isStreaming || !input.trim()} aria-label="Send message">
             {isStreaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
         </form>

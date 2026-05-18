@@ -73,7 +73,7 @@ const SharedDebug = () => {
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
               <Terminal className="h-3.5 w-3.5 text-primary-foreground" />
             </div>
-            <h1 className="font-mono text-sm font-bold text-foreground">Explain My Error</h1>
+            <h1 className="font-mono text-sm font-bold text-foreground">Shared Debug Results — Explain My Error</h1>
             <Badge variant="outline" className="font-mono text-[10px]">Shared</Badge>
           </div>
           <div className="flex items-center gap-2">
@@ -161,6 +161,7 @@ const SharedDebug = () => {
                     value={commentName}
                     onChange={(e) => setCommentName(e.target.value)}
                     className="font-mono text-xs h-8"
+                    aria-label="Your name (optional)"
                   />
                   <div className="flex gap-2">
                     <Textarea
@@ -168,6 +169,7 @@ const SharedDebug = () => {
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
                       className="font-mono text-xs min-h-[60px] flex-1"
+                      aria-label="Comment"
                     />
                     <Button
                       size="icon"
