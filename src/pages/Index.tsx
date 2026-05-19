@@ -423,7 +423,7 @@ const Index = () => {
                 <CardContent className="space-y-6 px-7 pb-8">
                   <Textarea
                     placeholder={currentMode?.placeholder || "Paste your error… we'll decode it ✨"}
-                    className="font-mono text-[13px] min-h-[200px] bg-muted/20 resize-y rounded-xl border-border/30 focus:border-primary/50 input-glow transition-all duration-300 placeholder:text-muted-foreground/30"
+                    className="font-mono text-[13px] min-h-[200px] bg-muted/20 resize-y rounded-xl border-border/30 focus:border-primary/50 input-glow transition-all duration-300 placeholder:text-muted-foreground"
                     value={errorInput}
                     onChange={(e) => setErrorInput(e.target.value)}
                   />
@@ -431,12 +431,12 @@ const Index = () => {
                   {/* Quick example chips */}
                   {!errorInput && (
                     <div className="flex flex-wrap gap-2">
-                      <span className="text-[10px] text-muted-foreground/40 mr-1 self-center font-medium">Try:</span>
+                      <span className="text-[10px] text-muted-foreground mr-1 self-center font-medium">Try:</span>
                       {exampleChips.map(chip => (
                         <button
                           key={chip}
                           onClick={() => { setErrorInput(chip); setInputMode("error"); setActiveCategory("Analyze"); }}
-                          className="text-[10px] font-mono text-muted-foreground/40 hover:text-primary bg-muted/15 hover:bg-accent px-3 py-1.5 rounded-full border border-border/20 hover:border-primary/20 transition-all duration-300"
+                          className="text-[10px] font-mono text-muted-foreground hover:text-primary bg-muted/15 hover:bg-accent px-3 py-1.5 rounded-full border border-border/20 hover:border-primary/20 transition-all duration-300"
                         >
                           {chip.length > 35 ? chip.slice(0, 35) + "…" : chip}
                         </button>
@@ -456,7 +456,7 @@ const Index = () => {
                             className={`px-3 py-1.5 rounded-full text-[10px] font-medium transition-all duration-300 ${
                               analysisMode === mode
                                 ? "bg-card text-foreground shadow-sm"
-                                : "text-muted-foreground/50 hover:text-foreground"
+                                : "text-muted-foreground hover:text-foreground"
                             }`}
                           >
                             {mode === "simple" ? "⚡ Simple" : mode === "explain" ? "📖 Explain" : "🔬 Deep"}
@@ -472,7 +472,7 @@ const Index = () => {
                             className={`px-2.5 py-1.5 rounded-full text-[10px] font-medium transition-all duration-300 ${
                               outputLength === len
                                 ? "bg-card text-foreground shadow-sm"
-                                : "text-muted-foreground/50 hover:text-foreground"
+                                : "text-muted-foreground hover:text-foreground"
                             }`}
                           >
                             {len.charAt(0).toUpperCase() + len.slice(1)}
@@ -484,7 +484,7 @@ const Index = () => {
 
                     <div className="flex gap-3">
                       {errorInput && (
-                        <Button variant="ghost" size="sm" onClick={handleNewError} className="text-[11px] rounded-full text-muted-foreground/50 hover:text-foreground h-10 transition-all duration-300">
+                        <Button variant="ghost" size="sm" onClick={handleNewError} className="text-[11px] rounded-full text-muted-foreground hover:text-foreground h-10 transition-all duration-300">
                           Clear
                         </Button>
                       )}
@@ -513,7 +513,7 @@ const Index = () => {
                     </div>
                     <div className="text-center space-y-2">
                       <p className="text-sm font-medium text-foreground/70">Analyzing your input…</p>
-                      <p className="text-[11px] text-muted-foreground/40">This usually takes a few seconds</p>
+                      <p className="text-[11px] text-muted-foreground">This usually takes a few seconds</p>
                     </div>
                   </div>
                   {[1, 2, 3].map(i => (
@@ -543,7 +543,7 @@ const Index = () => {
                     <CardContent className="py-5">
                       <button
                         onClick={() => { setActivePanel("chat"); setSidebarOpen(true); }}
-                        className="w-full flex items-center justify-center gap-2 text-[12px] font-medium text-muted-foreground/50 hover:text-primary transition-colors duration-300"
+                        className="w-full flex items-center justify-center gap-2 text-[12px] font-medium text-muted-foreground hover:text-primary transition-colors duration-300"
                       >
                         <MessageSquare className="h-3.5 w-3.5" />
                         Have questions? Open Debug Chat →
@@ -564,13 +564,13 @@ const Index = () => {
                   </div>
                   <div className="text-center space-y-4">
                     <h2 className="text-2xl font-semibold text-foreground/80 tracking-tight">Ready to debug</h2>
-                    <p className="text-[13px] text-muted-foreground/45 max-w-md leading-relaxed mx-auto">
+                    <p className="text-[13px] text-muted-foreground max-w-md leading-relaxed mx-auto">
                       Paste an error message, code snippet, or log file. Select a mode and let AI analyze it for you.
                     </p>
                   </div>
                   <div className="flex flex-wrap justify-center gap-2.5 pt-2">
                     {["Error Analysis", "Security Scan", "Code Review", "Performance"].map(label => (
-                      <Badge key={label} variant="secondary" className="text-[10px] font-medium rounded-full px-3.5 py-1.5 bg-muted/30 text-muted-foreground/40 border-border/15">{label}</Badge>
+                      <Badge key={label} variant="secondary" className="text-[10px] font-medium rounded-full px-3.5 py-1.5 bg-muted/30 text-muted-foreground border-border/15">{label}</Badge>
                     ))}
                   </div>
                 </div>
