@@ -228,7 +228,7 @@ function CollapsibleSection({ title, icon, children, defaultOpen = true, accentC
           <CardHeader className="pb-3 cursor-pointer hover:bg-muted/15 transition-colors duration-300 group px-6 pt-5">
             <div className="flex items-center justify-between">
               <CardTitle className="text-[13px] font-semibold flex items-center gap-2.5 tracking-tight text-foreground/80">{icon}{title}</CardTitle>
-              <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground/30 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
             </div>
           </CardHeader>
         </CollapsibleTrigger>
