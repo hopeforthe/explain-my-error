@@ -250,7 +250,7 @@ const Index = () => {
               </div>
               <div className="hidden sm:block">
                 <h1 className="font-semibold text-[15px] text-foreground tracking-tight leading-tight">Explain My Error — AI-powered debugger for developers</h1>
-                <p className="text-[10px] text-muted-foreground/50 leading-none mt-0.5 tracking-wide">Debug smarter, not harder</p>
+                <p className="text-[10px] text-muted-foreground leading-none mt-0.5 tracking-wide">Debug smarter, not harder</p>
               </div>
             </div>
           </div>
@@ -279,7 +279,7 @@ const Index = () => {
                         />
                       ))}
                     </div>
-                    <span className="text-[10px] text-muted-foreground/60 font-medium ml-0.5">{remaining}</span>
+                    <span className="text-[10px] text-muted-foreground font-medium ml-0.5">{remaining}</span>
                   </div>
                 )}
                 {remaining <= 0 && (
@@ -318,7 +318,7 @@ const Index = () => {
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
                 }`}
               >
-                <span className={`transition-colors duration-300 ${activePanel === item.id ? "text-primary" : "text-muted-foreground/50 group-hover:text-foreground"}`}>{item.icon}</span>
+                <span className={`transition-colors duration-300 ${activePanel === item.id ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`}>{item.icon}</span>
                 <span className="flex-1 text-left">{item.label}</span>
                 {activePanel === item.id && <div className="h-1 w-1 rounded-full bg-primary" />}
               </button>
@@ -333,7 +333,7 @@ const Index = () => {
             {activePanel === "snippets" && <SnippetLibrary />}
             {(activePanel === "new" || activePanel === "trends") && (
               <div className="p-4 space-y-4">
-                <p className="text-[11px] text-muted-foreground/50 leading-relaxed">
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
                   20+ AI analysis modes for debugging, review, and testing.
                 </p>
                 <div className="space-y-1">
@@ -345,7 +345,7 @@ const Index = () => {
                     <button
                       key={ex}
                       onClick={() => { setErrorInput(ex); setInputMode("error"); setActiveCategory("Analyze"); setActivePanel("new"); }}
-                      className="w-full text-left text-[10px] font-mono text-muted-foreground/40 hover:text-foreground p-2.5 rounded-xl hover:bg-muted/20 transition-all duration-250 border border-transparent hover:border-border/15"
+                      className="w-full text-left text-[10px] font-mono text-muted-foreground hover:text-foreground p-2.5 rounded-xl hover:bg-muted/20 transition-all duration-250 border border-transparent hover:border-border/15"
                     >
                       {ex}
                     </button>
