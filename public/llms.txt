@@ -1,0 +1,9 @@
+# Explain My Error
+
+> AI-powered debugging assistant for developers. Paste any programming error, terminal log, or code snippet and get an instant explanation, root cause, and fix across 120+ languages.
+
+Explain My Error helps developers debug smarter, not harder. It accepts text errors, terminal output, source code, and screenshots (via OCR), auto-detects the language and framework, and produces structured bug reports with explanations, suggested fixes, and follow-up chat. Free users get 10 queries before sign-in.
+
+## Pages
+
+- [Home](/): Main debugger — paste errors, code, terminal output, or images and get AI explanations and fixes.
