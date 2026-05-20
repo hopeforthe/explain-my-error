@@ -120,10 +120,8 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
-  const [freeQueryCount, setFreeQueryCount] = useState(() => {
-    const stored = localStorage.getItem(FREE_QUERY_KEY);
-    return stored ? parseInt(stored, 10) : 0;
-  });
+  const [freeQueryCount, setFreeQueryCount] = useState(() => readDailyCount());
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activePanel, setActivePanel] = useState<SidebarPanel>("new");
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
