@@ -25,10 +25,24 @@ import { ErrorHistory } from "@/components/ErrorHistory";
 import { ErrorTrends } from "@/components/ErrorTrends";
 import { SnippetLibrary } from "@/components/SnippetLibrary";
 import { addErrorHistory, findSimilarError } from "@/lib/errorHistory";
+import { UpgradePrompt } from "@/components/UpgradePrompt";
 import type { Session } from "@supabase/supabase-js";
 
 const FREE_QUERY_KEY = "eme_free_query_count";
+const FREE_QUERY_DATE_KEY = "eme_free_query_date";
 const MAX_FREE_QUERIES = 10;
+
+const todayKey = () => new Date().toISOString().slice(0, 10);
+const readDailyCount = () => {
+  const storedDate = localStorage.getItem(FREE_QUERY_DATE_KEY);
+  if (storedDate !== todayKey()) {
+    localStorage.setItem(FREE_QUERY_DATE_KEY, todayKey());
+    localStorage.setItem(FREE_QUERY_KEY, "0");
+    return 0;
+  }
+  const stored = localStorage.getItem(FREE_QUERY_KEY);
+  return stored ? parseInt(stored, 10) : 0;
+};
 
 type SidebarPanel = "new" | "history" | "chat" | "trends" | "snippets";
 type InputMode = string;
@@ -106,10 +120,8 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
-  const [freeQueryCount, setFreeQueryCount] = useState(() => {
-    const stored = localStorage.getItem(FREE_QUERY_KEY);
-    return stored ? parseInt(stored, 10) : 0;
-  });
+  const [freeQueryCount, setFreeQueryCount] = useState(() => readDailyCount());
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activePanel, setActivePanel] = useState<SidebarPanel>("new");
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
@@ -136,7 +148,7 @@ const Index = () => {
 
   const handleSubmit = async () => {
     if (!errorInput.trim()) { toast.error("Please paste some input first."); return; }
-    if (!session && freeQueryCount >= MAX_FREE_QUERIES) { setShowAuthModal(true); return; }
+    if (!session && freeQueryCount >= MAX_FREE_QUERIES) { setShowUpgrade(true); return; }
 
     setLoading(true);
     setResult(null);
@@ -283,9 +295,11 @@ const Index = () => {
                   </div>
                 )}
                 {remaining <= 0 && (
-                  <Badge variant="destructive" className="hidden sm:inline-flex text-[10px] rounded-full">
-                    Limit
-                  </Badge>
+                  <button onClick={() => setShowUpgrade(true)} className="hidden sm:inline-flex">
+                    <Badge variant="destructive" className="text-[10px] rounded-full cursor-pointer hover:opacity-90">
+                      Daily limit reached
+                    </Badge>
+                  </button>
                 )}
                 <Button
                   size="sm"
@@ -581,6 +595,12 @@ const Index = () => {
       </div>
 
       <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
+      <UpgradePrompt
+        open={showUpgrade}
+        onOpenChange={setShowUpgrade}
+        limit={MAX_FREE_QUERIES}
+        onSignIn={() => { setShowUpgrade(false); setShowAuthModal(true); }}
+      />
     </div>
   );
 };
