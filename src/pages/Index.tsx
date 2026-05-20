@@ -295,9 +295,11 @@ const Index = () => {
                   </div>
                 )}
                 {remaining <= 0 && (
-                  <Badge variant="destructive" className="hidden sm:inline-flex text-[10px] rounded-full">
-                    Limit
-                  </Badge>
+                  <button onClick={() => setShowUpgrade(true)} className="hidden sm:inline-flex">
+                    <Badge variant="destructive" className="text-[10px] rounded-full cursor-pointer hover:opacity-90">
+                      Daily limit reached
+                    </Badge>
+                  </button>
                 )}
                 <Button
                   size="sm"
