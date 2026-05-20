@@ -25,10 +25,24 @@ import { ErrorHistory } from "@/components/ErrorHistory";
 import { ErrorTrends } from "@/components/ErrorTrends";
 import { SnippetLibrary } from "@/components/SnippetLibrary";
 import { addErrorHistory, findSimilarError } from "@/lib/errorHistory";
+import { UpgradePrompt } from "@/components/UpgradePrompt";
 import type { Session } from "@supabase/supabase-js";
 
 const FREE_QUERY_KEY = "eme_free_query_count";
+const FREE_QUERY_DATE_KEY = "eme_free_query_date";
 const MAX_FREE_QUERIES = 10;
+
+const todayKey = () => new Date().toISOString().slice(0, 10);
+const readDailyCount = () => {
+  const storedDate = localStorage.getItem(FREE_QUERY_DATE_KEY);
+  if (storedDate !== todayKey()) {
+    localStorage.setItem(FREE_QUERY_DATE_KEY, todayKey());
+    localStorage.setItem(FREE_QUERY_KEY, "0");
+    return 0;
+  }
+  const stored = localStorage.getItem(FREE_QUERY_KEY);
+  return stored ? parseInt(stored, 10) : 0;
+};
 
 type SidebarPanel = "new" | "history" | "chat" | "trends" | "snippets";
 type InputMode = string;
