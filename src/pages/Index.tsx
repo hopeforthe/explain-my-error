@@ -593,6 +593,12 @@ const Index = () => {
       </div>
 
       <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
+      <UpgradePrompt
+        open={showUpgrade}
+        onOpenChange={setShowUpgrade}
+        limit={MAX_FREE_QUERIES}
+        onSignIn={() => { setShowUpgrade(false); setShowAuthModal(true); }}
+      />
     </div>
   );
 };
