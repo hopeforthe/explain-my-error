@@ -148,7 +148,7 @@ const Index = () => {
 
   const handleSubmit = async () => {
     if (!errorInput.trim()) { toast.error("Please paste some input first."); return; }
-    if (!session && freeQueryCount >= MAX_FREE_QUERIES) { setShowAuthModal(true); return; }
+    if (!session && freeQueryCount >= MAX_FREE_QUERIES) { setShowUpgrade(true); return; }
 
     setLoading(true);
     setResult(null);
