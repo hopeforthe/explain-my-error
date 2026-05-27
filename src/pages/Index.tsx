@@ -243,7 +243,16 @@ const Index = () => {
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-x-hidden overflow-y-hidden">
+    <>
+      <Helmet>
+        <title>Explain My Error — AI Debugger for Developers</title>
+        <meta name="description" content="Paste any programming error and get an instant AI-powered explanation, root cause, and fix. Debug smarter, not harder — across 120+ languages." />
+        <link rel="canonical" href="https://explain-my-error.lovable.app/" />
+        <meta property="og:title" content="Explain My Error — AI Debugger for Developers" />
+        <meta property="og:description" content="Paste any programming error and get an instant AI-powered explanation, root cause, and fix." />
+        <meta property="og:url" content="https://explain-my-error.lovable.app/" />
+      </Helmet>
+      <div className="h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-x-hidden overflow-y-hidden">
       {/* ─── Header ─── */}
       <header className="shrink-0 z-50 border-b border-border/40 glass">
         <div className="flex items-center justify-between px-6 h-[60px]">
