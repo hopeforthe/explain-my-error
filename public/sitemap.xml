@@ -10,4 +10,46 @@
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
+  <url>
+    <loc>https://explain-my-error.lovable.app/debug/2c57d03d-829f-4869-9668-a8a539145b18</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://explain-my-error.lovable.app/debug/9ccff839-9fb0-43f0-ae14-6d28e1910ffc</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://explain-my-error.lovable.app/debug/ea85c996-18b0-4433-a24d-3f45c48f4b2b</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://explain-my-error.lovable.app/debug/da733083-c200-4a5e-9726-a9cdf6d7e0de</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://explain-my-error.lovable.app/debug/7b8a358b-fdfc-4828-82e8-6e71d7f75b83</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://explain-my-error.lovable.app/debug/54ef8fe3-abd4-42f8-a9cc-40346c1cf3ba</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://explain-my-error.lovable.app/debug/5b9906ba-ba71-470a-ac0e-64338887e4b3</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>
