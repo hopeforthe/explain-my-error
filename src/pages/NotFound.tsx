@@ -18,6 +18,7 @@ const NotFound = () => {
         <meta property="og:title" content="Page Not Found — Explain My Error" />
         <meta property="og:description" content="The page you are looking for does not exist." />
         <meta property="og:url" content="https://explain-my-error.lovable.app/" />
+        <meta property="og:type" content="website" />
       </Helmet>
       <div className="flex min-h-screen items-center justify-center bg-muted">
       <div className="text-center">

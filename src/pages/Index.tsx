@@ -251,6 +251,7 @@ const Index = () => {
         <meta property="og:title" content="Explain My Error — AI Debugger for Developers" />
         <meta property="og:description" content="Paste any programming error and get an instant AI-powered explanation, root cause, and fix." />
         <meta property="og:url" content="https://explain-my-error.lovable.app/" />
+        <meta property="og:type" content="website" />
       </Helmet>
       <div className="h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-x-hidden overflow-y-hidden">
       {/* ─── Header ─── */}
