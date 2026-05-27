@@ -612,6 +612,7 @@ const Index = () => {
         onSignIn={() => { setShowUpgrade(false); setShowAuthModal(true); }}
       />
     </div>
+    </>
   );
 };
 
