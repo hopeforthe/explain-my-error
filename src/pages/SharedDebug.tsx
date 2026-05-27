@@ -197,6 +197,7 @@ const SharedDebug = () => {
         )}
       </main>
     </div>
+    </>
   );
 };
 
