@@ -49,6 +49,7 @@ const ResetPassword = () => {
         <meta property="og:title" content="Reset Password — Explain My Error" />
         <meta property="og:description" content="Reset your Explain My Error account password securely." />
         <meta property="og:url" content="https://explain-my-error.lovable.app/reset-password" />
+        <meta property="og:type" content="website" />
       </Helmet>
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <Card className="w-full max-w-md">
