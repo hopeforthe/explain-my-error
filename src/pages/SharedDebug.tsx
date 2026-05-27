@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,7 +67,16 @@ const SharedDebug = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      <Helmet>
+        <title>{data ? `Shared Debug — ${data.input_mode.charAt(0).toUpperCase() + data.input_mode.slice(1)} Result` : "Shared Debug Result — Explain My Error"}</title>
+        <meta name="description" content="View a shared AI-powered debug analysis, explanation, and fix. Collaborate with comments." />
+        <link rel="canonical" href={`https://explain-my-error.lovable.app/debug/${id}`} />
+        <meta property="og:title" content="Shared Debug Result — Explain My Error" />
+        <meta property="og:description" content="View a shared AI-powered debug analysis, explanation, and fix." />
+        <meta property="og:url" content={`https://explain-my-error.lovable.app/debug/${id}`} />
+      </Helmet>
+      <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/90 backdrop-blur-md">
         <div className="max-w-3xl mx-auto flex items-center justify-between px-4 py-2">
           <div className="flex items-center gap-2">
@@ -187,6 +197,7 @@ const SharedDebug = () => {
         )}
       </main>
     </div>
+    </>
   );
 };
 
