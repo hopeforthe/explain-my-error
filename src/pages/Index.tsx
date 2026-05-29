@@ -252,6 +252,24 @@ const Index = () => {
         <meta property="og:description" content="Paste any programming error and get an instant AI-powered explanation, root cause, and fix." />
         <meta property="og:url" content="https://explain-my-error.lovable.app/" />
         <meta property="og:type" content="website" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          "name": "Explain My Error",
+          "description": "AI-powered debugger for developers. Paste any programming error and get instant explanation, root cause, and fix across 120+ languages.",
+          "applicationCategory": "DeveloperApplication",
+          "operatingSystem": "Any",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "author": {
+            "@type": "Organization",
+            "name": "Explain My Error"
+          },
+          "url": "https://explain-my-error.lovable.app/"
+        })}</script>
       </Helmet>
       <div className="h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-x-hidden overflow-y-hidden">
       {/* ─── Header ─── */}
