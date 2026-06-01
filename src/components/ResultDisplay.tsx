@@ -282,29 +282,91 @@ function CodeRunner({ code, language }: { code: string; language: string }) {
   const [output, setOutput] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
 
   const run = () => {
     setRunning(true); setOutput(null); setError(null);
-    try {
-      if (language?.toLowerCase().includes("javascript") || language?.toLowerCase().includes("typescript")) {
-        const logs: string[] = [];
-        const fakeConsole = { log: (...a: any[]) => logs.push(a.map(String).join(" ")), error: (...a: any[]) => logs.push("ERROR: " + a.map(String).join(" ")), warn: (...a: any[]) => logs.push("WARN: " + a.map(String).join(" ")) };
-        const fn = new Function("console", code);
-        fn(fakeConsole);
-        setOutput(logs.join("\n") || "(no output)");
+    const isJs = language?.toLowerCase().includes("javascript") || language?.toLowerCase().includes("typescript");
+    if (!isJs) {
+      setError(`Code execution is only available for JavaScript/TypeScript in the browser.`);
+      setRunning(false);
+      return;
+    }
+
+    // Execute inside a sandboxed iframe with NO allow-same-origin.
+    // This isolates AI-generated code from the parent page's globals,
+    // cookies, localStorage, and same-origin network context.
+    const TIMEOUT_MS = 3000;
+    const reqId = Math.random().toString(36).slice(2);
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("sandbox", "allow-scripts");
+    iframe.style.display = "none";
+
+    const html = `<!doctype html><html><body><script>
+      (function(){
+        var logs = [];
+        var fakeConsole = {
+          log: function(){ logs.push(Array.prototype.map.call(arguments, String).join(" ")); },
+          error: function(){ logs.push("ERROR: " + Array.prototype.map.call(arguments, String).join(" ")); },
+          warn: function(){ logs.push("WARN: " + Array.prototype.map.call(arguments, String).join(" ")); }
+        };
+        try {
+          var userCode = ${JSON.stringify(code)};
+          (new Function("console", userCode))(fakeConsole);
+          parent.postMessage({ __runner: ${JSON.stringify(reqId)}, ok: true, logs: logs }, "*");
+        } catch (e) {
+          parent.postMessage({ __runner: ${JSON.stringify(reqId)}, ok: false, error: String(e && e.message || e), logs: logs }, "*");
+        }
+      })();
+    <\/script></body></html>`;
+
+    let done = false;
+    const cleanup = () => {
+      window.removeEventListener("message", onMsg);
+      if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+      setRunning(false);
+    };
+    const onMsg = (ev: MessageEvent) => {
+      const data: any = ev.data;
+      if (!data || data.__runner !== reqId) return;
+      done = true;
+      if (data.ok) {
+        setOutput((data.logs || []).join("\n") || "(no output)");
       } else {
-        setError(`Code execution is only available for JavaScript/TypeScript in the browser.`);
+        setOutput((data.logs || []).join("\n"));
+        setError(data.error || "Execution failed");
       }
-    } catch (e: any) {
-      setError(e?.message || "Execution failed");
-    } finally { setRunning(false); }
+      cleanup();
+    };
+    window.addEventListener("message", onMsg);
+    iframe.srcdoc = html;
+    document.body.appendChild(iframe);
+    window.setTimeout(() => {
+      if (done) return;
+      setError(`Execution timed out after ${TIMEOUT_MS}ms`);
+      cleanup();
+    }, TIMEOUT_MS);
   };
+
+  if (!confirmed) {
+    return (
+      <div className="space-y-2 rounded-lg border border-warning/30 bg-warning/5 p-3">
+        <p className="text-xs text-muted-foreground">
+          ⚠️ This will execute AI-generated code in an isolated sandbox. Only run code you trust.
+        </p>
+        <Button variant="outline" size="sm" onClick={() => setConfirmed(true)} className="gap-1.5 text-xs">
+          <Play className="h-3 w-3" />
+          I understand, enable Run
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
       <Button variant="outline" size="sm" onClick={run} disabled={running} className="gap-1.5 text-xs">
         {running ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
-        Run Code
+        Run Code (sandboxed)
       </Button>
       {output !== null && (
         <pre className="code-block text-[12px] bg-success/5 border-success/20">{output}</pre>
