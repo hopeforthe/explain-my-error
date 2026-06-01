@@ -409,12 +409,12 @@ const Index = () => {
               <Card className="shadow-lg border-border/30 bg-card rounded-2xl overflow-hidden transition-all duration-300">
                 <CardHeader className="pb-6 space-y-5 px-7 pt-8">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <CardTitle className="text-base font-semibold flex items-center gap-3 tracking-tight text-foreground">
+                    <h2 className="text-base font-semibold flex items-center gap-3 tracking-tight text-foreground leading-none">
                       <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent">
                         <Code className="h-4 w-4 text-accent-foreground" />
                       </div>
                       Input
-                    </CardTitle>
+                    </h2>
                     <ImageUpload
                       onTextExtracted={(text) => {
                         setErrorInput(text); setResult(null); setInputMode("error"); setActiveCategory("Analyze");
