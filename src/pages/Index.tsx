@@ -144,7 +144,6 @@ const Index = () => {
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
-    if (mq.matches) setSidebarOpen(false);
     const handler = (e: MediaQueryListEvent) => setSidebarOpen(!e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
