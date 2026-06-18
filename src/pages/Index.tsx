@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import {
   AlertTriangle, Send, Loader2, LogOut, Terminal,
@@ -14,7 +15,7 @@ import {
   Globe, Wrench, FileText, GitCompare, Bug, Gauge, Cog,
   ArrowRightLeft, GraduationCap, Layers, Rocket,
   ClipboardList, TestTubes, ListChecks, ChevronDown, SlidersHorizontal,
-  ArrowRight, Command,
+  ArrowRight, Menu,
 } from "lucide-react";
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
@@ -109,6 +110,15 @@ const inputModes: ModeConfig[] = [
 
 const categories = ["Analyze", "Improve", "Generate", "Compare", "Tester Tools"];
 
+const EXAMPLE_CHIPS = [
+  "TypeError",
+  "Cannot read properties of undefined",
+  "CORS Error",
+  "Module not found",
+  "Syntax Error",
+  "Unexpected token",
+];
+
 const Index = () => {
   const [errorInput, setErrorInput] = useState("");
   const [result, setResult] = useState<ExplanationResult | null>(null);
@@ -117,10 +127,8 @@ const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [freeQueryCount, setFreeQueryCount] = useState(() => readDailyCount());
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return !window.matchMedia("(max-width: 768px)").matches;
-  });
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [activePanel, setActivePanel] = useState<SidebarPanel>("new");
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [inputMode, setInputMode] = useState<InputMode>("error");
@@ -130,18 +138,12 @@ const Index = () => {
   const [outputLength, setOutputLength] = useState<"short" | "medium" | "detailed">("medium");
   const [outputLang, setOutputLang] = useState("en");
   const [similarError, setSimilarError] = useState<{ errorMessage: string; timestamp: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => setSession(s));
     supabase.auth.getSession().then(({ data: { session: s } }) => setSession(s));
     return () => subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 768px)");
-    const handler = (e: MediaQueryListEvent) => setSidebarOpen(!e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
   }, []);
 
   const handleSubmit = async () => {
@@ -202,7 +204,7 @@ const Index = () => {
   const handleHistorySelect = useCallback((errorMessage: string) => {
     setErrorInput(errorMessage); setResult(null); setSimilarError(null);
     setActivePanel("new"); setInputMode("error");
-    if (window.innerWidth < 768) setSidebarOpen(false);
+    setMobileNavOpen(false);
   }, []);
 
   const currentMode = inputModes.find((m) => m.id === inputMode)!;
@@ -231,12 +233,63 @@ const Index = () => {
 
   const remaining = MAX_FREE_QUERIES - freeQueryCount;
 
-  const exampleChips = [
-    "TypeError: Cannot read properties of undefined",
-    "CORS policy: No 'Access-Control-Allow-Origin'",
-    "Module not found: Can't resolve",
-    "SyntaxError: Unexpected token",
-  ];
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const text = e.dataTransfer.getData("text");
+    if (text) {
+      setErrorInput((prev) => prev ? `${prev}\n${text}` : text);
+    }
+  };
+
+  const SidebarNav = ({ onSelect }: { onSelect?: () => void }) => (
+    <>
+      <nav className="p-3 space-y-0.5">
+        <p className="px-3 pb-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 font-semibold">Workspace</p>
+        {sidebarItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => { setActivePanel(item.id); onSelect?.(); }}
+            className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] transition-all duration-200 ${
+              activePanel === item.id
+                ? "bg-accent text-accent-foreground font-medium"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+            }`}
+          >
+            <span className={activePanel === item.id ? "text-primary" : ""}>{item.icon}</span>
+            <span className="flex-1 text-left">{item.label}</span>
+          </button>
+        ))}
+      </nav>
+      <div className="h-px bg-border/30 mx-3" />
+      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin">
+        {activePanel === "history" && <ErrorHistory onSelect={handleHistorySelect} refreshKey={historyRefreshKey} />}
+        {activePanel === "chat" && <DebugChat errorContext={errorInput || undefined} />}
+        {activePanel === "snippets" && <SnippetLibrary />}
+        {(activePanel === "new" || activePanel === "trends") && (
+          <div className="p-4 space-y-3">
+            <p className="px-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 font-semibold">Quick start</p>
+            <div className="space-y-1">
+              {EXAMPLE_CHIPS.slice(0, 4).map((ex) => (
+                <button
+                  key={ex}
+                  onClick={() => { setErrorInput(ex); setInputMode("error"); setActivePanel("new"); onSelect?.(); }}
+                  className="w-full text-left text-[11px] font-mono text-muted-foreground hover:text-foreground p-2.5 rounded-lg hover:bg-muted/40 transition-colors"
+                >
+                  {ex}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="p-3 border-t border-border/30">
+        <p className="text-[10px] text-muted-foreground/70 leading-relaxed px-1">
+          20+ AI modes · 120+ languages
+        </p>
+      </div>
+    </>
+  );
 
   return (
     <>
@@ -263,27 +316,53 @@ const Index = () => {
       <div className="h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-hidden">
         {/* ─── Header ─── */}
         <header className="shrink-0 z-50 border-b border-border/30 glass">
-          <div className="flex items-center justify-between px-5 h-[58px]">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between px-3 sm:px-5 h-[54px] sm:h-[58px]">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              {/* Mobile hamburger */}
+              <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost" size="icon"
+                    className="md:hidden h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground"
+                    aria-label="Open menu"
+                  >
+                    <Menu className="h-4.5 w-4.5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[78vw] max-w-[300px] p-0 flex flex-col bg-card/95 backdrop-blur-xl">
+                  <SheetHeader className="px-4 py-3 border-b border-border/30">
+                    <SheetTitle className="flex items-center gap-2 text-[14px]">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-md btn-gradient-primary">
+                        <Terminal className="h-3 w-3 text-primary-foreground" />
+                      </div>
+                      Explain My Error
+                    </SheetTitle>
+                  </SheetHeader>
+                  <SidebarNav onSelect={() => setMobileNavOpen(false)} />
+                </SheetContent>
+              </Sheet>
+
+              {/* Desktop sidebar toggle */}
               <Button
                 variant="ghost" size="icon"
-                className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+                className="hidden md:flex h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+                onClick={() => setDesktopSidebarOpen(!desktopSidebarOpen)}
+                aria-label={desktopSidebarOpen ? "Close sidebar" : "Open sidebar"}
               >
-                {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+                {desktopSidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
               </Button>
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg btn-gradient-primary shadow-glow-sm">
+
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg btn-gradient-primary shadow-glow-sm shrink-0">
                   <Terminal className="h-3.5 w-3.5 text-primary-foreground" />
                 </div>
-                <div className="hidden sm:block leading-tight">
-                  <h1 className="font-semibold text-[14px] text-foreground tracking-tight">Explain My Error</h1>
-                  <p className="text-[10px] text-muted-foreground tracking-wide">AI debugger for developers</p>
+                <div className="leading-tight min-w-0">
+                  <h1 className="font-semibold text-[13px] sm:text-[14px] text-foreground tracking-tight truncate">Explain My Error</h1>
+                  <p className="hidden sm:block text-[10px] text-muted-foreground tracking-wide">AI debugger for developers</p>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <ThemeToggle />
               {session ? (
                 <>
@@ -305,7 +384,7 @@ const Index = () => {
                       <Badge variant="destructive" className="text-[10px] rounded-full cursor-pointer">Limit reached</Badge>
                     </button>
                   )}
-                  <Button size="sm" className="h-8 px-4 text-[11px] font-semibold rounded-lg btn-gradient-primary text-primary-foreground" onClick={() => setShowAuthModal(true)}>
+                  <Button size="sm" className="h-8 px-3 sm:px-4 text-[11px] font-semibold rounded-lg btn-gradient-primary text-primary-foreground" onClick={() => setShowAuthModal(true)}>
                     Sign in
                   </Button>
                 </>
@@ -315,63 +394,13 @@ const Index = () => {
         </header>
 
         <div className="flex flex-1 overflow-hidden">
-          {/* ─── Sidebar ─── */}
+          {/* ─── Desktop Sidebar ─── */}
           <aside
-            className={`shrink-0 border-r border-border/30 bg-card/40 flex flex-col transition-all duration-300 ease-out ${
-              sidebarOpen ? "w-60 max-w-[75vw]" : "w-0 overflow-hidden"
+            className={`hidden md:flex shrink-0 border-r border-border/30 bg-card/40 flex-col transition-all duration-300 ease-out ${
+              desktopSidebarOpen ? "w-60" : "w-0 overflow-hidden"
             }`}
           >
-            <nav className="p-3 space-y-0.5">
-              <p className="px-3 pb-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 font-semibold">Workspace</p>
-              {sidebarItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActivePanel(item.id)}
-                  className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-[12.5px] transition-all duration-200 ${
-                    activePanel === item.id
-                      ? "bg-accent text-accent-foreground font-medium"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                  }`}
-                >
-                  <span className={activePanel === item.id ? "text-primary" : ""}>{item.icon}</span>
-                  <span className="flex-1 text-left">{item.label}</span>
-                </button>
-              ))}
-            </nav>
-
-            <div className="h-px bg-border/30 mx-3" />
-
-            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin">
-              {activePanel === "history" && <ErrorHistory onSelect={handleHistorySelect} refreshKey={historyRefreshKey} />}
-              {activePanel === "chat" && <DebugChat errorContext={errorInput || undefined} />}
-              {activePanel === "snippets" && <SnippetLibrary />}
-              {(activePanel === "new" || activePanel === "trends") && (
-                <div className="p-4 space-y-3">
-                  <p className="px-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 font-semibold">Quick start</p>
-                  <div className="space-y-1">
-                    {[
-                      "TypeError: Cannot read properties of undefined",
-                      "SyntaxError: Unexpected token",
-                      "IndentationError: unexpected indent",
-                    ].map((ex) => (
-                      <button
-                        key={ex}
-                        onClick={() => { setErrorInput(ex); setInputMode("error"); setActivePanel("new"); }}
-                        className="w-full text-left text-[11px] font-mono text-muted-foreground hover:text-foreground p-2.5 rounded-lg hover:bg-muted/40 transition-colors"
-                      >
-                        {ex}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="p-3 border-t border-border/30">
-              <p className="text-[10px] text-muted-foreground/70 leading-relaxed px-1">
-                20+ AI modes · 120+ languages
-              </p>
-            </div>
+            <SidebarNav />
           </aside>
 
           {/* ─── Main Content ─── */}
@@ -379,28 +408,59 @@ const Index = () => {
             {activePanel === "trends" ? (
               <ErrorTrends refreshKey={historyRefreshKey} />
             ) : (
-              <div className="max-w-4xl mx-auto px-6 sm:px-10 py-10 lg:py-14 space-y-10 w-full">
+              <div className="max-w-[900px] mx-auto px-4 sm:px-8 py-5 sm:py-10 pb-32 md:pb-10 space-y-6 sm:space-y-10 w-full">
 
                 {/* ─── Hero ─── */}
                 {!result && !loading && (
-                  <div className="text-center space-y-3 max-w-2xl mx-auto">
+                  <div className="text-center space-y-2 sm:space-y-3 max-w-2xl mx-auto pt-1 sm:pt-2">
                     <Badge variant="secondary" className="rounded-full text-[10px] font-medium px-3 py-1 bg-accent/60 text-accent-foreground border border-border/30">
                       <Sparkles className="h-3 w-3 mr-1.5" />
                       AI-powered · 120+ languages
                     </Badge>
-                    <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
+                    <h2 className="text-2xl sm:text-4xl font-semibold tracking-tight text-foreground leading-tight">
                       Paste your error. Get the fix.
                     </h2>
-                    <p className="text-[14px] text-muted-foreground leading-relaxed">
-                      Instant explanations, root causes, and code suggestions for any error, log, or snippet.
+                    <p className="text-[13px] sm:text-[14px] text-muted-foreground leading-relaxed px-2">
+                      Instant explanations, root causes, and code fixes for any error or log.
                     </p>
                   </div>
                 )}
 
+                {/* ─── Mobile: Upload screenshot button above textarea ─── */}
+                <div className="md:hidden flex items-center justify-between gap-2 -mb-2">
+                  <Popover open={modePickerOpen} onOpenChange={setModePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-foreground bg-muted/40 hover:bg-muted/60 transition-colors">
+                        <span className="text-primary">{currentMode.icon}</span>
+                        <span>{currentMode.label}</span>
+                        <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="w-[88vw] max-w-[380px] p-0 rounded-xl border-border/50 shadow-xl">
+                      <ModePickerContent
+                        inputMode={inputMode}
+                        onPick={(id) => { setInputMode(id); setModePickerOpen(false); }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <ImageUpload
+                    onTextExtracted={(text) => {
+                      setErrorInput(text); setResult(null); setInputMode("error");
+                    }}
+                  />
+                </div>
+
                 {/* ─── Primary Input Card ─── */}
-                <Card className="border-border/40 bg-card rounded-2xl shadow-lg shadow-black/[0.03] dark:shadow-black/20 overflow-hidden">
-                  {/* Top bar: mode picker + image upload */}
-                  <div className="flex items-center justify-between gap-3 px-5 py-3 border-b border-border/30 bg-muted/20">
+                <Card
+                  className={`border-border/40 bg-card rounded-2xl shadow-lg shadow-black/[0.03] dark:shadow-black/20 overflow-hidden transition-all ${
+                    isDragging ? "ring-2 ring-primary/50 border-primary/50" : ""
+                  }`}
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                >
+                  {/* Desktop top bar: mode picker + image upload */}
+                  <div className="hidden md:flex items-center justify-between gap-3 px-5 py-3 border-b border-border/30 bg-muted/20">
                     <div className="flex items-center gap-2 min-w-0">
                       <Popover open={modePickerOpen} onOpenChange={setModePickerOpen}>
                         <PopoverTrigger asChild>
@@ -411,37 +471,10 @@ const Index = () => {
                           </button>
                         </PopoverTrigger>
                         <PopoverContent align="start" className="w-[440px] p-0 rounded-xl border-border/50 shadow-xl">
-                          <div className="p-3 border-b border-border/40">
-                            <p className="text-[11px] font-semibold text-foreground">Choose an analysis mode</p>
-                            <p className="text-[10px] text-muted-foreground">Pick the type of input you're pasting</p>
-                          </div>
-                          <div className="max-h-[420px] overflow-y-auto scrollbar-thin p-2">
-                            {categories.map((cat) => {
-                              const modes = inputModes.filter(m => m.category === cat);
-                              return (
-                                <div key={cat} className="mb-2 last:mb-0">
-                                  <p className="px-2 py-1.5 text-[9px] uppercase tracking-[0.12em] font-semibold text-muted-foreground/80">{cat}</p>
-                                  <div className="grid grid-cols-2 gap-1">
-                                    {modes.map((m) => (
-                                      <button
-                                        key={m.id}
-                                        onClick={() => { setInputMode(m.id); setModePickerOpen(false); }}
-                                        className={`flex items-start gap-2 p-2 rounded-lg text-left transition-colors ${
-                                          inputMode === m.id ? "bg-accent" : "hover:bg-muted/50"
-                                        }`}
-                                      >
-                                        <span className={`mt-0.5 ${inputMode === m.id ? "text-primary" : "text-muted-foreground"}`}>{m.icon}</span>
-                                        <div className="min-w-0 flex-1">
-                                          <p className="text-[11.5px] font-medium text-foreground leading-tight">{m.label}</p>
-                                          {m.description && <p className="text-[10px] text-muted-foreground leading-tight mt-0.5 truncate">{m.description}</p>}
-                                        </div>
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
+                          <ModePickerContent
+                            inputMode={inputMode}
+                            onPick={(id) => { setInputMode(id); setModePickerOpen(false); }}
+                          />
                         </PopoverContent>
                       </Popover>
                       {currentMode.description && (
@@ -456,80 +489,52 @@ const Index = () => {
                   </div>
 
                   {/* Textarea */}
-                  <div className="p-5 pb-3">
+                  <div className="p-3 sm:p-5 pb-3">
                     <Textarea
                       placeholder={currentMode?.placeholder || "Paste your error…"}
-                      className="font-mono text-[13px] min-h-[220px] bg-transparent resize-y rounded-lg border-border/40 focus:border-primary/50 input-glow transition-colors placeholder:text-muted-foreground/60"
+                      className="font-mono text-[13px] min-h-[200px] sm:min-h-[240px] bg-transparent resize-y rounded-lg border-border/40 focus:border-primary/50 input-glow transition-colors placeholder:text-muted-foreground/70"
                       value={errorInput}
                       onChange={(e) => setErrorInput(e.target.value)}
                     />
+                  </div>
 
-                    {!errorInput && (
-                      <div className="flex flex-wrap gap-1.5 mt-3">
-                        <span className="text-[10px] text-muted-foreground self-center mr-1 font-medium">Try</span>
-                        {exampleChips.map(chip => (
+                  {/* Example chips — horizontally scrollable on mobile */}
+                  {!errorInput && (
+                    <div className="px-3 sm:px-5 pb-3">
+                      <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-thin -mx-1 px-1 pb-1 snap-x">
+                        <span className="text-[10px] text-muted-foreground self-center mr-1 font-medium shrink-0 uppercase tracking-wider">Try</span>
+                        {EXAMPLE_CHIPS.map(chip => (
                           <button
                             key={chip}
                             onClick={() => { setErrorInput(chip); setInputMode("error"); }}
-                            className="text-[10px] font-mono text-muted-foreground hover:text-foreground bg-muted/30 hover:bg-muted/60 px-2.5 py-1 rounded-md border border-border/30 transition-colors"
+                            className="shrink-0 snap-start text-[11px] font-mono text-muted-foreground hover:text-foreground bg-muted/30 hover:bg-muted/60 px-2.5 py-1.5 rounded-md border border-border/30 transition-colors whitespace-nowrap"
                           >
-                            {chip.length > 32 ? chip.slice(0, 32) + "…" : chip}
+                            {chip}
                           </button>
                         ))}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
-                  {/* Footer toolbar: options + submit */}
-                  <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-border/30 bg-muted/10">
+                  {/* Footer toolbar: options + submit (desktop) */}
+                  <div className="hidden md:flex items-center justify-between gap-3 px-5 py-3 border-t border-border/30 bg-muted/10">
                     <Popover open={optionsOpen} onOpenChange={setOptionsOpen}>
                       <PopoverTrigger asChild>
                         <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
                           <SlidersHorizontal className="h-3.5 w-3.5" />
                           <span>Options</span>
-                          <span className="hidden sm:inline text-muted-foreground/70">·</span>
-                          <span className="hidden sm:inline text-foreground/80 capitalize">{analysisMode}</span>
-                          <span className="hidden sm:inline text-muted-foreground/70">·</span>
-                          <span className="hidden sm:inline text-foreground/80 capitalize">{outputLength}</span>
+                          <span className="text-muted-foreground/70">·</span>
+                          <span className="text-foreground/80 capitalize">{analysisMode}</span>
+                          <span className="text-muted-foreground/70">·</span>
+                          <span className="text-foreground/80 capitalize">{outputLength}</span>
                         </button>
                       </PopoverTrigger>
                       <PopoverContent align="start" className="w-[320px] p-4 rounded-xl border-border/50 shadow-xl space-y-4">
-                        <div className="space-y-2">
-                          <p className="text-[10px] uppercase tracking-[0.12em] font-semibold text-muted-foreground">Analysis depth</p>
-                          <div className="flex items-center bg-muted/40 rounded-lg p-0.5">
-                            {(["simple", "explain", "deep"] as const).map((mode) => (
-                              <button
-                                key={mode}
-                                onClick={() => setAnalysisMode(mode)}
-                                className={`flex-1 px-2 py-1.5 rounded-md text-[11px] font-medium capitalize transition-all ${
-                                  analysisMode === mode ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                                }`}
-                              >
-                                {mode}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <p className="text-[10px] uppercase tracking-[0.12em] font-semibold text-muted-foreground">Output length</p>
-                          <div className="flex items-center bg-muted/40 rounded-lg p-0.5">
-                            {(["short", "medium", "detailed"] as const).map((len) => (
-                              <button
-                                key={len}
-                                onClick={() => setOutputLength(len)}
-                                className={`flex-1 px-2 py-1.5 rounded-md text-[11px] font-medium capitalize transition-all ${
-                                  outputLength === len ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                                }`}
-                              >
-                                {len}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <p className="text-[10px] uppercase tracking-[0.12em] font-semibold text-muted-foreground">Output language</p>
-                          <LanguageSelector value={outputLang} onChange={setOutputLang} />
-                        </div>
+                        <OptionsContent
+                          analysisMode={analysisMode} setAnalysisMode={setAnalysisMode}
+                          outputLength={outputLength} setOutputLength={setOutputLength}
+                          outputLang={outputLang} setOutputLang={setOutputLang}
+                        />
                       </PopoverContent>
                     </Popover>
 
@@ -549,23 +554,52 @@ const Index = () => {
                       </Button>
                     </div>
                   </div>
+
+                  {/* Mobile inline analyze button (when no input yet) */}
+                  {!errorInput && (
+                    <div className="md:hidden p-3 pt-1 border-t border-border/30 flex items-center justify-between gap-2">
+                      <Popover open={optionsOpen} onOpenChange={setOptionsOpen}>
+                        <PopoverTrigger asChild>
+                          <button className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
+                            <SlidersHorizontal className="h-3.5 w-3.5" />
+                            Options
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent align="start" className="w-[88vw] max-w-[320px] p-4 rounded-xl border-border/50 shadow-xl space-y-4">
+                          <OptionsContent
+                            analysisMode={analysisMode} setAnalysisMode={setAnalysisMode}
+                            outputLength={outputLength} setOutputLength={setOutputLength}
+                            outputLang={outputLang} setOutputLang={setOutputLang}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <Button
+                        onClick={handleSubmit}
+                        disabled={loading || !errorInput.trim()}
+                        className="flex-1 gap-2 h-11 px-5 font-semibold text-[13px] rounded-lg btn-gradient-primary text-primary-foreground disabled:opacity-30"
+                      >
+                        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                        {loading ? "Analyzing…" : submitLabel}
+                      </Button>
+                    </div>
+                  )}
                 </Card>
 
                 {/* ─── Workflow hint ─── */}
                 {!result && !loading && (
-                  <div className="grid grid-cols-3 gap-3 max-w-2xl mx-auto">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3 max-w-2xl mx-auto">
                     {[
                       { n: "1", title: "Paste", desc: "Drop in your error or code" },
                       { n: "2", title: "Analyze", desc: "AI scans in seconds" },
                       { n: "3", title: "Resolve", desc: "Get the fix and explanation" },
                     ].map((step, i, arr) => (
-                      <div key={step.n} className="relative flex items-start gap-2.5 p-3 rounded-xl bg-card/40 border border-border/30">
-                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground text-[11px] font-semibold">
+                      <div key={step.n} className="relative flex items-start gap-2 sm:gap-2.5 p-2.5 sm:p-3 rounded-xl bg-card/40 border border-border/30">
+                        <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground text-[10px] sm:text-[11px] font-semibold">
                           {step.n}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[12px] font-semibold text-foreground leading-tight">{step.title}</p>
-                          <p className="text-[10.5px] text-muted-foreground leading-tight mt-0.5">{step.desc}</p>
+                          <p className="text-[11px] sm:text-[12px] font-semibold text-foreground leading-tight">{step.title}</p>
+                          <p className="hidden sm:block text-[10.5px] text-muted-foreground leading-tight mt-0.5">{step.desc}</p>
                         </div>
                         {i < arr.length - 1 && (
                           <ArrowRight className="hidden sm:block absolute -right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-border" />
@@ -578,7 +612,7 @@ const Index = () => {
                 {/* Loading */}
                 {loading && (
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                    <div className="flex flex-col items-center justify-center py-16 space-y-6">
+                    <div className="flex flex-col items-center justify-center py-10 sm:py-16 space-y-6">
                       <div className="relative">
                         <div className="h-14 w-14 rounded-full border border-border/20" />
                         <div className="absolute inset-0 h-14 w-14 rounded-full border-2 border-primary/40 border-t-transparent animate-spin" style={{ animationDuration: '1.2s' }} />
@@ -614,7 +648,7 @@ const Index = () => {
                     <Card className="mt-8 border-dashed border-border/40 bg-card/30 rounded-2xl hover:bg-card/50 transition-colors">
                       <CardContent className="py-4">
                         <button
-                          onClick={() => { setActivePanel("chat"); setSidebarOpen(true); }}
+                          onClick={() => { setActivePanel("chat"); setMobileNavOpen(true); }}
                           className="w-full flex items-center justify-center gap-2 text-[12px] font-medium text-muted-foreground hover:text-primary transition-colors"
                         >
                           <MessageSquare className="h-3.5 w-3.5" />
@@ -630,6 +664,25 @@ const Index = () => {
           </main>
         </div>
 
+        {/* ─── Mobile Sticky Analyze Bar ─── */}
+        {errorInput && !result && !loading && (
+          <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-3 py-2.5 border-t border-border/40 glass">
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={handleNewError} className="text-[11px] rounded-lg text-muted-foreground hover:text-foreground h-11 px-3 shrink-0">
+                Clear
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="flex-1 gap-2 h-11 font-semibold text-[13.5px] rounded-lg btn-gradient-primary text-primary-foreground disabled:opacity-30 shadow-glow"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                {loading ? "Analyzing…" : submitLabel}
+              </Button>
+            </div>
+          </div>
+        )}
+
         <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
         <UpgradePrompt
           open={showUpgrade}
@@ -641,5 +694,91 @@ const Index = () => {
     </>
   );
 };
+
+const ModePickerContent = ({ inputMode, onPick }: { inputMode: string; onPick: (id: string) => void }) => (
+  <>
+    <div className="p-3 border-b border-border/40">
+      <p className="text-[11px] font-semibold text-foreground">Choose an analysis mode</p>
+      <p className="text-[10px] text-muted-foreground">Pick the type of input you're pasting</p>
+    </div>
+    <div className="max-h-[60vh] sm:max-h-[420px] overflow-y-auto scrollbar-thin p-2">
+      {categories.map((cat) => {
+        const modes = inputModes.filter(m => m.category === cat);
+        return (
+          <div key={cat} className="mb-2 last:mb-0">
+            <p className="px-2 py-1.5 text-[9px] uppercase tracking-[0.12em] font-semibold text-muted-foreground/80">{cat}</p>
+            <div className="grid grid-cols-2 gap-1">
+              {modes.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => onPick(m.id)}
+                  className={`flex items-start gap-2 p-2 rounded-lg text-left transition-colors ${
+                    inputMode === m.id ? "bg-accent" : "hover:bg-muted/50"
+                  }`}
+                >
+                  <span className={`mt-0.5 ${inputMode === m.id ? "text-primary" : "text-muted-foreground"}`}>{m.icon}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11.5px] font-medium text-foreground leading-tight">{m.label}</p>
+                    {m.description && <p className="text-[10px] text-muted-foreground leading-tight mt-0.5 truncate">{m.description}</p>}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </>
+);
+
+const OptionsContent = ({
+  analysisMode, setAnalysisMode, outputLength, setOutputLength, outputLang, setOutputLang,
+}: {
+  analysisMode: "simple" | "explain" | "deep";
+  setAnalysisMode: (m: "simple" | "explain" | "deep") => void;
+  outputLength: "short" | "medium" | "detailed";
+  setOutputLength: (l: "short" | "medium" | "detailed") => void;
+  outputLang: string;
+  setOutputLang: (l: string) => void;
+}) => (
+  <>
+    <div className="space-y-2">
+      <p className="text-[10px] uppercase tracking-[0.12em] font-semibold text-muted-foreground">Analysis depth</p>
+      <div className="flex items-center bg-muted/40 rounded-lg p-0.5">
+        {(["simple", "explain", "deep"] as const).map((mode) => (
+          <button
+            key={mode}
+            onClick={() => setAnalysisMode(mode)}
+            className={`flex-1 px-2 py-1.5 rounded-md text-[11px] font-medium capitalize transition-all ${
+              analysisMode === mode ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {mode}
+          </button>
+        ))}
+      </div>
+    </div>
+    <div className="space-y-2">
+      <p className="text-[10px] uppercase tracking-[0.12em] font-semibold text-muted-foreground">Output length</p>
+      <div className="flex items-center bg-muted/40 rounded-lg p-0.5">
+        {(["short", "medium", "detailed"] as const).map((len) => (
+          <button
+            key={len}
+            onClick={() => setOutputLength(len)}
+            className={`flex-1 px-2 py-1.5 rounded-md text-[11px] font-medium capitalize transition-all ${
+              outputLength === len ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {len}
+          </button>
+        ))}
+      </div>
+    </div>
+    <div className="space-y-2">
+      <p className="text-[10px] uppercase tracking-[0.12em] font-semibold text-muted-foreground">Output language</p>
+      <LanguageSelector value={outputLang} onChange={setOutputLang} />
+    </div>
+  </>
+);
 
 export default Index;
