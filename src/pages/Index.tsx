@@ -209,7 +209,11 @@ const Index = () => {
     setInputMode("error");
     setResult(null);
     setShowSuggestions(false);
-    setTimeout(() => textareaRef.current?.focus(), 0);
+    suppressFocusOpenRef.current = true;
+    setTimeout(() => {
+      textareaRef.current?.focus();
+      suppressFocusOpenRef.current = false;
+    }, 0);
   };
 
   useEffect(() => {
