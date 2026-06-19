@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
@@ -110,13 +110,52 @@ const inputModes: ModeConfig[] = [
 
 const categories = ["Analyze", "Improve", "Generate", "Compare", "Tester Tools"];
 
-const EXAMPLE_CHIPS = [
-  "TypeError",
-  "Cannot read properties of undefined",
-  "CORS Error",
-  "Module not found",
-  "Syntax Error",
-  "Unexpected token",
+interface ErrorSuggestion {
+  label: string;
+  example: string;
+}
+
+const ERROR_SUGGESTIONS: ErrorSuggestion[] = [
+  {
+    label: "TypeError: undefined",
+    example: "TypeError: Cannot read properties of undefined (reading 'map')\n    at UserList (UserList.tsx:24:18)\n    at renderWithHooks (react-dom.development.js:14985:18)\n    at mountIndeterminateComponent (react-dom.development.js:17811:13)",
+  },
+  {
+    label: "ReferenceError",
+    example: "ReferenceError: userName is not defined\n    at handleSubmit (LoginForm.tsx:42:5)\n    at HTMLButtonElement.onclick (LoginForm.tsx:78:22)",
+  },
+  {
+    label: "SyntaxError",
+    example: "SyntaxError: Unexpected token '}' \n    at /src/utils/parser.js:18:3\n    at Module._compile (node:internal/modules/cjs/loader:1126:14)",
+  },
+  {
+    label: "Module not found",
+    example: "Module not found: Error: Can't resolve 'react-router' in '/app/src/pages'\n  > 1 | import { useNavigate } from 'react-router';\n      | ^\n  Did you mean 'react-router-dom'?",
+  },
+  {
+    label: "CORS policy error",
+    example: "Access to fetch at 'https://api.example.com/users' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+  },
+  {
+    label: "Network Error",
+    example: "Network Error\n    at XMLHttpRequest.handleError (axios/lib/adapters/xhr.js:96:14)\n    at XMLHttpRequest.dispatchEvent\n  Config: GET https://api.example.com/data — timeout: 10000ms",
+  },
+  {
+    label: "API request failed",
+    example: "Request failed with status code 401\n  URL: POST https://api.example.com/v1/orders\n  Response: { \"error\": \"Unauthorized\", \"message\": \"Invalid or expired access token\" }",
+  },
+  {
+    label: "Build / Compilation Error",
+    example: "ERROR in ./src/App.tsx:12:8\nTS2304: Cannot find name 'useStat'. Did you mean 'useState'?\n   10 | import { useState } from 'react';\n   11 |\n>  12 | const [count, useStat] = useStat(0);\n      |        ^^^^^^^",
+  },
+  {
+    label: "Database Connection Error",
+    example: "Error: connect ECONNREFUSED 127.0.0.1:5432\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1494:16)\n  code: 'ECONNREFUSED', errno: -111, host: '127.0.0.1', port: 5432",
+  },
+  {
+    label: "Authentication Error",
+    example: "AuthError: Invalid login credentials\n  status: 400\n  name: 'AuthApiError'\n  message: 'Invalid login credentials'\n    at handleSignIn (auth.ts:58:11)",
+  },
 ];
 
 const Index = () => {
@@ -139,6 +178,41 @@ const Index = () => {
   const [outputLang, setOutputLang] = useState("en");
   const [similarError, setSimilarError] = useState<{ errorMessage: string; timestamp: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const inputAreaRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    if (!showSuggestions) return;
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      if (inputAreaRef.current && !inputAreaRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("touchstart", onDown);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("touchstart", onDown);
+    };
+  }, [showSuggestions]);
+
+  const filteredSuggestions = (() => {
+    const q = errorInput.trim().toLowerCase();
+    if (!q) return ERROR_SUGGESTIONS;
+    const matches = ERROR_SUGGESTIONS.filter(
+      (s) => s.label.toLowerCase().includes(q) || s.example.toLowerCase().includes(q)
+    );
+    return matches.length ? matches : ERROR_SUGGESTIONS;
+  })();
+
+  const pickSuggestion = (s: ErrorSuggestion) => {
+    setErrorInput(s.example);
+    setInputMode("error");
+    setResult(null);
+    setShowSuggestions(false);
+    setTimeout(() => textareaRef.current?.focus(), 0);
+  };
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => setSession(s));
@@ -270,13 +344,13 @@ const Index = () => {
           <div className="p-4 space-y-3">
             <p className="px-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 font-semibold">Quick start</p>
             <div className="space-y-1">
-              {EXAMPLE_CHIPS.slice(0, 4).map((ex) => (
+              {ERROR_SUGGESTIONS.slice(0, 5).map((s) => (
                 <button
-                  key={ex}
-                  onClick={() => { setErrorInput(ex); setInputMode("error"); setActivePanel("new"); onSelect?.(); }}
+                  key={s.label}
+                  onClick={() => { pickSuggestion(s); setActivePanel("new"); onSelect?.(); }}
                   className="w-full text-left text-[11px] font-mono text-muted-foreground hover:text-foreground p-2.5 rounded-lg hover:bg-muted/40 transition-colors"
                 >
-                  {ex}
+                  {s.label}
                 </button>
               ))}
             </div>
@@ -488,33 +562,54 @@ const Index = () => {
                     />
                   </div>
 
-                  {/* Textarea */}
-                  <div className="p-3 sm:p-5 pb-3">
+                  {/* Textarea + Suggestions */}
+                  <div ref={inputAreaRef} className="p-3 sm:p-5 pb-3 relative">
                     <Textarea
+                      ref={textareaRef}
                       placeholder={currentMode?.placeholder || "Paste your error…"}
                       className="font-mono text-[13px] min-h-[200px] sm:min-h-[240px] bg-transparent resize-y rounded-lg border-border/40 focus:border-primary/50 input-glow transition-colors placeholder:text-muted-foreground/70"
                       value={errorInput}
-                      onChange={(e) => setErrorInput(e.target.value)}
+                      onChange={(e) => { setErrorInput(e.target.value); setShowSuggestions(true); }}
+                      onFocus={() => setShowSuggestions(true)}
+                      onClick={() => setShowSuggestions(true)}
                     />
+
+                    {showSuggestions && inputMode === "error" && (
+                      <div
+                        className="mt-3 rounded-xl border border-border/40 bg-popover/95 backdrop-blur-md shadow-lg p-3 animate-in fade-in slide-in-from-top-1 duration-200 z-20 relative"
+                        role="listbox"
+                        aria-label="Common error suggestions"
+                      >
+                        <div className="flex items-center justify-between mb-2 px-1">
+                          <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+                            {errorInput.trim() ? "Matching suggestions" : "Common errors"}
+                          </span>
+                          <button
+                            onClick={() => setShowSuggestions(false)}
+                            className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                            aria-label="Hide suggestions"
+                          >
+                            Hide
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {filteredSuggestions.map((s) => (
+                            <button
+                              key={s.label}
+                              type="button"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => pickSuggestion(s)}
+                              title={s.example}
+                              className="text-[11.5px] font-mono text-foreground/80 hover:text-foreground bg-muted/40 hover:bg-primary/10 hover:border-primary/40 px-2.5 py-1.5 rounded-md border border-border/40 transition-all whitespace-nowrap max-w-full truncate"
+                            >
+                              {s.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Example chips — horizontally scrollable on mobile */}
-                  {!errorInput && (
-                    <div className="px-3 sm:px-5 pb-3">
-                      <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-thin -mx-1 px-1 pb-1 snap-x">
-                        <span className="text-[10px] text-muted-foreground self-center mr-1 font-medium shrink-0 uppercase tracking-wider">Try</span>
-                        {EXAMPLE_CHIPS.map(chip => (
-                          <button
-                            key={chip}
-                            onClick={() => { setErrorInput(chip); setInputMode("error"); }}
-                            className="shrink-0 snap-start text-[11px] font-mono text-muted-foreground hover:text-foreground bg-muted/30 hover:bg-muted/60 px-2.5 py-1.5 rounded-md border border-border/30 transition-colors whitespace-nowrap"
-                          >
-                            {chip}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
                   {/* Footer toolbar: options + submit (desktop) */}
                   <div className="hidden md:flex items-center justify-between gap-3 px-5 py-3 border-t border-border/30 bg-muted/10">
