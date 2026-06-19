@@ -344,13 +344,13 @@ const Index = () => {
           <div className="p-4 space-y-3">
             <p className="px-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 font-semibold">Quick start</p>
             <div className="space-y-1">
-              {EXAMPLE_CHIPS.slice(0, 4).map((ex) => (
+              {ERROR_SUGGESTIONS.slice(0, 5).map((s) => (
                 <button
-                  key={ex}
-                  onClick={() => { setErrorInput(ex); setInputMode("error"); setActivePanel("new"); onSelect?.(); }}
+                  key={s.label}
+                  onClick={() => { pickSuggestion(s); setActivePanel("new"); onSelect?.(); }}
                   className="w-full text-left text-[11px] font-mono text-muted-foreground hover:text-foreground p-2.5 rounded-lg hover:bg-muted/40 transition-colors"
                 >
-                  {ex}
+                  {s.label}
                 </button>
               ))}
             </div>
