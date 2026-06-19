@@ -178,6 +178,41 @@ const Index = () => {
   const [outputLang, setOutputLang] = useState("en");
   const [similarError, setSimilarError] = useState<{ errorMessage: string; timestamp: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const inputAreaRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    if (!showSuggestions) return;
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      if (inputAreaRef.current && !inputAreaRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("touchstart", onDown);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("touchstart", onDown);
+    };
+  }, [showSuggestions]);
+
+  const filteredSuggestions = (() => {
+    const q = errorInput.trim().toLowerCase();
+    if (!q) return ERROR_SUGGESTIONS;
+    const matches = ERROR_SUGGESTIONS.filter(
+      (s) => s.label.toLowerCase().includes(q) || s.example.toLowerCase().includes(q)
+    );
+    return matches.length ? matches : ERROR_SUGGESTIONS;
+  })();
+
+  const pickSuggestion = (s: ErrorSuggestion) => {
+    setErrorInput(s.example);
+    setInputMode("error");
+    setResult(null);
+    setShowSuggestions(false);
+    setTimeout(() => textareaRef.current?.focus(), 0);
+  };
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => setSession(s));
