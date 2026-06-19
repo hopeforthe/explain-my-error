@@ -562,33 +562,54 @@ const Index = () => {
                     />
                   </div>
 
-                  {/* Textarea */}
-                  <div className="p-3 sm:p-5 pb-3">
+                  {/* Textarea + Suggestions */}
+                  <div ref={inputAreaRef} className="p-3 sm:p-5 pb-3 relative">
                     <Textarea
+                      ref={textareaRef}
                       placeholder={currentMode?.placeholder || "Paste your error…"}
                       className="font-mono text-[13px] min-h-[200px] sm:min-h-[240px] bg-transparent resize-y rounded-lg border-border/40 focus:border-primary/50 input-glow transition-colors placeholder:text-muted-foreground/70"
                       value={errorInput}
-                      onChange={(e) => setErrorInput(e.target.value)}
+                      onChange={(e) => { setErrorInput(e.target.value); setShowSuggestions(true); }}
+                      onFocus={() => setShowSuggestions(true)}
+                      onClick={() => setShowSuggestions(true)}
                     />
+
+                    {showSuggestions && inputMode === "error" && (
+                      <div
+                        className="mt-3 rounded-xl border border-border/40 bg-popover/95 backdrop-blur-md shadow-lg p-3 animate-in fade-in slide-in-from-top-1 duration-200 z-20 relative"
+                        role="listbox"
+                        aria-label="Common error suggestions"
+                      >
+                        <div className="flex items-center justify-between mb-2 px-1">
+                          <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+                            {errorInput.trim() ? "Matching suggestions" : "Common errors"}
+                          </span>
+                          <button
+                            onClick={() => setShowSuggestions(false)}
+                            className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                            aria-label="Hide suggestions"
+                          >
+                            Hide
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {filteredSuggestions.map((s) => (
+                            <button
+                              key={s.label}
+                              type="button"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => pickSuggestion(s)}
+                              title={s.example}
+                              className="text-[11.5px] font-mono text-foreground/80 hover:text-foreground bg-muted/40 hover:bg-primary/10 hover:border-primary/40 px-2.5 py-1.5 rounded-md border border-border/40 transition-all whitespace-nowrap max-w-full truncate"
+                            >
+                              {s.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Example chips — horizontally scrollable on mobile */}
-                  {!errorInput && (
-                    <div className="px-3 sm:px-5 pb-3">
-                      <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-thin -mx-1 px-1 pb-1 snap-x">
-                        <span className="text-[10px] text-muted-foreground self-center mr-1 font-medium shrink-0 uppercase tracking-wider">Try</span>
-                        {EXAMPLE_CHIPS.map(chip => (
-                          <button
-                            key={chip}
-                            onClick={() => { setErrorInput(chip); setInputMode("error"); }}
-                            className="shrink-0 snap-start text-[11px] font-mono text-muted-foreground hover:text-foreground bg-muted/30 hover:bg-muted/60 px-2.5 py-1.5 rounded-md border border-border/30 transition-colors whitespace-nowrap"
-                          >
-                            {chip}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
                   {/* Footer toolbar: options + submit (desktop) */}
                   <div className="hidden md:flex items-center justify-between gap-3 px-5 py-3 border-t border-border/30 bg-muted/10">
