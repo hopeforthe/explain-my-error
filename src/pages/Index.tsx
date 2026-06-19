@@ -181,21 +181,18 @@ const Index = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputAreaRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const suppressFocusOpenRef = useRef(false);
 
   useEffect(() => {
-    if (!showSuggestions) return;
-    const onDown = (e: MouseEvent | TouchEvent) => {
-      if (inputAreaRef.current && !inputAreaRef.current.contains(e.target as Node)) {
+    const handlePointerDown = (e: PointerEvent) => {
+      if (!inputAreaRef.current) return;
+      if (!inputAreaRef.current.contains(e.target as Node)) {
         setShowSuggestions(false);
       }
     };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("touchstart", onDown);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("touchstart", onDown);
-    };
-  }, [showSuggestions]);
+    document.addEventListener("pointerdown", handlePointerDown, true);
+    return () => document.removeEventListener("pointerdown", handlePointerDown, true);
+  }, []);
 
   const filteredSuggestions = (() => {
     const q = errorInput.trim().toLowerCase();
@@ -211,7 +208,11 @@ const Index = () => {
     setInputMode("error");
     setResult(null);
     setShowSuggestions(false);
-    setTimeout(() => textareaRef.current?.focus(), 0);
+    suppressFocusOpenRef.current = true;
+    setTimeout(() => {
+      textareaRef.current?.focus();
+      suppressFocusOpenRef.current = false;
+    }, 0);
   };
 
   useEffect(() => {
@@ -569,23 +570,31 @@ const Index = () => {
                       placeholder={currentMode?.placeholder || "Paste your error…"}
                       className="font-mono text-[13px] min-h-[200px] sm:min-h-[240px] bg-transparent resize-y rounded-lg border-border/40 focus:border-primary/50 input-glow transition-colors placeholder:text-muted-foreground/70"
                       value={errorInput}
-                      onChange={(e) => { setErrorInput(e.target.value); setShowSuggestions(true); }}
-                      onFocus={() => setShowSuggestions(true)}
+                      onChange={(e) => { setErrorInput(e.target.value); if (!showSuggestions) setShowSuggestions(true); }}
+                      onFocus={() => { if (!suppressFocusOpenRef.current) setShowSuggestions(true); }}
                       onClick={() => setShowSuggestions(true)}
                     />
 
                     {showSuggestions && inputMode === "error" && (
                       <div
-                        className="mt-3 rounded-xl border border-border/40 bg-popover/95 backdrop-blur-md shadow-lg p-3 animate-in fade-in slide-in-from-top-1 duration-200 z-20 relative"
+                        className="mt-3 rounded-xl border border-border/40 bg-popover/95 backdrop-blur-md shadow-lg p-3 animate-in fade-in slide-in-from-top-1 duration-200 z-20"
                         role="listbox"
                         aria-label="Common error suggestions"
+                        onPointerDown={(e) => {
+                          e.preventDefault();
+                          textareaRef.current?.focus();
+                        }}
                       >
                         <div className="flex items-center justify-between mb-2 px-1">
                           <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
                             {errorInput.trim() ? "Matching suggestions" : "Common errors"}
                           </span>
                           <button
-                            onClick={() => setShowSuggestions(false)}
+                            type="button"
+                            onPointerDown={(e) => {
+                              e.preventDefault();
+                              setShowSuggestions(false);
+                            }}
                             className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
                             aria-label="Hide suggestions"
                           >
@@ -597,8 +606,11 @@ const Index = () => {
                             <button
                               key={s.label}
                               type="button"
-                              onMouseDown={(e) => e.preventDefault()}
-                              onClick={() => pickSuggestion(s)}
+                              onPointerDown={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                pickSuggestion(s);
+                              }}
                               title={s.example}
                               className="text-[11.5px] font-mono text-foreground/80 hover:text-foreground bg-muted/40 hover:bg-primary/10 hover:border-primary/40 px-2.5 py-1.5 rounded-md border border-border/40 transition-all whitespace-nowrap max-w-full truncate"
                             >
