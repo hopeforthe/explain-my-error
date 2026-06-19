@@ -185,19 +185,15 @@ const Index = () => {
 
 
   useEffect(() => {
-    if (!showSuggestions) return;
-    const onDown = (e: MouseEvent | TouchEvent) => {
-      if (inputAreaRef.current && !inputAreaRef.current.contains(e.target as Node)) {
+    const handlePointerDown = (e: PointerEvent) => {
+      if (!inputAreaRef.current) return;
+      if (!inputAreaRef.current.contains(e.target as Node)) {
         setShowSuggestions(false);
       }
     };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("touchstart", onDown);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("touchstart", onDown);
-    };
-  }, [showSuggestions]);
+    document.addEventListener("pointerdown", handlePointerDown, true);
+    return () => document.removeEventListener("pointerdown", handlePointerDown, true);
+  }, []);
 
   const filteredSuggestions = (() => {
     const q = errorInput.trim().toLowerCase();
