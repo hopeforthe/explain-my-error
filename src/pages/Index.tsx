@@ -183,7 +183,6 @@ const Index = () => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const suppressFocusOpenRef = useRef(false);
 
-
   useEffect(() => {
     const handlePointerDown = (e: PointerEvent) => {
       if (!inputAreaRef.current) return;
