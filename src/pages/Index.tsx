@@ -110,13 +110,52 @@ const inputModes: ModeConfig[] = [
 
 const categories = ["Analyze", "Improve", "Generate", "Compare", "Tester Tools"];
 
-const EXAMPLE_CHIPS = [
-  "TypeError",
-  "Cannot read properties of undefined",
-  "CORS Error",
-  "Module not found",
-  "Syntax Error",
-  "Unexpected token",
+interface ErrorSuggestion {
+  label: string;
+  example: string;
+}
+
+const ERROR_SUGGESTIONS: ErrorSuggestion[] = [
+  {
+    label: "TypeError: undefined",
+    example: "TypeError: Cannot read properties of undefined (reading 'map')\n    at UserList (UserList.tsx:24:18)\n    at renderWithHooks (react-dom.development.js:14985:18)\n    at mountIndeterminateComponent (react-dom.development.js:17811:13)",
+  },
+  {
+    label: "ReferenceError",
+    example: "ReferenceError: userName is not defined\n    at handleSubmit (LoginForm.tsx:42:5)\n    at HTMLButtonElement.onclick (LoginForm.tsx:78:22)",
+  },
+  {
+    label: "SyntaxError",
+    example: "SyntaxError: Unexpected token '}' \n    at /src/utils/parser.js:18:3\n    at Module._compile (node:internal/modules/cjs/loader:1126:14)",
+  },
+  {
+    label: "Module not found",
+    example: "Module not found: Error: Can't resolve 'react-router' in '/app/src/pages'\n  > 1 | import { useNavigate } from 'react-router';\n      | ^\n  Did you mean 'react-router-dom'?",
+  },
+  {
+    label: "CORS policy error",
+    example: "Access to fetch at 'https://api.example.com/users' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+  },
+  {
+    label: "Network Error",
+    example: "Network Error\n    at XMLHttpRequest.handleError (axios/lib/adapters/xhr.js:96:14)\n    at XMLHttpRequest.dispatchEvent\n  Config: GET https://api.example.com/data — timeout: 10000ms",
+  },
+  {
+    label: "API request failed",
+    example: "Request failed with status code 401\n  URL: POST https://api.example.com/v1/orders\n  Response: { \"error\": \"Unauthorized\", \"message\": \"Invalid or expired access token\" }",
+  },
+  {
+    label: "Build / Compilation Error",
+    example: "ERROR in ./src/App.tsx:12:8\nTS2304: Cannot find name 'useStat'. Did you mean 'useState'?\n   10 | import { useState } from 'react';\n   11 |\n>  12 | const [count, useStat] = useStat(0);\n      |        ^^^^^^^",
+  },
+  {
+    label: "Database Connection Error",
+    example: "Error: connect ECONNREFUSED 127.0.0.1:5432\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1494:16)\n  code: 'ECONNREFUSED', errno: -111, host: '127.0.0.1', port: 5432",
+  },
+  {
+    label: "Authentication Error",
+    example: "AuthError: Invalid login credentials\n  status: 400\n  name: 'AuthApiError'\n  message: 'Invalid login credentials'\n    at handleSignIn (auth.ts:58:11)",
+  },
 ];
 
 const Index = () => {
