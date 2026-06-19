@@ -181,6 +181,8 @@ const Index = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputAreaRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const suppressFocusOpenRef = useRef(false);
+
 
   useEffect(() => {
     if (!showSuggestions) return;
