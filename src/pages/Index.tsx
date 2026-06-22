@@ -463,7 +463,9 @@ const Index = () => {
                       Explain My Error
                     </SheetTitle>
                   </SheetHeader>
-                  <SidebarNav onSelect={() => setMobileNavOpen(false)} />
+                  {renderSidebarNav((itemId) => {
+                    if (itemId === "new") setMobileNavOpen(false);
+                  })}
                 </SheetContent>
               </Sheet>
 
@@ -525,7 +527,7 @@ const Index = () => {
               desktopSidebarOpen ? "w-60" : "w-0 overflow-hidden"
             }`}
           >
-            <SidebarNav />
+            {renderSidebarNav()}
           </aside>
 
           {/* ─── Main Content ─── */}
