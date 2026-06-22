@@ -49,6 +49,7 @@ const readDailyCount = () => {
 
 type SidebarPanel = "new" | "history" | "chat" | "trends" | "snippets";
 type InputMode = string;
+type TraceFn = (event: string, payload?: Record<string, unknown>) => void;
 
 interface ModeConfig {
   id: string;
@@ -171,8 +172,10 @@ const Index = () => {
   const [activePanel, setActivePanel] = useState<SidebarPanel>("new");
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [inputMode, setInputMode] = useState<InputMode>("error");
-  const [modePickerOpen, setModePickerOpen] = useState(false);
-  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [mobileModePickerOpen, setMobileModePickerOpen] = useState(false);
+  const [desktopModePickerOpen, setDesktopModePickerOpen] = useState(false);
+  const [mobileOptionsOpen, setMobileOptionsOpen] = useState(false);
+  const [desktopOptionsOpen, setDesktopOptionsOpen] = useState(false);
   const [analysisMode, setAnalysisMode] = useState<"simple" | "explain" | "deep">("explain");
   const [outputLength, setOutputLength] = useState<"short" | "medium" | "detailed">("medium");
   const [outputLang, setOutputLang] = useState("en");
@@ -183,16 +186,60 @@ const Index = () => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const suppressFocusOpenRef = useRef(false);
 
+  const trace = useCallback<TraceFn>((event, payload = {}) => {
+    console.log(`[Explain My Error trace] ${event}`, payload);
+  }, []);
+
   useEffect(() => {
+    trace("Index mounted");
+    return () => trace("Index unmounted");
+  }, [trace]);
+
+  useEffect(() => {
+    trace("state changed", {
+      activePanel,
+      inputMode,
+      errorInputLength: errorInput.length,
+      showSuggestions,
+      mobileModePickerOpen,
+      desktopModePickerOpen,
+      mobileOptionsOpen,
+      desktopOptionsOpen,
+      loading,
+      hasResult: Boolean(result),
+    });
+  }, [
+    activePanel,
+    inputMode,
+    errorInput.length,
+    showSuggestions,
+    mobileModePickerOpen,
+    desktopModePickerOpen,
+    mobileOptionsOpen,
+    desktopOptionsOpen,
+    loading,
+    result,
+    trace,
+  ]);
+
+  useEffect(() => {
+    if (!showSuggestions) return;
+    trace("suggestions outside-click effect mounted");
     const handlePointerDown = (e: PointerEvent) => {
       if (!inputAreaRef.current) return;
-      if (!inputAreaRef.current.contains(e.target as Node)) {
+      const clickedInsideInputArea = inputAreaRef.current.contains(e.target as Node);
+      trace("document pointerdown while suggestions open", { clickedInsideInputArea });
+      if (!clickedInsideInputArea) {
+        trace("closing suggestions: outside click");
         setShowSuggestions(false);
       }
     };
     document.addEventListener("pointerdown", handlePointerDown, true);
-    return () => document.removeEventListener("pointerdown", handlePointerDown, true);
-  }, []);
+    return () => {
+      trace("suggestions outside-click effect cleanup");
+      document.removeEventListener("pointerdown", handlePointerDown, true);
+    };
+  }, [showSuggestions, trace]);
 
   const filteredSuggestions = (() => {
     const q = errorInput.trim().toLowerCase();
@@ -204,6 +251,7 @@ const Index = () => {
   })();
 
   const pickSuggestion = (s: ErrorSuggestion) => {
+    trace("pickSuggestion executed", { label: s.label });
     setErrorInput(s.example);
     setInputMode("error");
     setResult(null);
@@ -273,14 +321,16 @@ const Index = () => {
   };
 
   const handleNewError = useCallback(() => {
+    trace("clear/new analysis click executed");
     setErrorInput(""); setResult(null); setSimilarError(null); setActivePanel("new");
-  }, []);
+  }, [trace]);
 
   const handleHistorySelect = useCallback((errorMessage: string) => {
+    trace("history item click executed", { errorInputLength: errorMessage.length });
     setErrorInput(errorMessage); setResult(null); setSimilarError(null);
     setActivePanel("new"); setInputMode("error");
     setMobileNavOpen(false);
-  }, []);
+  }, [trace]);
 
   const currentMode = inputModes.find((m) => m.id === inputMode)!;
   const reviewModes = ["review", "refactor", "security", "performance", "complexity"];
