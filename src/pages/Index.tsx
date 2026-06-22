@@ -553,7 +553,7 @@ const Index = () => {
 
                 {/* ─── Mobile: Upload screenshot button above textarea ─── */}
                 <div className="md:hidden flex items-center justify-between gap-2 -mb-2">
-                  <Popover open={modePickerOpen} onOpenChange={setModePickerOpen}>
+                  <Popover open={mobileModePickerOpen} onOpenChange={(open) => { trace("mobile mode picker open change", { open }); setMobileModePickerOpen(open); }}>
                     <PopoverTrigger asChild>
                       <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-foreground bg-muted/40 hover:bg-muted/60 transition-colors">
                         <span className="text-primary">{currentMode.icon}</span>
@@ -564,7 +564,7 @@ const Index = () => {
                     <PopoverContent align="start" className="w-[88vw] max-w-[380px] p-0 rounded-xl border-border/50 shadow-xl">
                       <ModePickerContent
                         inputMode={inputMode}
-                        onPick={(id) => { setInputMode(id); setModePickerOpen(false); }}
+                        onPick={(id) => { trace("mobile mode option click executed", { id }); setInputMode(id); setMobileModePickerOpen(false); }}
                       />
                     </PopoverContent>
                   </Popover>
@@ -587,7 +587,7 @@ const Index = () => {
                   {/* Desktop top bar: mode picker + image upload */}
                   <div className="hidden md:flex items-center justify-between gap-3 px-5 py-3 border-b border-border/30 bg-muted/20">
                     <div className="flex items-center gap-2 min-w-0">
-                      <Popover open={modePickerOpen} onOpenChange={setModePickerOpen}>
+                      <Popover open={desktopModePickerOpen} onOpenChange={(open) => { trace("desktop mode picker open change", { open }); setDesktopModePickerOpen(open); }}>
                         <PopoverTrigger asChild>
                           <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-foreground hover:bg-muted/60 transition-colors">
                             <span className="text-primary">{currentMode.icon}</span>
@@ -598,7 +598,7 @@ const Index = () => {
                         <PopoverContent align="start" className="w-[440px] p-0 rounded-xl border-border/50 shadow-xl">
                           <ModePickerContent
                             inputMode={inputMode}
-                            onPick={(id) => { setInputMode(id); setModePickerOpen(false); }}
+                            onPick={(id) => { trace("desktop mode option click executed", { id }); setInputMode(id); setDesktopModePickerOpen(false); }}
                           />
                         </PopoverContent>
                       </Popover>
