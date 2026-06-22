@@ -367,14 +367,14 @@ const Index = () => {
     }
   };
 
-  const SidebarNav = ({ onSelect }: { onSelect?: () => void }) => (
+  const renderSidebarNav = (onSelect?: (itemId: SidebarPanel) => void) => (
     <>
       <nav className="p-3 space-y-0.5">
         <p className="px-3 pb-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 font-semibold">Workspace</p>
         {sidebarItems.map((item) => (
           <button
             key={item.id}
-            onClick={() => { setActivePanel(item.id); onSelect?.(); }}
+            onClick={() => { trace("sidebar menu click executed", { itemId: item.id }); setActivePanel(item.id); onSelect?.(item.id); }}
             className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] transition-all duration-200 ${
               activePanel === item.id
                 ? "bg-accent text-accent-foreground font-medium"
@@ -398,7 +398,7 @@ const Index = () => {
               {ERROR_SUGGESTIONS.slice(0, 5).map((s) => (
                 <button
                   key={s.label}
-                  onClick={() => { pickSuggestion(s); setActivePanel("new"); onSelect?.(); }}
+                  onClick={() => { trace("quick start click executed", { label: s.label }); pickSuggestion(s); setActivePanel("new"); onSelect?.("new"); }}
                   className="w-full text-left text-[11px] font-mono text-muted-foreground hover:text-foreground p-2.5 rounded-lg hover:bg-muted/40 transition-colors"
                 >
                   {s.label}
