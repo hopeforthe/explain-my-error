@@ -675,7 +675,7 @@ const Index = () => {
 
                   {/* Footer toolbar: options + submit (desktop) */}
                   <div className="hidden md:flex items-center justify-between gap-3 px-5 py-3 border-t border-border/30 bg-muted/10">
-                    <Popover open={optionsOpen} onOpenChange={setOptionsOpen}>
+                    <Popover open={desktopOptionsOpen} onOpenChange={(open) => { trace("desktop options open change", { open }); setDesktopOptionsOpen(open); }}>
                       <PopoverTrigger asChild>
                         <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
                           <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -715,7 +715,7 @@ const Index = () => {
                   {/* Mobile inline analyze button (when no input yet) */}
                   {!errorInput && (
                     <div className="md:hidden p-3 pt-1 border-t border-border/30 flex items-center justify-between gap-2">
-                      <Popover open={optionsOpen} onOpenChange={setOptionsOpen}>
+                      <Popover open={mobileOptionsOpen} onOpenChange={(open) => { trace("mobile options open change", { open }); setMobileOptionsOpen(open); }}>
                         <PopoverTrigger asChild>
                           <button className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
                             <SlidersHorizontal className="h-3.5 w-3.5" />
