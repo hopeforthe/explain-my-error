@@ -49,6 +49,7 @@ const readDailyCount = () => {
 
 type SidebarPanel = "new" | "history" | "chat" | "trends" | "snippets";
 type InputMode = string;
+type TraceFn = (event: string, payload?: Record<string, unknown>) => void;
 
 interface ModeConfig {
   id: string;
@@ -171,8 +172,10 @@ const Index = () => {
   const [activePanel, setActivePanel] = useState<SidebarPanel>("new");
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [inputMode, setInputMode] = useState<InputMode>("error");
-  const [modePickerOpen, setModePickerOpen] = useState(false);
-  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [mobileModePickerOpen, setMobileModePickerOpen] = useState(false);
+  const [desktopModePickerOpen, setDesktopModePickerOpen] = useState(false);
+  const [mobileOptionsOpen, setMobileOptionsOpen] = useState(false);
+  const [desktopOptionsOpen, setDesktopOptionsOpen] = useState(false);
   const [analysisMode, setAnalysisMode] = useState<"simple" | "explain" | "deep">("explain");
   const [outputLength, setOutputLength] = useState<"short" | "medium" | "detailed">("medium");
   const [outputLang, setOutputLang] = useState("en");
@@ -183,16 +186,60 @@ const Index = () => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const suppressFocusOpenRef = useRef(false);
 
+  const trace = useCallback<TraceFn>((event, payload = {}) => {
+    console.log(`[Explain My Error trace] ${event}`, payload);
+  }, []);
+
   useEffect(() => {
+    trace("Index mounted");
+    return () => trace("Index unmounted");
+  }, [trace]);
+
+  useEffect(() => {
+    trace("state changed", {
+      activePanel,
+      inputMode,
+      errorInputLength: errorInput.length,
+      showSuggestions,
+      mobileModePickerOpen,
+      desktopModePickerOpen,
+      mobileOptionsOpen,
+      desktopOptionsOpen,
+      loading,
+      hasResult: Boolean(result),
+    });
+  }, [
+    activePanel,
+    inputMode,
+    errorInput.length,
+    showSuggestions,
+    mobileModePickerOpen,
+    desktopModePickerOpen,
+    mobileOptionsOpen,
+    desktopOptionsOpen,
+    loading,
+    result,
+    trace,
+  ]);
+
+  useEffect(() => {
+    if (!showSuggestions) return;
+    trace("suggestions outside-click effect mounted");
     const handlePointerDown = (e: PointerEvent) => {
       if (!inputAreaRef.current) return;
-      if (!inputAreaRef.current.contains(e.target as Node)) {
+      const clickedInsideInputArea = inputAreaRef.current.contains(e.target as Node);
+      trace("document pointerdown while suggestions open", { clickedInsideInputArea });
+      if (!clickedInsideInputArea) {
+        trace("closing suggestions: outside click");
         setShowSuggestions(false);
       }
     };
     document.addEventListener("pointerdown", handlePointerDown, true);
-    return () => document.removeEventListener("pointerdown", handlePointerDown, true);
-  }, []);
+    return () => {
+      trace("suggestions outside-click effect cleanup");
+      document.removeEventListener("pointerdown", handlePointerDown, true);
+    };
+  }, [showSuggestions, trace]);
 
   const filteredSuggestions = (() => {
     const q = errorInput.trim().toLowerCase();
@@ -204,6 +251,7 @@ const Index = () => {
   })();
 
   const pickSuggestion = (s: ErrorSuggestion) => {
+    trace("pickSuggestion executed", { label: s.label });
     setErrorInput(s.example);
     setInputMode("error");
     setResult(null);
@@ -273,14 +321,16 @@ const Index = () => {
   };
 
   const handleNewError = useCallback(() => {
+    trace("clear/new analysis click executed");
     setErrorInput(""); setResult(null); setSimilarError(null); setActivePanel("new");
-  }, []);
+  }, [trace]);
 
   const handleHistorySelect = useCallback((errorMessage: string) => {
+    trace("history item click executed", { errorInputLength: errorMessage.length });
     setErrorInput(errorMessage); setResult(null); setSimilarError(null);
     setActivePanel("new"); setInputMode("error");
     setMobileNavOpen(false);
-  }, []);
+  }, [trace]);
 
   const currentMode = inputModes.find((m) => m.id === inputMode)!;
   const reviewModes = ["review", "refactor", "security", "performance", "complexity"];
@@ -317,14 +367,14 @@ const Index = () => {
     }
   };
 
-  const SidebarNav = ({ onSelect }: { onSelect?: () => void }) => (
+  const renderSidebarNav = (onSelect?: (itemId: SidebarPanel) => void) => (
     <>
       <nav className="p-3 space-y-0.5">
         <p className="px-3 pb-2 text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 font-semibold">Workspace</p>
         {sidebarItems.map((item) => (
           <button
             key={item.id}
-            onClick={() => { setActivePanel(item.id); onSelect?.(); }}
+            onClick={() => { trace("sidebar menu click executed", { itemId: item.id }); setActivePanel(item.id); onSelect?.(item.id); }}
             className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] transition-all duration-200 ${
               activePanel === item.id
                 ? "bg-accent text-accent-foreground font-medium"
@@ -348,7 +398,7 @@ const Index = () => {
               {ERROR_SUGGESTIONS.slice(0, 5).map((s) => (
                 <button
                   key={s.label}
-                  onClick={() => { pickSuggestion(s); setActivePanel("new"); onSelect?.(); }}
+                  onClick={() => { trace("quick start click executed", { label: s.label }); pickSuggestion(s); setActivePanel("new"); onSelect?.("new"); }}
                   className="w-full text-left text-[11px] font-mono text-muted-foreground hover:text-foreground p-2.5 rounded-lg hover:bg-muted/40 transition-colors"
                 >
                   {s.label}
@@ -413,7 +463,9 @@ const Index = () => {
                       Explain My Error
                     </SheetTitle>
                   </SheetHeader>
-                  <SidebarNav onSelect={() => setMobileNavOpen(false)} />
+                  {renderSidebarNav((itemId) => {
+                    if (itemId === "new") setMobileNavOpen(false);
+                  })}
                 </SheetContent>
               </Sheet>
 
@@ -475,7 +527,7 @@ const Index = () => {
               desktopSidebarOpen ? "w-60" : "w-0 overflow-hidden"
             }`}
           >
-            <SidebarNav />
+            {renderSidebarNav()}
           </aside>
 
           {/* ─── Main Content ─── */}
@@ -503,7 +555,7 @@ const Index = () => {
 
                 {/* ─── Mobile: Upload screenshot button above textarea ─── */}
                 <div className="md:hidden flex items-center justify-between gap-2 -mb-2">
-                  <Popover open={modePickerOpen} onOpenChange={setModePickerOpen}>
+                  <Popover open={mobileModePickerOpen} onOpenChange={(open) => { trace("mobile mode picker open change", { open }); setMobileModePickerOpen(open); }}>
                     <PopoverTrigger asChild>
                       <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-foreground bg-muted/40 hover:bg-muted/60 transition-colors">
                         <span className="text-primary">{currentMode.icon}</span>
@@ -514,7 +566,7 @@ const Index = () => {
                     <PopoverContent align="start" className="w-[88vw] max-w-[380px] p-0 rounded-xl border-border/50 shadow-xl">
                       <ModePickerContent
                         inputMode={inputMode}
-                        onPick={(id) => { setInputMode(id); setModePickerOpen(false); }}
+                        onPick={(id) => { trace("mobile mode option click executed", { id }); setInputMode(id); setMobileModePickerOpen(false); }}
                       />
                     </PopoverContent>
                   </Popover>
@@ -537,7 +589,7 @@ const Index = () => {
                   {/* Desktop top bar: mode picker + image upload */}
                   <div className="hidden md:flex items-center justify-between gap-3 px-5 py-3 border-b border-border/30 bg-muted/20">
                     <div className="flex items-center gap-2 min-w-0">
-                      <Popover open={modePickerOpen} onOpenChange={setModePickerOpen}>
+                      <Popover open={desktopModePickerOpen} onOpenChange={(open) => { trace("desktop mode picker open change", { open }); setDesktopModePickerOpen(open); }}>
                         <PopoverTrigger asChild>
                           <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-foreground hover:bg-muted/60 transition-colors">
                             <span className="text-primary">{currentMode.icon}</span>
@@ -548,7 +600,7 @@ const Index = () => {
                         <PopoverContent align="start" className="w-[440px] p-0 rounded-xl border-border/50 shadow-xl">
                           <ModePickerContent
                             inputMode={inputMode}
-                            onPick={(id) => { setInputMode(id); setModePickerOpen(false); }}
+                            onPick={(id) => { trace("desktop mode option click executed", { id }); setInputMode(id); setDesktopModePickerOpen(false); }}
                           />
                         </PopoverContent>
                       </Popover>
@@ -625,7 +677,7 @@ const Index = () => {
 
                   {/* Footer toolbar: options + submit (desktop) */}
                   <div className="hidden md:flex items-center justify-between gap-3 px-5 py-3 border-t border-border/30 bg-muted/10">
-                    <Popover open={optionsOpen} onOpenChange={setOptionsOpen}>
+                    <Popover open={desktopOptionsOpen} onOpenChange={(open) => { trace("desktop options open change", { open }); setDesktopOptionsOpen(open); }}>
                       <PopoverTrigger asChild>
                         <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
                           <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -665,7 +717,7 @@ const Index = () => {
                   {/* Mobile inline analyze button (when no input yet) */}
                   {!errorInput && (
                     <div className="md:hidden p-3 pt-1 border-t border-border/30 flex items-center justify-between gap-2">
-                      <Popover open={optionsOpen} onOpenChange={setOptionsOpen}>
+                      <Popover open={mobileOptionsOpen} onOpenChange={(open) => { trace("mobile options open change", { open }); setMobileOptionsOpen(open); }}>
                         <PopoverTrigger asChild>
                           <button className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
                             <SlidersHorizontal className="h-3.5 w-3.5" />
