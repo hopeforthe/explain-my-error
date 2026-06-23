@@ -72,6 +72,11 @@ export const DebugChat = ({ errorContext, temporary = false }: DebugChatProps) =
       <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
         <MessageSquare className="h-4 w-4 text-primary" />
         <span className="font-mono text-sm font-medium text-foreground">Debug Chat</span>
+        {temporary && (
+          <span className="ml-auto inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+            <Ghost className="h-3 w-3" /> Temporary
+          </span>
+        )}
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
