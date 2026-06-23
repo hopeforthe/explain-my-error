@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Loader2, MessageSquare } from "lucide-react";
+import { Send, Loader2, MessageSquare, Ghost } from "lucide-react";
 import { streamChat, type ChatMsg } from "@/lib/streamChat";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
