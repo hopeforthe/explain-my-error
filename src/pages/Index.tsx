@@ -243,6 +243,15 @@ const Index = () => {
     };
   }, [showSuggestions, trace]);
 
+  // Auto-grow textarea (ChatGPT-style)
+  useEffect(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = "0px";
+    const next = Math.min(ta.scrollHeight, 220);
+    ta.style.height = next + "px";
+  }, [errorInput, inputMode]);
+
   const filteredSuggestions = (() => {
     const q = errorInput.trim().toLowerCase();
     if (!q) return ERROR_SUGGESTIONS;
