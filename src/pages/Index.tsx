@@ -590,316 +590,252 @@ const Index = () => {
           </aside>
 
           {/* ─── Main Content ─── */}
-          <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden scrollbar-thin">
+          <main className="flex-1 min-w-0 flex flex-col overflow-hidden">
             {activePanel === "trends" ? (
-              <ErrorTrends refreshKey={historyRefreshKey} />
+              <div className="flex-1 overflow-y-auto scrollbar-thin">
+                <ErrorTrends refreshKey={historyRefreshKey} />
+              </div>
             ) : (
-              <div className="max-w-[900px] mx-auto px-4 sm:px-8 py-5 sm:py-10 pb-32 md:pb-10 space-y-6 sm:space-y-10 w-full">
-
-                {/* ─── Hero ─── */}
-                {!result && !loading && (
-                  <div className="text-center space-y-2 sm:space-y-3 max-w-2xl mx-auto pt-1 sm:pt-2">
-                    <Badge variant="secondary" className="rounded-full text-[10px] font-medium px-3 py-1 bg-accent/60 text-accent-foreground border border-border/30">
-                      <Sparkles className="h-3 w-3 mr-1.5" />
-                      AI-powered · 120+ languages
-                    </Badge>
-                    <h2 className="text-2xl sm:text-4xl font-semibold tracking-tight text-foreground leading-tight">
-                      Paste your error. Get the fix.
-                    </h2>
-                    <p className="text-[13px] sm:text-[14px] text-muted-foreground leading-relaxed px-2">
-                      Instant explanations, root causes, and code fixes for any error or log.
-                    </p>
-                  </div>
-                )}
-
-                {/* ─── Mobile: Upload screenshot button above textarea ─── */}
-                <div className="md:hidden flex items-center justify-between gap-2 -mb-2">
-                  <Popover open={mobileModePickerOpen} onOpenChange={(open) => { trace("mobile mode picker open change", { open }); setMobileModePickerOpen(open); }}>
-                    <PopoverTrigger asChild>
-                      <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-foreground bg-muted/40 hover:bg-muted/60 transition-colors">
-                        <span className="text-primary">{currentMode.icon}</span>
-                        <span>{currentMode.label}</span>
-                        <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent align="start" className="w-[88vw] max-w-[380px] p-0 rounded-xl border-border/50 shadow-xl">
-                      <ModePickerContent
-                        inputMode={inputMode}
-                        onPick={(id) => { trace("mobile mode option click executed", { id }); setInputMode(id); setMobileModePickerOpen(false); }}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <ImageUpload
-                    onTextExtracted={(text) => {
-                      setErrorInput(text); setResult(null); setInputMode("error");
-                    }}
-                  />
-                </div>
-
-                {/* ─── Primary Input Card ─── */}
-                <Card
-                  className={`border-border/40 bg-card rounded-2xl shadow-lg shadow-black/[0.03] dark:shadow-black/20 overflow-hidden transition-all ${
-                    isDragging ? "ring-2 ring-primary/50 border-primary/50" : ""
-                  }`}
+              <>
+                {/* Scrollable conversation/results area */}
+                <div
+                  className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin"
                   onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                   onDragLeave={() => setIsDragging(false)}
                   onDrop={handleDrop}
                 >
-                  {/* Desktop top bar: mode picker + image upload */}
-                  <div className="hidden md:flex items-center justify-between gap-3 px-5 py-3 border-b border-border/30 bg-muted/20">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Popover open={desktopModePickerOpen} onOpenChange={(open) => { trace("desktop mode picker open change", { open }); setDesktopModePickerOpen(open); }}>
-                        <PopoverTrigger asChild>
-                          <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-foreground hover:bg-muted/60 transition-colors">
-                            <span className="text-primary">{currentMode.icon}</span>
-                            <span>{currentMode.label}</span>
-                            <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent align="start" className="w-[440px] p-0 rounded-xl border-border/50 shadow-xl">
-                          <ModePickerContent
-                            inputMode={inputMode}
-                            onPick={(id) => { trace("desktop mode option click executed", { id }); setInputMode(id); setDesktopModePickerOpen(false); }}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      {currentMode.description && (
-                        <span className="hidden md:inline text-[11px] text-muted-foreground truncate">· {currentMode.description}</span>
-                      )}
-                    </div>
-                    <ImageUpload
-                      onTextExtracted={(text) => {
-                        setErrorInput(text); setResult(null); setInputMode("error");
-                      }}
-                    />
-                  </div>
+                  <div className="max-w-[820px] mx-auto px-4 sm:px-8 py-6 sm:py-10 w-full">
+                    {!result && !loading && (
+                      <div className="text-center space-y-3 max-w-2xl mx-auto py-8 sm:py-16">
+                        <Badge variant="secondary" className="rounded-full text-[10px] font-medium px-3 py-1 bg-accent/60 text-accent-foreground border border-border/30">
+                          <Sparkles className="h-3 w-3 mr-1.5" />
+                          AI-powered · 120+ languages
+                        </Badge>
+                        <h2 className="text-2xl sm:text-4xl font-semibold tracking-tight text-foreground leading-tight">
+                          Paste your error. Get the fix.
+                        </h2>
+                        <p className="text-[13px] sm:text-[14px] text-muted-foreground leading-relaxed px-2">
+                          Instant explanations, root causes, and code fixes for any error or log.
+                        </p>
+                      </div>
+                    )}
 
-                  {/* Textarea + Suggestions */}
-                  <div ref={inputAreaRef} className="p-3 sm:p-5 pb-3 relative">
-                    <Textarea
-                      ref={textareaRef}
-                      placeholder={currentMode?.placeholder || "Paste your error…"}
-                      className="font-mono text-[13px] min-h-[200px] sm:min-h-[240px] bg-transparent resize-y rounded-lg border-border/40 focus:border-primary/50 input-glow transition-colors placeholder:text-muted-foreground/70"
-                      value={errorInput}
-                      onChange={(e) => { setErrorInput(e.target.value); if (!showSuggestions) setShowSuggestions(true); }}
-                      onFocus={() => { if (!suppressFocusOpenRef.current) setShowSuggestions(true); }}
-                      onClick={() => setShowSuggestions(true)}
-                    />
-
-                    {showSuggestions && inputMode === "error" && (
-                      <div
-                        className="mt-3 rounded-xl border border-border/40 bg-popover/95 backdrop-blur-md shadow-lg p-3 animate-in fade-in slide-in-from-top-1 duration-200 z-20"
-                        role="listbox"
-                        aria-label="Common error suggestions"
-                        onPointerDown={(e) => {
-                          e.preventDefault();
-                          textareaRef.current?.focus();
-                        }}
-                      >
-                        <div className="flex items-center justify-between mb-2 px-1">
-                          <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
-                            {errorInput.trim() ? "Matching suggestions" : "Common errors"}
-                          </span>
-                          <button
-                            type="button"
-                            onPointerDown={(e) => {
-                              e.preventDefault();
-                              setShowSuggestions(false);
-                            }}
-                            className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-                            aria-label="Hide suggestions"
-                          >
-                            Hide
-                          </button>
+                    {loading && (
+                      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <div className="flex flex-col items-center justify-center py-10 sm:py-16 space-y-6">
+                          <div className="relative">
+                            <div className="h-14 w-14 rounded-full border border-border/20" />
+                            <div className="absolute inset-0 h-14 w-14 rounded-full border-2 border-primary/40 border-t-transparent animate-spin" style={{ animationDuration: '1.2s' }} />
+                          </div>
+                          <div className="text-center space-y-1">
+                            <p className="text-sm font-medium text-foreground/80">Analyzing your input…</p>
+                            <p className="text-[11px] text-muted-foreground">This usually takes a few seconds</p>
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {filteredSuggestions.map((s) => (
+                        {[1, 2, 3].map(i => (
+                          <Card key={i} className="border-border/30 bg-card/40 rounded-2xl">
+                            <CardContent className="p-5 space-y-3">
+                              <Skeleton className="h-4 w-36 rounded-md" />
+                              <Skeleton className="h-3 w-full rounded-md" />
+                              <Skeleton className="h-3 w-4/5 rounded-md" />
+                              <Skeleton className="h-3 w-3/5 rounded-md" />
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+
+                    {result && !loading && (
+                      <div className="animate-in fade-in slide-in-from-bottom-3 duration-500">
+                        <ResultDisplay
+                          result={result}
+                          inputMode={inputMode}
+                          isReview={isReview}
+                          onShare={handleShare}
+                          similarError={similarError}
+                        />
+                        <Card className="mt-8 border-dashed border-border/40 bg-card/30 rounded-2xl hover:bg-card/50 transition-colors">
+                          <CardContent className="py-4">
                             <button
-                              key={s.label}
-                              type="button"
-                              onPointerDown={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                pickSuggestion(s);
-                              }}
-                              title={s.example}
-                              className="text-[11.5px] font-mono text-foreground/80 hover:text-foreground bg-muted/40 hover:bg-primary/10 hover:border-primary/40 px-2.5 py-1.5 rounded-md border border-border/40 transition-all whitespace-nowrap max-w-full truncate"
+                              onClick={() => { setActivePanel("chat"); setMobileNavOpen(true); }}
+                              className="w-full flex items-center justify-center gap-2 text-[12px] font-medium text-muted-foreground hover:text-primary transition-colors"
                             >
-                              {s.label}
+                              <MessageSquare className="h-3.5 w-3.5" />
+                              Have follow-up questions? Open Debug Chat
+                              <ArrowRight className="h-3 w-3" />
                             </button>
-                          ))}
-                        </div>
+                          </CardContent>
+                        </Card>
                       </div>
                     )}
                   </div>
+                </div>
 
-
-                  {/* Footer toolbar: options + submit (desktop) */}
-                  <div className="hidden md:flex items-center justify-between gap-3 px-5 py-3 border-t border-border/30 bg-muted/10">
-                    <Popover open={desktopOptionsOpen} onOpenChange={(open) => { trace("desktop options open change", { open }); setDesktopOptionsOpen(open); }}>
-                      <PopoverTrigger asChild>
-                        <button className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
-                          <SlidersHorizontal className="h-3.5 w-3.5" />
-                          <span>Options</span>
-                          <span className="text-muted-foreground/70">·</span>
-                          <span className="text-foreground/80 capitalize">{analysisMode}</span>
-                          <span className="text-muted-foreground/70">·</span>
-                          <span className="text-foreground/80 capitalize">{outputLength}</span>
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent align="start" className="w-[320px] p-4 rounded-xl border-border/50 shadow-xl space-y-4">
-                        <OptionsContent
-                          analysisMode={analysisMode} setAnalysisMode={setAnalysisMode}
-                          outputLength={outputLength} setOutputLength={setOutputLength}
-                          outputLang={outputLang} setOutputLang={setOutputLang}
-                        />
-                      </PopoverContent>
-                    </Popover>
-
-                    <div className="flex items-center gap-2">
-                      {errorInput && (
-                        <Button variant="ghost" size="sm" onClick={handleNewError} className="text-[11px] rounded-lg text-muted-foreground hover:text-foreground h-9">
-                          Clear
-                        </Button>
-                      )}
-                      <Button
-                        onClick={handleSubmit}
-                        disabled={loading || !errorInput.trim()}
-                        className="gap-2 h-9 px-5 font-semibold text-[12.5px] rounded-lg btn-gradient-primary text-primary-foreground disabled:opacity-30 shadow-glow"
-                      >
-                        {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-                        {loading ? "Analyzing…" : submitLabel}
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Mobile inline analyze button (when no input yet) */}
-                  {!errorInput && (
-                    <div className="md:hidden p-3 pt-1 border-t border-border/30 flex items-center justify-between gap-2">
-                      <Popover open={mobileOptionsOpen} onOpenChange={(open) => { trace("mobile options open change", { open }); setMobileOptionsOpen(open); }}>
-                        <PopoverTrigger asChild>
-                          <button className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
-                            <SlidersHorizontal className="h-3.5 w-3.5" />
-                            Options
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent align="start" className="w-[88vw] max-w-[320px] p-4 rounded-xl border-border/50 shadow-xl space-y-4">
-                          <OptionsContent
-                            analysisMode={analysisMode} setAnalysisMode={setAnalysisMode}
-                            outputLength={outputLength} setOutputLength={setOutputLength}
-                            outputLang={outputLang} setOutputLang={setOutputLang}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <Button
-                        onClick={handleSubmit}
-                        disabled={loading || !errorInput.trim()}
-                        className="flex-1 gap-2 h-11 px-5 font-semibold text-[13px] rounded-lg btn-gradient-primary text-primary-foreground disabled:opacity-30"
-                      >
-                        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                        {loading ? "Analyzing…" : submitLabel}
-                      </Button>
-                    </div>
-                  )}
-                </Card>
-
-                {/* ─── Workflow hint ─── */}
-                {!result && !loading && (
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3 max-w-2xl mx-auto">
-                    {[
-                      { n: "1", title: "Paste", desc: "Drop in your error or code" },
-                      { n: "2", title: "Analyze", desc: "AI scans in seconds" },
-                      { n: "3", title: "Resolve", desc: "Get the fix and explanation" },
-                    ].map((step, i, arr) => (
-                      <div key={step.n} className="relative flex items-start gap-2 sm:gap-2.5 p-2.5 sm:p-3 rounded-xl bg-card/40 border border-border/30">
-                        <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground text-[10px] sm:text-[11px] font-semibold">
-                          {step.n}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-[11px] sm:text-[12px] font-semibold text-foreground leading-tight">{step.title}</p>
-                          <p className="hidden sm:block text-[10.5px] text-muted-foreground leading-tight mt-0.5">{step.desc}</p>
-                        </div>
-                        {i < arr.length - 1 && (
-                          <ArrowRight className="hidden sm:block absolute -right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-border" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Loading */}
-                {loading && (
-                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                    <div className="flex flex-col items-center justify-center py-10 sm:py-16 space-y-6">
-                      <div className="relative">
-                        <div className="h-14 w-14 rounded-full border border-border/20" />
-                        <div className="absolute inset-0 h-14 w-14 rounded-full border-2 border-primary/40 border-t-transparent animate-spin" style={{ animationDuration: '1.2s' }} />
-                      </div>
-                      <div className="text-center space-y-1">
-                        <p className="text-sm font-medium text-foreground/80">Analyzing your input…</p>
-                        <p className="text-[11px] text-muted-foreground">This usually takes a few seconds</p>
-                      </div>
-                    </div>
-                    {[1, 2, 3].map(i => (
-                      <Card key={i} className="border-border/30 bg-card/40 rounded-2xl">
-                        <CardContent className="p-5 space-y-3">
-                          <Skeleton className="h-4 w-36 rounded-md" />
-                          <Skeleton className="h-3 w-full rounded-md" />
-                          <Skeleton className="h-3 w-4/5 rounded-md" />
-                          <Skeleton className="h-3 w-3/5 rounded-md" />
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-
-                {/* Results */}
-                {result && !loading && (
-                  <div className="animate-in fade-in slide-in-from-bottom-3 duration-500">
-                    <ResultDisplay
-                      result={result}
-                      inputMode={inputMode}
-                      isReview={isReview}
-                      onShare={handleShare}
-                      similarError={similarError}
-                    />
-                    <Card className="mt-8 border-dashed border-border/40 bg-card/30 rounded-2xl hover:bg-card/50 transition-colors">
-                      <CardContent className="py-4">
-                        <button
-                          onClick={() => { setActivePanel("chat"); setMobileNavOpen(true); }}
-                          className="w-full flex items-center justify-center gap-2 text-[12px] font-medium text-muted-foreground hover:text-primary transition-colors"
+                {/* ─── Sticky ChatGPT-style Composer ─── */}
+                <div className="shrink-0 border-t border-border/30 bg-background/85 backdrop-blur-md">
+                  <div className="max-w-[820px] mx-auto px-3 sm:px-6 pt-2 pb-3 sm:pb-4">
+                    <div ref={inputAreaRef} className="relative">
+                      {/* Suggestions popover (above input) */}
+                      {showSuggestions && inputMode === "error" && (
+                        <div
+                          className="absolute bottom-full left-0 right-0 mb-2 rounded-2xl border border-border/40 bg-popover/95 backdrop-blur-md shadow-xl p-3 animate-in fade-in slide-in-from-bottom-1 duration-150 z-30"
+                          role="listbox"
+                          aria-label="Common error suggestions"
+                          onPointerDown={(e) => { e.preventDefault(); textareaRef.current?.focus(); }}
                         >
-                          <MessageSquare className="h-3.5 w-3.5" />
-                          Have follow-up questions? Open Debug Chat
-                          <ArrowRight className="h-3 w-3" />
-                        </button>
-                      </CardContent>
-                    </Card>
+                          <div className="flex items-center justify-between mb-2 px-1">
+                            <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+                              {errorInput.trim() ? "Matching suggestions" : "Common errors"}
+                            </span>
+                            <button
+                              type="button"
+                              onPointerDown={(e) => { e.preventDefault(); setShowSuggestions(false); }}
+                              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                              aria-label="Hide suggestions"
+                            >
+                              Hide
+                            </button>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-thin">
+                            {filteredSuggestions.map((s) => (
+                              <button
+                                key={s.label}
+                                type="button"
+                                onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); pickSuggestion(s); }}
+                                title={s.example}
+                                className="text-[11.5px] font-mono text-foreground/80 hover:text-foreground bg-muted/40 hover:bg-primary/10 hover:border-primary/40 px-2.5 py-1.5 rounded-md border border-border/40 transition-all whitespace-nowrap max-w-full truncate"
+                              >
+                                {s.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Composer box */}
+                      <div
+                        className={`flex flex-col rounded-3xl border bg-card shadow-md transition-all ${
+                          isDragging ? "ring-2 ring-primary/50 border-primary/50" : "border-border/50 focus-within:border-primary/40 focus-within:shadow-lg"
+                        }`}
+                      >
+                        <Textarea
+                          ref={textareaRef}
+                          placeholder={currentMode?.placeholder?.split("\n")[0] || "Paste your error…"}
+                          rows={1}
+                          className="font-mono text-[13.5px] leading-relaxed bg-transparent resize-none border-0 rounded-3xl px-4 pt-3.5 pb-1 min-h-0 max-h-[220px] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 scrollbar-thin"
+                          value={errorInput}
+                          onChange={(e) => { setErrorInput(e.target.value); if (!showSuggestions) setShowSuggestions(true); }}
+                          onFocus={() => { if (!suppressFocusOpenRef.current) setShowSuggestions(true); }}
+                          onClick={() => setShowSuggestions(true)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+                              e.preventDefault();
+                              if (!loading && errorInput.trim()) handleSubmit();
+                            }
+                          }}
+                        />
+
+                        {/* Toolbar row */}
+                        <div className="flex items-center justify-between gap-1.5 px-2 pb-2 pt-1">
+                          <div className="flex items-center gap-1 min-w-0">
+                            <Popover open={desktopModePickerOpen} onOpenChange={setDesktopModePickerOpen}>
+                              <PopoverTrigger asChild>
+                                <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[11.5px] font-medium text-foreground hover:bg-muted/60 transition-colors max-w-[160px]">
+                                  <span className="text-primary shrink-0">{currentMode.icon}</span>
+                                  <span className="truncate">{currentMode.label}</span>
+                                  <ChevronDown className="h-3 w-3 text-muted-foreground shrink-0" />
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent align="start" side="top" className="w-[min(92vw,440px)] p-0 rounded-xl border-border/50 shadow-xl">
+                                <ModePickerContent
+                                  inputMode={inputMode}
+                                  onPick={(id) => { setInputMode(id); setDesktopModePickerOpen(false); }}
+                                />
+                              </PopoverContent>
+                            </Popover>
+
+                            <Popover open={desktopOptionsOpen} onOpenChange={setDesktopOptionsOpen}>
+                              <PopoverTrigger asChild>
+                                <button
+                                  className="hidden sm:flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[11.5px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                                  aria-label="Analysis options"
+                                >
+                                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                                  <span className="capitalize">{analysisMode}</span>
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent align="start" side="top" className="w-[320px] p-4 rounded-xl border-border/50 shadow-xl space-y-4">
+                                <OptionsContent
+                                  analysisMode={analysisMode} setAnalysisMode={setAnalysisMode}
+                                  outputLength={outputLength} setOutputLength={setOutputLength}
+                                  outputLang={outputLang} setOutputLang={setOutputLang}
+                                />
+                              </PopoverContent>
+                            </Popover>
+
+                            <div className="hidden sm:block">
+                              <ImageUpload
+                                onTextExtracted={(text) => { setErrorInput(text); setResult(null); setInputMode("error"); }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type="button"
+                                  onClick={() => setTemporaryChat((v) => !v)}
+                                  aria-pressed={temporaryChat}
+                                  className={`inline-flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[11.5px] font-medium transition-colors ${
+                                    temporaryChat
+                                      ? "bg-primary/15 text-primary"
+                                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                                  }`}
+                                >
+                                  <Ghost className="h-3.5 w-3.5" />
+                                  <span className="hidden sm:inline">Temporary</span>
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-[240px] text-[11px]">
+                                Temporary chat — not saved to history.
+                              </TooltipContent>
+                            </Tooltip>
+
+                            {errorInput && (
+                              <button
+                                onClick={handleNewError}
+                                className="hidden sm:inline-flex items-center px-2 py-1.5 rounded-full text-[11.5px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                              >
+                                Clear
+                              </button>
+                            )}
+
+                            <Button
+                              onClick={handleSubmit}
+                              disabled={loading || !errorInput.trim()}
+                              size="icon"
+                              className="h-9 w-9 rounded-full btn-gradient-primary text-primary-foreground disabled:opacity-30 shadow-glow shrink-0"
+                              aria-label={loading ? "Analyzing" : submitLabel}
+                            >
+                              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="hidden sm:block text-[10.5px] text-center text-muted-foreground/70 mt-1.5">
+                        Press <kbd className="px-1 py-0.5 rounded bg-muted/60 text-[10px] font-mono">Enter</kbd> to send · <kbd className="px-1 py-0.5 rounded bg-muted/60 text-[10px] font-mono">Shift+Enter</kbd> for newline
+                      </p>
+                    </div>
                   </div>
-                )}
-              </div>
+                </div>
+              </>
             )}
           </main>
         </div>
 
-        {/* ─── Mobile Sticky Analyze Bar ─── */}
-        {errorInput && !result && !loading && (
-          <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-3 py-2.5 border-t border-border/40 glass">
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={handleNewError} className="text-[11px] rounded-lg text-muted-foreground hover:text-foreground h-11 px-3 shrink-0">
-                Clear
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="flex-1 gap-2 h-11 font-semibold text-[13.5px] rounded-lg btn-gradient-primary text-primary-foreground disabled:opacity-30 shadow-glow"
-              >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                {loading ? "Analyzing…" : submitLabel}
-              </Button>
-            </div>
-          </div>
-        )}
+
 
         <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
         <UpgradePrompt
