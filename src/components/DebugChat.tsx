@@ -1,16 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Loader2, MessageSquare } from "lucide-react";
+import { Send, Loader2, MessageSquare, Ghost } from "lucide-react";
 import { streamChat, type ChatMsg } from "@/lib/streamChat";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 
 interface DebugChatProps {
   errorContext?: string;
+  temporary?: boolean;
 }
 
-export const DebugChat = ({ errorContext }: DebugChatProps) => {
+export const DebugChat = ({ errorContext, temporary = false }: DebugChatProps) => {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -21,10 +22,10 @@ export const DebugChat = ({ errorContext }: DebugChatProps) => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  // Reset chat when error context changes
+  // Reset chat when error context or temporary mode changes
   useEffect(() => {
     setMessages([]);
-  }, [errorContext]);
+  }, [errorContext, temporary]);
 
   const send = async () => {
     const text = input.trim();
@@ -71,6 +72,11 @@ export const DebugChat = ({ errorContext }: DebugChatProps) => {
       <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
         <MessageSquare className="h-4 w-4 text-primary" />
         <span className="font-mono text-sm font-medium text-foreground">Debug Chat</span>
+        {temporary && (
+          <span className="ml-auto inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+            <Ghost className="h-3 w-3" /> Temporary
+          </span>
+        )}
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">

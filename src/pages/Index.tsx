@@ -15,8 +15,9 @@ import {
   Globe, Wrench, FileText, GitCompare, Bug, Gauge, Cog,
   ArrowRightLeft, GraduationCap, Layers, Rocket,
   ClipboardList, TestTubes, ListChecks, ChevronDown, SlidersHorizontal,
-  ArrowRight, Menu,
+  ArrowRight, Menu, Ghost, X,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -185,6 +186,7 @@ const Index = () => {
   const inputAreaRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const suppressFocusOpenRef = useRef(false);
+  const [temporaryChat, setTemporaryChat] = useState<boolean>(false);
 
   const trace = useCallback<TraceFn>((event, payload = {}) => {
     console.log(`[Explain My Error trace] ${event}`, payload);
@@ -294,8 +296,10 @@ const Index = () => {
 
       const parsed = data as ExplanationResult;
       setResult(parsed);
-      addErrorHistory(errorInput.trim(), parsed.language || "Unknown", parsed.framework);
-      setHistoryRefreshKey((k) => k + 1);
+      if (!temporaryChat) {
+        addErrorHistory(errorInput.trim(), parsed.language || "Unknown", parsed.framework);
+        setHistoryRefreshKey((k) => k + 1);
+      }
     } catch (err: any) {
       console.error(err);
       toast.error(err?.message || "Something went wrong. Please try again.");
@@ -389,7 +393,7 @@ const Index = () => {
       <div className="h-px bg-border/30 mx-3" />
       <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin">
         {activePanel === "history" && <ErrorHistory onSelect={handleHistorySelect} refreshKey={historyRefreshKey} />}
-        {activePanel === "chat" && <DebugChat errorContext={errorInput || undefined} />}
+        {activePanel === "chat" && <DebugChat errorContext={errorInput || undefined} temporary={temporaryChat} />}
         {activePanel === "snippets" && <SnippetLibrary />}
         {(activePanel === "new" || activePanel === "trends") && (
           <div className="p-4 space-y-3">
@@ -490,6 +494,34 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setTemporaryChat((v) => {
+                        const next = !v;
+                        toast.info(next ? "Temporary chat enabled — nothing will be saved." : "Temporary chat disabled.");
+                        return next;
+                      });
+                    }}
+                    aria-label="Toggle temporary chat"
+                    aria-pressed={temporaryChat}
+                    className={`h-8 w-8 rounded-lg transition-colors ${
+                      temporaryChat
+                        ? "bg-primary/15 text-primary hover:bg-primary/20"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Ghost className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-[240px] text-[11px] leading-relaxed">
+                  <p className="font-semibold mb-0.5">Temporary chat {temporaryChat ? "(on)" : "(off)"}</p>
+                  <p className="text-muted-foreground">Temporary chats are not saved, do not appear in history, and are deleted when the session ends.</p>
+                </TooltipContent>
+              </Tooltip>
               <ThemeToggle />
               {session ? (
                 <>
@@ -519,6 +551,24 @@ const Index = () => {
             </div>
           </div>
         </header>
+
+        {temporaryChat && (
+          <div
+            role="status"
+            className="shrink-0 flex items-center justify-center gap-2 px-3 py-1.5 text-[11px] font-medium border-b border-primary/20 bg-primary/10 text-primary"
+          >
+            <Ghost className="h-3.5 w-3.5" />
+            <span>Temporary Chat — this conversation won't be saved.</span>
+            <button
+              onClick={() => setTemporaryChat(false)}
+              className="ml-1 inline-flex items-center justify-center rounded p-0.5 hover:bg-primary/20"
+              aria-label="Disable temporary chat"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+        )}
+
 
         <div className="flex flex-1 overflow-hidden">
           {/* ─── Desktop Sidebar ─── */}
