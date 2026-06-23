@@ -773,7 +773,7 @@ const Index = () => {
                               </PopoverContent>
                             </Popover>
 
-                            <div className="hidden sm:block">
+                            <div className="block">
                               <ImageUpload
                                 onTextExtracted={(text) => { setErrorInput(text); setResult(null); setInputMode("error"); }}
                               />
