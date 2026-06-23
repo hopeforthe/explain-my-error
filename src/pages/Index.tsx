@@ -186,6 +186,7 @@ const Index = () => {
   const inputAreaRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const suppressFocusOpenRef = useRef(false);
+  const [temporaryChat, setTemporaryChat] = useState<boolean>(false);
 
   const trace = useCallback<TraceFn>((event, payload = {}) => {
     console.log(`[Explain My Error trace] ${event}`, payload);
