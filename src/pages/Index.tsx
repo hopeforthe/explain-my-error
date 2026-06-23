@@ -552,6 +552,24 @@ const Index = () => {
           </div>
         </header>
 
+        {temporaryChat && (
+          <div
+            role="status"
+            className="shrink-0 flex items-center justify-center gap-2 px-3 py-1.5 text-[11px] font-medium border-b border-primary/20 bg-primary/10 text-primary"
+          >
+            <Ghost className="h-3.5 w-3.5" />
+            <span>Temporary Chat — this conversation won't be saved.</span>
+            <button
+              onClick={() => setTemporaryChat(false)}
+              className="ml-1 inline-flex items-center justify-center rounded p-0.5 hover:bg-primary/20"
+              aria-label="Disable temporary chat"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+        )}
+
+
         <div className="flex flex-1 overflow-hidden">
           {/* ─── Desktop Sidebar ─── */}
           <aside
