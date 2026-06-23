@@ -494,6 +494,34 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setTemporaryChat((v) => {
+                        const next = !v;
+                        toast.info(next ? "Temporary chat enabled — nothing will be saved." : "Temporary chat disabled.");
+                        return next;
+                      });
+                    }}
+                    aria-label="Toggle temporary chat"
+                    aria-pressed={temporaryChat}
+                    className={`h-8 w-8 rounded-lg transition-colors ${
+                      temporaryChat
+                        ? "bg-primary/15 text-primary hover:bg-primary/20"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Ghost className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-[240px] text-[11px] leading-relaxed">
+                  <p className="font-semibold mb-0.5">Temporary chat {temporaryChat ? "(on)" : "(off)"}</p>
+                  <p className="text-muted-foreground">Temporary chats are not saved, do not appear in history, and are deleted when the session ends.</p>
+                </TooltipContent>
+              </Tooltip>
               <ThemeToggle />
               {session ? (
                 <>
