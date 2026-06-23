@@ -296,8 +296,10 @@ const Index = () => {
 
       const parsed = data as ExplanationResult;
       setResult(parsed);
-      addErrorHistory(errorInput.trim(), parsed.language || "Unknown", parsed.framework);
-      setHistoryRefreshKey((k) => k + 1);
+      if (!temporaryChat) {
+        addErrorHistory(errorInput.trim(), parsed.language || "Unknown", parsed.framework);
+        setHistoryRefreshKey((k) => k + 1);
+      }
     } catch (err: any) {
       console.error(err);
       toast.error(err?.message || "Something went wrong. Please try again.");
