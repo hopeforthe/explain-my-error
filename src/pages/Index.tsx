@@ -15,8 +15,9 @@ import {
   Globe, Wrench, FileText, GitCompare, Bug, Gauge, Cog,
   ArrowRightLeft, GraduationCap, Layers, Rocket,
   ClipboardList, TestTubes, ListChecks, ChevronDown, SlidersHorizontal,
-  ArrowRight, Menu,
+  ArrowRight, Menu, Ghost, X,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import AuthModal from "@/components/AuthModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
