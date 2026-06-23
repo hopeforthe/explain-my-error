@@ -8,9 +8,10 @@ import ReactMarkdown from "react-markdown";
 
 interface DebugChatProps {
   errorContext?: string;
+  temporary?: boolean;
 }
 
-export const DebugChat = ({ errorContext }: DebugChatProps) => {
+export const DebugChat = ({ errorContext, temporary = false }: DebugChatProps) => {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -21,10 +22,10 @@ export const DebugChat = ({ errorContext }: DebugChatProps) => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
-  // Reset chat when error context changes
+  // Reset chat when error context or temporary mode changes
   useEffect(() => {
     setMessages([]);
-  }, [errorContext]);
+  }, [errorContext, temporary]);
 
   const send = async () => {
     const text = input.trim();
