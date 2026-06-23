@@ -393,7 +393,7 @@ const Index = () => {
       <div className="h-px bg-border/30 mx-3" />
       <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin">
         {activePanel === "history" && <ErrorHistory onSelect={handleHistorySelect} refreshKey={historyRefreshKey} />}
-        {activePanel === "chat" && <DebugChat errorContext={errorInput || undefined} />}
+        {activePanel === "chat" && <DebugChat errorContext={errorInput || undefined} temporary={temporaryChat} />}
         {activePanel === "snippets" && <SnippetLibrary />}
         {(activePanel === "new" || activePanel === "trends") && (
           <div className="p-4 space-y-3">
