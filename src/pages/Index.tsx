@@ -757,7 +757,7 @@ const Index = () => {
                             <Popover open={desktopOptionsOpen} onOpenChange={setDesktopOptionsOpen}>
                               <PopoverTrigger asChild>
                                 <button
-                                  className="hidden sm:flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[11.5px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[11.5px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
                                   aria-label="Analysis options"
                                 >
                                   <SlidersHorizontal className="h-3.5 w-3.5" />
