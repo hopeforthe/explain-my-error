@@ -672,8 +672,8 @@ const Index = () => {
                 </div>
 
                 {/* ─── Sticky ChatGPT-style Composer ─── */}
-                <div className="shrink-0 border-t border-border/30 bg-background/85 backdrop-blur-md">
-                  <div className="max-w-[820px] mx-auto px-3 sm:px-6 pt-2 pb-3 sm:pb-4">
+                <div className="shrink-0 border-t border-border/30 bg-background/85 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
+                  <div className="max-w-[820px] mx-auto px-3 sm:px-6 pt-2 pb-2 sm:pb-4">
                     <div ref={inputAreaRef} className="relative">
                       {/* Suggestions popover (above input) */}
                       {showSuggestions && inputMode === "error" && (
