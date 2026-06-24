@@ -451,7 +451,7 @@ const Index = () => {
           "url": "https://explain-my-error.lovable.app/"
         })}</script>
       </Helmet>
-      <div className="h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-hidden">
+      <div className="h-[100svh] md:h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-hidden">
         {/* ─── Header ─── */}
         <header className="shrink-0 z-50 border-b border-border/30 glass">
           <div className="flex items-center justify-between px-3 sm:px-5 h-[54px] sm:h-[58px]">
