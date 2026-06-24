@@ -604,9 +604,9 @@ const Index = () => {
                   onDragLeave={() => setIsDragging(false)}
                   onDrop={handleDrop}
                 >
-                  <div className="max-w-[820px] mx-auto px-4 sm:px-8 py-6 sm:py-10 w-full">
+                  <div className="max-w-[820px] mx-auto px-4 sm:px-8 py-4 sm:py-10 w-full">
                     {!result && !loading && (
-                      <div className="text-center space-y-3 max-w-2xl mx-auto py-8 sm:py-16">
+                      <div className="text-center space-y-3 max-w-2xl mx-auto py-4 sm:py-16">
                         <Badge variant="secondary" className="rounded-full text-[10px] font-medium px-3 py-1 bg-accent/60 text-accent-foreground border border-border/30">
                           <Sparkles className="h-3 w-3 mr-1.5" />
                           AI-powered · 120+ languages
