@@ -606,7 +606,7 @@ const Index = () => {
                 >
                   <div className="max-w-[820px] mx-auto px-4 sm:px-8 py-4 sm:py-10 w-full">
                     {!result && !loading && (
-                      <div className="text-center space-y-3 max-w-2xl mx-auto py-4 sm:py-16">
+                      <div className="text-center space-y-3 max-w-2xl mx-auto py-6 sm:py-16">
                         <Badge variant="secondary" className="rounded-full text-[10px] font-medium px-3 py-1 bg-accent/60 text-accent-foreground border border-border/30">
                           <Sparkles className="h-3 w-3 mr-1.5" />
                           AI-powered · 120+ languages
@@ -678,7 +678,7 @@ const Index = () => {
                       {/* Suggestions popover (above input) */}
                       {showSuggestions && inputMode === "error" && (
                         <div
-                          className="absolute bottom-full left-0 right-0 mb-2 rounded-2xl border border-border/40 bg-popover/95 backdrop-blur-md shadow-xl p-3 animate-in fade-in slide-in-from-bottom-1 duration-150 z-30"
+                          className="hidden md:absolute md:bottom-full md:left-0 md:right-0 md:mb-2 rounded-2xl md:block border border-border/40 bg-popover/95 backdrop-blur-md shadow-xl p-3 animate-in fade-in slide-in-from-bottom-1 duration-150 z-30"
                           role="listbox"
                           aria-label="Common error suggestions"
                           onPointerDown={(e) => { e.preventDefault(); textareaRef.current?.focus(); }}
@@ -711,6 +711,36 @@ const Index = () => {
                           </div>
                         </div>
                       )}
+                      {showSuggestions && inputMode === "error" && (
+                        <div className="md:hidden rounded-2xl border border-border/40 bg-popover/95 backdrop-blur-md shadow-xl p-3 mb-2 animate-in fade-in slide-in-from-top-1 duration-150 z-30">
+                          <div className="flex items-center justify-between mb-2 px-1">
+                            <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+                              {errorInput.trim() ? "Matching suggestions" : "Common errors"}
+                            </span>
+                            <button
+                              type="button"
+                              onPointerDown={(e) => { e.preventDefault(); setShowSuggestions(false); }}
+                              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                              aria-label="Hide suggestions"
+                            >
+                              Hide
+                            </button>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-thin">
+                            {filteredSuggestions.map((s) => (
+                              <button
+                                key={s.label}
+                                type="button"
+                                onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); pickSuggestion(s); }}
+                                title={s.example}
+                                className="text-[11.5px] font-mono text-foreground/80 hover:text-foreground bg-muted/40 hover:bg-primary/10 hover:border-primary/40 px-2.5 py-1.5 rounded-md border border-border/40 transition-all whitespace-nowrap max-w-full truncate"
+                              >
+                                {s.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )
 
                       {/* Composer box */}
                       <div
@@ -722,7 +752,7 @@ const Index = () => {
                           ref={textareaRef}
                           placeholder={currentMode?.placeholder?.split("\n")[0] || "Paste your error…"}
                           rows={1}
-                          className="font-mono text-[13.5px] leading-relaxed bg-transparent resize-none border-0 rounded-3xl px-4 pt-3.5 pb-1 min-h-0 max-h-[220px] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 scrollbar-thin"
+                          className="font-mono text-[13.5px] leading-relaxed bg-transparent resize-none border-0 rounded-3xl px-4 pt-3.5 pb-1 min-h-0 max-h-[180px] md:max-h-[220px] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 scrollbar-thin"
                           value={errorInput}
                           onChange={(e) => { setErrorInput(e.target.value); if (!showSuggestions) setShowSuggestions(true); }}
                           onFocus={() => { if (!suppressFocusOpenRef.current) setShowSuggestions(true); }}
@@ -855,7 +885,7 @@ const ModePickerContent = ({ inputMode, onPick }: { inputMode: string; onPick: (
       <p className="text-[11px] font-semibold text-foreground">Choose an analysis mode</p>
       <p className="text-[10px] text-muted-foreground">Pick the type of input you're pasting</p>
     </div>
-    <div className="max-h-[60vh] sm:max-h-[420px] overflow-y-auto scrollbar-thin p-2">
+    <div className="max-h-[50vh] sm:max-h-[420px] overflow-y-auto scrollbar-thin p-2">
       {categories.map((cat) => {
         const modes = inputModes.filter(m => m.category === cat);
         return (
