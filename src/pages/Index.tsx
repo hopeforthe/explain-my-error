@@ -400,7 +400,7 @@ const Index = () => {
         ))}
       </nav>
       <div className="h-px bg-border/30 mx-3" />
-      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin pb-20 sm:pb-24">
         {activePanel === "history" && <ErrorHistory onSelect={handleHistorySelect} refreshKey={historyRefreshKey} />}
         {activePanel === "chat" && <DebugChat errorContext={errorInput || undefined} temporary={temporaryChat} />}
         {activePanel === "snippets" && <SnippetLibrary />}
@@ -451,7 +451,7 @@ const Index = () => {
           "url": "https://explain-my-error.lovable.app/"
         })}</script>
       </Helmet>
-      <div className="h-[100svh] md:h-screen flex flex-col bg-gradient-dark transition-colors duration-300 overflow-hidden">
+      <div className="h-[100svh] md:h-screen flex flex-col bg-gradient-dark transition-colors duration-300 ">
         {/* ─── Header ─── */}
         <header className="shrink-0 z-50 border-b border-border/30 glass">
           <div className="flex items-center justify-between px-3 sm:px-5 h-[54px] sm:h-[58px]">
@@ -590,7 +590,7 @@ const Index = () => {
           </aside>
 
           {/* ─── Main Content ─── */}
-          <main className="flex-1 min-w-0 flex flex-col overflow-hidden">
+          <main className="flex-1 min-w-0 flex flex-col ">
             {activePanel === "trends" ? (
               <div className="flex-1 overflow-y-auto scrollbar-thin">
                 <ErrorTrends refreshKey={historyRefreshKey} />
@@ -672,13 +672,13 @@ const Index = () => {
                 </div>
 
                 {/* ─── Sticky ChatGPT-style Composer ─── */}
-                <div className="shrink-0 border-t border-border/30 bg-background/85 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
+                <div className="shrink-0 border-t border-border/30 bg-background/85 backdrop-blur-md sticky bottom-0 z-10 pb-[env(safe-area-inset-bottom)]">
                   <div className="max-w-[820px] mx-auto px-3 sm:px-6 pt-2 pb-2 sm:pb-4">
                     <div ref={inputAreaRef} className="relative">
                       {/* Suggestions popover (above input) */}
                       {showSuggestions && inputMode === "error" && (
                         <div
-                          className="absolute bottom-full left-0 right-0 mb-2 rounded-2xl border border-border/40 bg-popover/95 backdrop-blur-md shadow-xl p-3 animate-in fade-in slide-in-from-bottom-1 duration-150 z-30"
+                          className="hidden md:absolute md:bottom-full md:left-0 md:right-0 md:mb-2 rounded-2xl border border-border/40 bg-popover/95 backdrop-blur-md shadow-xl p-3 animate-in fade-in slide-in-from-bottom-1 duration-150 z-50 md:block"
                           role="listbox"
                           aria-label="Common error suggestions"
                           onPointerDown={(e) => { e.preventDefault(); textareaRef.current?.focus(); }}
@@ -711,6 +711,36 @@ const Index = () => {
                           </div>
                         </div>
                       )}
+                      {showSuggestions && inputMode === "error" && (
+                        <div className="md:hidden rounded-2xl border border-border/40 bg-popover/95 backdrop-blur-md shadow-xl p-3 mb-2 animate-in fade-in slide-in-from-top-1 duration-150 z-50">
+                          <div className="flex items-center justify-between mb-2 px-1">
+                            <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+                              {errorInput.trim() ? "Matching suggestions" : "Common errors"}
+                            </span>
+                            <button
+                              type="button"
+                              onPointerDown={(e) => { e.preventDefault(); setShowSuggestions(false); }}
+                              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                              aria-label="Hide suggestions"
+                            >
+                              Hide
+                            </button>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto scrollbar-thin">
+                            {filteredSuggestions.map((s) => (
+                              <button
+                                key={s.label}
+                                type="button"
+                                onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); pickSuggestion(s); }}
+                                title={s.example}
+                                className="text-[11.5px] font-mono text-foreground/80 hover:text-foreground bg-muted/40 hover:bg-primary/10 hover:border-primary/40 px-2.5 py-1.5 rounded-md border border-border/40 transition-all whitespace-nowrap max-w-full truncate"
+                              >
+                                {s.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )
 
                       {/* Composer box */}
                       <div
@@ -722,7 +752,7 @@ const Index = () => {
                           ref={textareaRef}
                           placeholder={currentMode?.placeholder?.split("\n")[0] || "Paste your error…"}
                           rows={1}
-                          className="font-mono text-[13.5px] leading-relaxed bg-transparent resize-none border-0 rounded-3xl px-4 pt-3.5 pb-1 min-h-0 max-h-[220px] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 scrollbar-thin"
+                          className="font-mono text-[13.5px] leading-relaxed bg-transparent resize-none border-0 rounded-3xl px-4 pt-3.5 pb-1 min-h-0 max-h-[180px] md:max-h-[220px] focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 scrollbar-thin"
                           value={errorInput}
                           onChange={(e) => { setErrorInput(e.target.value); if (!showSuggestions) setShowSuggestions(true); }}
                           onFocus={() => { if (!suppressFocusOpenRef.current) setShowSuggestions(true); }}
