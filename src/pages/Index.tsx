@@ -604,17 +604,17 @@ const Index = () => {
                   onDragLeave={() => setIsDragging(false)}
                   onDrop={handleDrop}
                 >
-                  <div className="max-w-[820px] mx-auto px-4 sm:px-8 py-4 sm:py-10 w-full">
+                  <div className={`max-w-[820px] mx-auto px-4 sm:px-8 w-full ${!result && !loading ? "min-h-full flex flex-col items-center justify-center py-10 sm:py-10" : "py-4 sm:py-10"}`}>
                     {!result && !loading && (
-                      <div className="text-center space-y-3 max-w-2xl mx-auto py-6 sm:py-16">
+                      <div className="text-center flex flex-col items-center gap-4 sm:gap-3 max-w-2xl mx-auto w-full pb-10 sm:pb-16">
                         <Badge variant="secondary" className="rounded-full text-[10px] font-medium px-3 py-1 bg-accent/60 text-accent-foreground border border-border/30">
                           <Sparkles className="h-3 w-3 mr-1.5" />
                           AI-powered · 120+ languages
                         </Badge>
-                        <h2 className="text-2xl sm:text-4xl font-semibold tracking-tight text-foreground leading-tight">
+                        <h2 className="text-[26px] leading-[1.15] sm:text-4xl font-semibold tracking-tight text-foreground">
                           Paste your error. Get the fix.
                         </h2>
-                        <p className="text-[13px] sm:text-[14px] text-muted-foreground leading-relaxed px-2">
+                        <p className="text-[13px] sm:text-[14px] text-muted-foreground leading-relaxed px-2 max-w-[34ch] sm:max-w-none">
                           Instant explanations, root causes, and code fixes for any error or log.
                         </p>
                       </div>
@@ -740,7 +740,7 @@ const Index = () => {
                             ))}
                           </div>
                         </div>
-                      )
+                      )}
 
                       {/* Composer box */}
                       <div
