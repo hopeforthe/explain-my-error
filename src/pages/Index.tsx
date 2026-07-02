@@ -579,7 +579,7 @@ const Index = () => {
         )}
 
 
-        <div className="flex flex-1 min-h-0 md:overflow-hidden">
+        <div className="flex flex-col overflow-x-hidden md:flex-1 md:min-h-0 md:flex-row md:overflow-hidden">
           {/* ─── Desktop Sidebar ─── */}
           <aside
             className={`hidden md:flex shrink-0 border-r border-border/30 bg-card/40 flex-col transition-all duration-300 ease-out ${
@@ -590,7 +590,7 @@ const Index = () => {
           </aside>
 
           {/* ─── Main Content ─── */}
-          <main className="flex-1 min-w-0 flex flex-col md:overflow-hidden">
+          <main className="w-full min-w-0 flex flex-col overflow-x-hidden md:flex-1 md:overflow-hidden">
             {activePanel === "trends" ? (
               <div className="flex-1 overflow-y-auto scrollbar-thin">
                 <ErrorTrends refreshKey={historyRefreshKey} />
@@ -599,14 +599,14 @@ const Index = () => {
               <>
                 {/* Scrollable conversation/results area */}
                 <div
-                  className={`flex-1 min-h-0 overflow-x-hidden scrollbar-thin ${!result && !loading ? "flex flex-col overflow-visible md:block md:overflow-y-auto" : "overflow-y-auto"}`}
+                  className={`overflow-x-hidden scrollbar-thin ${!result && !loading ? "overflow-visible md:flex-1 md:min-h-0 md:block md:overflow-y-auto" : "overflow-y-auto md:flex-1 md:min-h-0"}`}
                   onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                   onDragLeave={() => setIsDragging(false)}
                   onDrop={handleDrop}
                 >
-                  <div className={`max-w-[820px] mx-auto px-4 sm:px-8 w-full ${!result && !loading ? "flex flex-1 flex-col items-center justify-center py-8 sm:py-10 md:min-h-full" : "py-4 sm:py-10"}`}>
+                  <div className={`max-w-[820px] mx-auto px-4 sm:px-8 w-full ${!result && !loading ? "flex min-h-[auto] flex-col items-center justify-start py-6 sm:py-8 md:flex-1 md:min-h-full md:justify-center md:py-8" : "py-4 sm:py-10"}`}>
                     {!result && !loading && (
-                      <div className="text-center flex flex-col items-center justify-center gap-4 sm:gap-3 max-w-2xl mx-auto w-full">
+                      <div className="text-center flex flex-col items-center justify-center gap-4 sm:gap-5 md:gap-3 max-w-2xl mx-auto w-full">
                         <Badge variant="secondary" className="rounded-full text-[10px] font-medium px-3 py-1 bg-accent/60 text-accent-foreground border border-border/30">
                           <Sparkles className="h-3 w-3 mr-1.5" />
                           AI-powered · 120+ languages
@@ -672,8 +672,8 @@ const Index = () => {
                 </div>
 
                 {/* ─── Sticky ChatGPT-style Composer ─── */}
-                <div className="shrink-0 border-t border-border/30 bg-background/85 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
-                  <div className="max-w-[820px] mx-auto px-3 sm:px-6 pt-2 pb-2 sm:pb-4">
+                <div className="shrink-0 mt-4 border-t border-border/30 bg-background/85 backdrop-blur-md pb-[env(safe-area-inset-bottom)] md:mt-0">
+                  <div className="max-w-[820px] mx-auto px-3 sm:px-6 pt-3 pb-3 sm:pb-4 md:pt-2 md:pb-4">
                     <div ref={inputAreaRef} className="relative">
                       {/* Suggestions popover (above input) */}
                       {showSuggestions && inputMode === "error" && (
